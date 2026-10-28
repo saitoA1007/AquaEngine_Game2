@@ -1,0 +1,181 @@
+{
+    "PlayerDownAttackParticle": {
+        "Emitter": {
+            "ColorEmit": {
+                "Enable": false
+            },
+            "Defalut": {
+                "Color": [
+                    1.0,
+                    0.9276993870735168,
+                    0.2509652376174927,
+                    1.0
+                ],
+                "EmittePos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "LifeTime": 0.5,
+                "Rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "DirectionEmit": {
+                "Enable": false
+            },
+            "IsActiveBlendAdd": true,
+            "IsBillBoard": true,
+            "IsLoop": true,
+            "LifeTimeEmit": {
+                "Enable": false
+            },
+            "RotateEmit": {
+                "Enable": true,
+                "RangeRotate": {
+                    "_Max": [
+                        0.0,
+                        0.0,
+                        6.46999979019165
+                    ],
+                    "_Min": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "RotateVelocityEmit": {
+                "Enable": false
+            },
+            "ScaleEmit": {
+                "Enable": true,
+                "RangeScale": {
+                    "_Max": [
+                        2.0,
+                        0.0,
+                        0.0
+                    ],
+                    "_Min": [
+                        0.5,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "SeparateAxes": false
+            },
+            "ShapeEmit": {
+                "Enable": true,
+                "Shape": {
+                    "_ShapeType": "Sphere",
+                    "_boxSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "_emitFromShell": false,
+                    "_radius": 1.0
+                }
+            },
+            "SpawnCoolTime": 0.0,
+            "SpawnMaxCount": 4,
+            "TextureEmit": {
+                "Enable": true,
+                "Texture": {
+                    "_TextureName": "star.png"
+                }
+            },
+            "VelocityEmit": {
+                "Enable": false
+            }
+        },
+        "Particle": {
+            "AlphaOverLifeTime": {
+                "Enable": false
+            },
+            "Attraction": {
+                "Enable": false
+            },
+            "ColorOverLifeTime": {
+                "EaseCurve": {
+                    "_EaseCurve": [
+                        {
+                            "inTangent": 1.0,
+                            "mode": "Linear",
+                            "outTangent": 1.0,
+                            "time": 0.0,
+                            "value": 0.0
+                        },
+                        {
+                            "inTangent": 1.0,
+                            "mode": "Linear",
+                            "outTangent": 1.0,
+                            "time": 1.0,
+                            "value": 1.0
+                        }
+                    ]
+                },
+                "Enable": true,
+                "EndColor": [
+                    0.6563706398010254,
+                    1.0,
+                    0.0,
+                    1.0
+                ]
+            },
+            "RotationByVelocity": {
+                "Enable": false
+            },
+            "SizeOverLifeTime": {
+                "EaseCurve": {
+                    "_EaseCurve": [
+                        {
+                            "inTangent": 0.0,
+                            "mode": "Free",
+                            "outTangent": 0.0,
+                            "time": 0.0,
+                            "value": 0.0
+                        },
+                        {
+                            "inTangent": 2.777200698852539,
+                            "mode": "Free",
+                            "outTangent": 2.777200698852539,
+                            "time": 1.0,
+                            "value": 0.9706000089645386
+                        }
+                    ]
+                },
+                "Enable": true,
+                "EndSize": 0.0,
+                "SeparateAxes": false,
+                "SeparateAxesEndSize": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "VelocityOverLifeTime": {
+                "Enable": false
+            },
+            "Vortex": {
+                "AttractionSpeed": 200.0,
+                "AxisSpeed": 0.5,
+                "CenterPos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Enable": true,
+                "RotationSpeed": 200.0
+            }
+        },
+        "SceneName": "Test"
+    }
+}

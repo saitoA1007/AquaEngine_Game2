@@ -1,0 +1,14 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Development" />
+    <BuildType Name="Release" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/ソリューション項目/">
+    <File Path="../FilterOrganization.bat" />
+    <File Path=".editorconfig" />
+  </Folder>
+  <Project Path="AquaEngine.vcxproj" Id="02fe7fa0-08ec-4c82-b42f-ee759773a63c" />
+  <Project Path="Externals/DirectXTex/DirectXTex_Desktop_2026.vcxproj" Id="371b9fa9-4c90-4ac6-a123-aced756d6c77" />
+</Solution>

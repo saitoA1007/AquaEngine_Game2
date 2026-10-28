@@ -1,0 +1,65 @@
+#pragma once
+
+// WindowsAPI
+#define NOMINMAX
+#include <Windows.h>
+#include <wrl/client.h>
+
+// DirectX関連
+#include <d3d12.h>
+#include <d3dcommon.h>
+#include <dxgi1_6.h>
+#include <dxgidebug.h>
+#include <dxcapi.h>
+#include <d3dcompiler.h> 
+#include <DirectXMath.h>
+
+// C++の標準ライブラリ
+#include <cstdint>
+#include <cassert>
+#include <cstring>
+#include <string>
+#include <string_view>
+#include <sstream>
+#include <vector>
+#include <array>
+#include <list>    
+#include <deque>
+#include <set>
+#include <map>
+#include <unordered_map>
+#include <unordered_set>
+#include <variant>
+#include <algorithm>
+#include <chrono>
+#include <thread>
+#include <mutex>
+#include <memory>
+#include <filesystem>
+#include <fstream>      
+#include <iostream>  
+#include <ostream>
+#include <functional>   
+#include <span>
+#include <format>       
+#include <queue>        
+#include <utility>       
+#include <optional>      
+#include <stdexcept>
+#include <source_location>
+
+// 数学定数
+#define _USE_MATH_DEFINES
+#include <cmath> 
+#include <cfloat>
+#include <limits>
+#include <random>
+#include <numbers>
+
+// 外部ライブラリ
+#include <json.hpp>
+#include "Externals/DirectXTex/d3dx12.h"      
+#include "Externals/DirectXTex/DirectXTex.h"
+#include <assimp/Importer.hpp> 
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>

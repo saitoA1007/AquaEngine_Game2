@@ -1,0 +1,22 @@
+// Project tasks configuration. See https://zed.dev/docs/tasks for documentation.
+//
+// Example:
+[
+  {
+    "label": "VS2022: Build Engine",
+    "command": "cmd.exe",
+    "args": [
+      "/c",
+      "call \"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\Tools\\VsDevCmd.bat\" && msbuild AquaEngine.slnx /p:Configuration=Debug /p:Platform=x64",
+    ],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "reveal_target": "dock",
+    "hide": "never",
+    "shell": "system",
+    "show_summary": true,
+    "show_command": true,
+    "save": "all",
+  },
+]

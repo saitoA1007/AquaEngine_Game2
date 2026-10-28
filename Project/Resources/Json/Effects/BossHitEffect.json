@@ -1,0 +1,48 @@
+{
+    "Duration": 1.0,
+    "IsLoop": false,
+    "Tracks": [
+        {
+            "Duration": 1.0,
+            "EmitMode": "Burst",
+            "MaxNum": 4,
+            "ModelName": "plane.obj",
+            "Name": "HitStar",
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ParticleName": "BossHitStarParticle",
+            "StartTime": 0.0
+        },
+        {
+            "Duration": 1.0,
+            "EmitMode": "Burst",
+            "MaxNum": 32,
+            "ModelName": "plane.obj",
+            "Name": "HitLine",
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ParticleName": "BossHitLineParticle",
+            "StartTime": 0.07000000029802322
+        },
+        {
+            "Duration": 1.0,
+            "EmitMode": "Burst",
+            "MaxNum": 32,
+            "ModelName": "plane.obj",
+            "Name": "HitBurst",
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ParticleName": "BossHitParticle",
+            "StartTime": 0.07000000029802322
+        }
+    ]
+}

@@ -1,0 +1,125 @@
+{
+    "BossHitLineParticle": {
+        "Emitter": {
+            "ColorEmit": {
+                "Enable": false
+            },
+            "Defalut": {
+                "Color": [
+                    1.0,
+                    0.5188801884651184,
+                    0.23552125692367554,
+                    1.0
+                ],
+                "EmittePos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "LifeTime": 0.5,
+                "Rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "DirectionEmit": {
+                "Enable": false
+            },
+            "IsActiveBlendAdd": true,
+            "IsBillBoard": true,
+            "IsLoop": true,
+            "LifeTimeEmit": {
+                "Enable": false
+            },
+            "RotateEmit": {
+                "Enable": false
+            },
+            "RotateVelocityEmit": {
+                "Enable": false
+            },
+            "ScaleEmit": {
+                "Enable": false
+            },
+            "ShapeEmit": {
+                "Enable": true,
+                "Shape": {
+                    "_ShapeType": "Sphere",
+                    "_boxSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "_emitFromShell": true,
+                    "_radius": 1.0
+                }
+            },
+            "SpawnCoolTime": 1.0,
+            "SpawnMaxCount": 16,
+            "TextureEmit": {
+                "Enable": true,
+                "Texture": {
+                    "_TextureName": "heightLine.png"
+                }
+            },
+            "VelocityEmit": {
+                "Enable": false
+            }
+        },
+        "Particle": {
+            "AlphaOverLifeTime": {
+                "EaseCurve": {
+                    "_EaseCurve": [
+                        {
+                            "inTangent": 0.0,
+                            "mode": "Free",
+                            "outTangent": 0.0,
+                            "time": 0.0,
+                            "value": 0.0
+                        },
+                        {
+                            "inTangent": 2.0,
+                            "mode": "Free",
+                            "outTangent": 2.0,
+                            "time": 1.0,
+                            "value": 1.0
+                        }
+                    ]
+                },
+                "Enable": true,
+                "EndAlpha": 0.0
+            },
+            "Attraction": {
+                "Damping": -5.0,
+                "Enable": true,
+                "Strength": -40.0,
+                "TargetPos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ColorOverLifeTime": {
+                "Enable": false
+            },
+            "RotationByVelocity": {
+                "Enable": true
+            },
+            "SizeOverLifeTime": {
+                "Enable": false
+            },
+            "VelocityOverLifeTime": {
+                "Enable": false
+            },
+            "Vortex": {
+                "Enable": false
+            }
+        },
+        "SceneName": "Test"
+    }
+}

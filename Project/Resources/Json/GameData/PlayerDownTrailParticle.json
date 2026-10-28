@@ -1,0 +1,169 @@
+{
+    "PlayerDownTrailParticle": {
+        "Emitter": {
+            "ColorEmit": {
+                "Enable": false
+            },
+            "Defalut": {
+                "Color": [
+                    1.0,
+                    0.7562945485115051,
+                    0.05791503190994263,
+                    1.0
+                ],
+                "EmittePos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "LifeTime": 0.5,
+                "Rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "DirectionEmit": {
+                "Enable": false
+            },
+            "IsActiveBlendAdd": true,
+            "IsBillBoard": true,
+            "IsLoop": true,
+            "LifeTimeEmit": {
+                "Enable": false
+            },
+            "RotateEmit": {
+                "Enable": true,
+                "RangeRotate": {
+                    "_Max": [
+                        0.0,
+                        0.0,
+                        6.400000095367432
+                    ],
+                    "_Min": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "RotateVelocityEmit": {
+                "Enable": false
+            },
+            "ScaleEmit": {
+                "Enable": false
+            },
+            "ShapeEmit": {
+                "Enable": false
+            },
+            "SpawnCoolTime": 0.0,
+            "SpawnMaxCount": 2,
+            "TextureEmit": {
+                "Enable": true,
+                "Texture": {
+                    "_TextureName": "FX01_Flare_03.png"
+                }
+            },
+            "VelocityEmit": {
+                "Enable": false
+            }
+        },
+        "Particle": {
+            "AlphaOverLifeTime": {
+                "EaseCurve": {
+                    "_EaseCurve": [
+                        {
+                            "inTangent": 2.0,
+                            "mode": "Free",
+                            "outTangent": 2.0,
+                            "time": 0.0,
+                            "value": 0.0
+                        },
+                        {
+                            "inTangent": 0.0,
+                            "mode": "Free",
+                            "outTangent": 0.0,
+                            "time": 1.0,
+                            "value": 1.0
+                        }
+                    ]
+                },
+                "Enable": true,
+                "EndAlpha": 0.0
+            },
+            "Attraction": {
+                "Enable": false
+            },
+            "ColorOverLifeTime": {
+                "EaseCurve": {
+                    "_EaseCurve": [
+                        {
+                            "inTangent": 1.0,
+                            "mode": "Linear",
+                            "outTangent": 1.0,
+                            "time": 0.0,
+                            "value": 0.0
+                        },
+                        {
+                            "inTangent": 1.0,
+                            "mode": "Linear",
+                            "outTangent": 1.0,
+                            "time": 1.0,
+                            "value": 1.0
+                        }
+                    ]
+                },
+                "Enable": true,
+                "EndColor": [
+                    1.0,
+                    0.07722008228302002,
+                    0.07722008228302002,
+                    1.0
+                ]
+            },
+            "RotationByVelocity": {
+                "Enable": false
+            },
+            "SizeOverLifeTime": {
+                "EaseCurve": {
+                    "_EaseCurve": [
+                        {
+                            "inTangent": 0.0,
+                            "mode": "Free",
+                            "outTangent": 0.0,
+                            "time": 0.0,
+                            "value": 0.0
+                        },
+                        {
+                            "inTangent": 2.0,
+                            "mode": "Free",
+                            "outTangent": 2.0,
+                            "time": 1.0,
+                            "value": 1.0
+                        }
+                    ]
+                },
+                "Enable": true,
+                "EndSize": 0.0,
+                "SeparateAxes": false,
+                "SeparateAxesEndSize": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "VelocityOverLifeTime": {
+                "Enable": false
+            },
+            "Vortex": {
+                "Enable": false
+            }
+        },
+        "SceneName": "Test"
+    }
+}

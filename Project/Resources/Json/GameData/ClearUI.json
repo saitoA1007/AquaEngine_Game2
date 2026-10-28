@@ -1,0 +1,130 @@
+{
+    "ClearUI": {
+        "BgSpriteSprite": {
+            "AnchorPoint": [
+                0.0,
+                0.0
+            ],
+            "Color": [
+                0.830115795135498,
+                0.830115795135498,
+                0.830115795135498,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                0.0,
+                0.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                1280.0,
+                720.0
+            ]
+        },
+        "ButtonTextSprite": {
+            "AnchorPoint": [
+                0.5,
+                0.5
+            ],
+            "Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                640.0,
+                610.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                307.0,
+                96.0
+            ]
+        },
+        "ClearTextSprite": {
+            "AnchorPoint": [
+                0.5,
+                0.5
+            ],
+            "Color": [
+                0.8880308866500854,
+                1.0,
+                0.0,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                650.0,
+                200.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                307.0,
+                153.0
+            ]
+        },
+        "ClearTimeTextSprite": {
+            "AnchorPoint": [
+                0.5,
+                0.5
+            ],
+            "Color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                640.0,
+                393.0299987792969
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                210.0,
+                80.0
+            ]
+        },
+        "FrameTextSprite": {
+            "AnchorPoint": [
+                0.0,
+                0.0
+            ],
+            "Color": [
+                0.3243243098258972,
+                0.3243243098258972,
+                0.3243243098258972,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                0.0,
+                120.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                1280.0,
+                150.0
+            ]
+        },
+        "SceneName": "Game"
+    }
+}

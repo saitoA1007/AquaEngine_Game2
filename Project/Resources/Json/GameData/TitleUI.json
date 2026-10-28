@@ -1,0 +1,55 @@
+{
+    "TitleUI": {
+        "ButtonTextSprite": {
+            "AnchorPoint": [
+                0.5,
+                0.5
+            ],
+            "Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                640.0,
+                500.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                308.0,
+                76.0
+            ]
+        },
+        "SceneName": "Game",
+        "TitleTextSprite": {
+            "AnchorPoint": [
+                0.5,
+                0.5
+            ],
+            "Color": [
+                0.7799227833747864,
+                0.7799227833747864,
+                0.7799227833747864,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                640.0,
+                200.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                716.0,
+                179.0
+            ]
+        }
+    }
+}

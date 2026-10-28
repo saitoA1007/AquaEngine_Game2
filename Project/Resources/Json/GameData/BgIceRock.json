@@ -1,0 +1,35 @@
+{
+    "BgIceRock": {
+        "IceMaterial": {
+            "Color": [
+                0.8108399510383606,
+                0.7737361788749695,
+                0.915057897567749,
+                1.0
+            ],
+            "bubbleDensity": 0.03999999910593033,
+            "bubbleHighlight": 0.15000000596046448,
+            "bubbleJitter": 0.3700000047683716,
+            "bubbleMaxDepth": 0.8299999833106995,
+            "bubbleScale": 0.03999999910593033
+        },
+        "SceneName": "Game",
+        "worldWorldTransform": {
+            "Rotate": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Scale": [
+                20.0,
+                20.0,
+                20.0
+            ],
+            "Translate": [
+                0.0,
+                -22.0,
+                0.0
+            ]
+        }
+    }
+}

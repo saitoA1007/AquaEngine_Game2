@@ -1,0 +1,160 @@
+{
+    "links": [
+        {
+            "from": 1,
+            "slot": 0,
+            "to": 5
+        },
+        {
+            "from": 5,
+            "slot": 0,
+            "to": 8
+        },
+        {
+            "from": 8,
+            "slot": 0,
+            "to": 11
+        },
+        {
+            "from": 11,
+            "slot": 0,
+            "to": 14
+        },
+        {
+            "from": 1,
+            "slot": 1,
+            "to": 14
+        },
+        {
+            "from": 14,
+            "slot": 0,
+            "to": 18
+        },
+        {
+            "from": 18,
+            "slot": 0,
+            "to": 21
+        },
+        {
+            "from": 21,
+            "slot": 0,
+            "to": 3
+        }
+    ],
+    "nodes": [
+        {
+            "id": 1,
+            "kind": "Scene",
+            "pos": [
+                -472.0,
+                284.0
+            ]
+        },
+        {
+            "id": 3,
+            "kind": "Output",
+            "pos": [
+                1656.0,
+                252.0
+            ]
+        },
+        {
+            "active": true,
+            "id": 5,
+            "kind": "Effect",
+            "name": "HighLumMask",
+            "params": {
+                "highLumMask": 0.800000011920929
+            },
+            "passName": "HighLumMaskPass",
+            "pos": [
+                -136.0,
+                -12.0
+            ],
+            "type": "HighLumMask"
+        },
+        {
+            "active": true,
+            "id": 8,
+            "kind": "Effect",
+            "name": "GaussVertical",
+            "params": {
+                "sd": 2.0
+            },
+            "passName": "",
+            "pos": [
+                168.0,
+                -12.0
+            ],
+            "type": "GaussVertical"
+        },
+        {
+            "active": true,
+            "id": 11,
+            "kind": "Effect",
+            "name": "GaussHorizontal",
+            "params": {
+                "sd": 2.0
+            },
+            "passName": "",
+            "pos": [
+                472.0,
+                -12.0
+            ],
+            "type": "GaussHorizontal"
+        },
+        {
+            "active": true,
+            "id": 14,
+            "kind": "Effect",
+            "name": "Bloom",
+            "params": {
+                "intensity": 1.0
+            },
+            "passName": "",
+            "pos": [
+                792.0,
+                244.0
+            ],
+            "type": "Bloom"
+        },
+        {
+            "active": true,
+            "id": 18,
+            "kind": "Effect",
+            "name": "ColorGrading",
+            "params": {
+                "grayscale": false,
+                "random": true,
+                "randomIntensity": 0.019999999552965164,
+                "randomTime": 1.0,
+                "sepia": false,
+                "vignetting": true,
+                "vignettingIntensity": 16.0,
+                "vignettingTime": 0.15000000596046448
+            },
+            "passName": "",
+            "pos": [
+                1080.0,
+                244.0
+            ],
+            "type": "ColorGrading"
+        },
+        {
+            "active": true,
+            "id": 21,
+            "kind": "Effect",
+            "name": "Dissolve",
+            "params": {
+                "threshold": 0.0
+            },
+            "passName": "",
+            "pos": [
+                1368.0,
+                244.0
+            ],
+            "type": "Dissolve"
+        }
+    ],
+    "version": 1
+}

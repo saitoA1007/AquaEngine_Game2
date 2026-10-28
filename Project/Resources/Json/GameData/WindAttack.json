@@ -1,0 +1,10 @@
+{
+    "WindAttack": {
+        "ColliderRadius": [
+            1.0,
+            1.0,
+            16.0
+        ],
+        "SceneName": "Game"
+    }
+}

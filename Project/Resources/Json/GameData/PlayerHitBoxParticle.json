@@ -1,0 +1,165 @@
+{
+    "PlayerHitBoxParticle": {
+        "Emitter": {
+            "ColorEmit": {
+                "Enable": false
+            },
+            "Defalut": {
+                "Color": [
+                    1.0,
+                    0.5494104027748108,
+                    0.0810810923576355,
+                    1.0
+                ],
+                "EmittePos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "LifeTime": 0.5,
+                "Rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "DirectionEmit": {
+                "Enable": false
+            },
+            "IsActiveBlendAdd": true,
+            "IsBillBoard": true,
+            "IsLoop": true,
+            "LifeTimeEmit": {
+                "Enable": false
+            },
+            "RotateEmit": {
+                "Enable": true,
+                "RangeRotate": {
+                    "_Max": [
+                        0.0,
+                        0.0,
+                        6.400000095367432
+                    ],
+                    "_Min": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "RotateVelocityEmit": {
+                "Enable": false
+            },
+            "ScaleEmit": {
+                "Enable": true,
+                "RangeScale": {
+                    "_Max": [
+                        0.800000011920929,
+                        0.0,
+                        0.0
+                    ],
+                    "_Min": [
+                        0.20000000298023224,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "SeparateAxes": false
+            },
+            "ShapeEmit": {
+                "Enable": true,
+                "Shape": {
+                    "_ShapeType": "Sphere",
+                    "_boxSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "_emitFromShell": false,
+                    "_radius": 1.0
+                }
+            },
+            "SpawnCoolTime": 1.0,
+            "SpawnMaxCount": 16,
+            "TextureEmit": {
+                "Enable": false
+            },
+            "VelocityEmit": {
+                "Enable": true,
+                "RangeVelocity": {
+                    "_Max": [
+                        10.0,
+                        20.0,
+                        10.0
+                    ],
+                    "_Min": [
+                        -10.0,
+                        15.0,
+                        -10.0
+                    ]
+                }
+            }
+        },
+        "Particle": {
+            "AlphaOverLifeTime": {
+                "EaseCurve": {
+                    "_EaseCurve": [
+                        {
+                            "inTangent": 0.0,
+                            "mode": "Free",
+                            "outTangent": 0.0,
+                            "time": 0.0,
+                            "value": 0.0
+                        },
+                        {
+                            "inTangent": 2.0,
+                            "mode": "Free",
+                            "outTangent": 2.0,
+                            "time": 1.0,
+                            "value": 1.0
+                        }
+                    ]
+                },
+                "Enable": true,
+                "EndAlpha": 0.0
+            },
+            "Attraction": {
+                "Enable": false
+            },
+            "ColorOverLifeTime": {
+                "Enable": false
+            },
+            "GravityField": {
+                "Direction": [
+                    0.0,
+                    -1.0,
+                    0.0
+                ],
+                "Enable": true,
+                "MaxSpeed": 0.0,
+                "Strength": 50.0
+            },
+            "RotationByVelocity": {
+                "Enable": false
+            },
+            "SizeOverLifeTime": {
+                "Enable": false
+            },
+            "Trail": {
+                "Enable": false
+            },
+            "VelocityOverLifeTime": {
+                "Enable": false
+            },
+            "Vortex": {
+                "Enable": false
+            }
+        },
+        "SceneName": "Test"
+    }
+}

@@ -1,0 +1,34 @@
+{
+    "Duration": 0.5,
+    "IsLoop": true,
+    "Tracks": [
+        {
+            "Duration": 0.5,
+            "EmitMode": "Continuous",
+            "MaxNum": 128,
+            "ModelName": "plane.obj",
+            "Name": "DownVortex",
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ParticleName": "PlayerDownAttackParticle",
+            "StartTime": 0.0
+        },
+        {
+            "Duration": 0.5,
+            "EmitMode": "Continuous",
+            "MaxNum": 128,
+            "ModelName": "plane.obj",
+            "Name": "DownTrail",
+            "Offset": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "ParticleName": "PlayerDownTrailParticle",
+            "StartTime": 0.0
+        }
+    ]
+}

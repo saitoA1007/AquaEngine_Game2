@@ -1,0 +1,46 @@
+{
+    "IceDemo": {
+        "Bubble": {
+            "bubbleDensity": 0.029999999329447746,
+            "bubbleHighlight": 0.15000000596046448,
+            "bubbleJitter": 0.4000000059604645,
+            "bubbleMaxDepth": 0.5,
+            "bubbleScale": 0.10000000149011612
+        },
+        "IceColor": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "IceIor": 1.309999942779541,
+        "IceRoughness": 0.5,
+        "SceneName": "Test",
+        "Surface": {
+            "IceChipScale": 0.23000000417232513,
+            "IceChipStrength": 0.6600000262260437,
+            "IceDissolveThreshold": 0.44999998807907104,
+            "IceEdgeStrength": 0.6000000238418579,
+            "IceEdgeWidth": 0.46000000834465027,
+            "IceMicroScale": 0.009999999776482582,
+            "IceMicroStrength": 0.23999999463558197
+        },
+        "WorldTransform": {
+            "Rotate": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "Translate": [
+                -6.0,
+                0.0,
+                0.0
+            ]
+        }
+    }
+}

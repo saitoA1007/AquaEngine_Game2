@@ -1,0 +1,97 @@
+{
+    "BossEnemy": {
+        "Collider": {
+            "ColliderOffsetPosY": 3.950000047683716,
+            "ColliderRadius": 4.0
+        },
+        "Color0": [
+            0.41788285970687866,
+            0.4839336574077606,
+            0.84555983543396,
+            1.0
+        ],
+        "Color1": [
+            0.34516242146492004,
+            0.1767415702342987,
+            0.8803088665008545,
+            1.0
+        ],
+        "Color2": [
+            0.39249563217163086,
+            0.8996139168739319,
+            0.8584961891174316,
+            1.0
+        ],
+        "Color3": [
+            0.8571428656578064,
+            0.8438156843185425,
+            0.36403754353523254,
+            1.0
+        ],
+        "CrossMove": {
+            "CrossEndRatio": 0.800000011920929,
+            "DefaultPosY": 5.0,
+            "MaxMoveHeight": 4.0,
+            "MaxTime": 4.0,
+            "UpDownCount": 3.0
+        },
+        "IceFallAttack": {
+            "IceFallMaxNum": 5,
+            "IceFallNum": 3,
+            "MaxIter": 100,
+            "MaxTime": 2.0,
+            "MinDistance": 5.0,
+            "RangeRadiusRatio": 0.800000011920929
+        },
+        "MaxHp": 65,
+        "ResetAction": {
+            "MoveSpeed": 20.0,
+            "RotateSpeed": 6.0
+        },
+        "RotateMove": {
+            "DefaultPosY": 5.0,
+            "MaxMoveHeight": 2.0,
+            "MaxTime": 2.0,
+            "OffsetStageRadius": 0.0
+        },
+        "RushAttack": {
+            "RotateMoveMaxTime": 2.0,
+            "RushDistanceRatio": 1.5,
+            "RushMaxTime": 2.0
+        },
+        "Scale": [
+            3.0,
+            3.0,
+            3.0
+        ],
+        "SceneName": "Game",
+        "StateOutAnimation": {
+            "CycleHeight": 2.0,
+            "EndPosY": 1.0,
+            "FadeMaxTime": 2.0,
+            "InMaxTime": 4.0,
+            "StartPosY": 0.0,
+            "SwayPhase": 0.0,
+            "SwaySpeed": 0.0,
+            "SwayWeithX": 10.0,
+            "SwayWeithZ": 5.0
+        },
+        "StatusWeight": {
+            "CrossMove": 10,
+            "IceFallAttack": 0,
+            "RotateMove": 10,
+            "RushAttack": 40,
+            "Wait": 10,
+            "WindAttack": 20
+        },
+        "Wait": {
+            "MaxTime": 3.5
+        },
+        "WindAttack": {
+            "InMaxTime": 1.0,
+            "MainMaxTime": 3.0,
+            "OutMaxTime": 1.0,
+            "WindDirY": -0.10000000149011612
+        }
+    }
+}

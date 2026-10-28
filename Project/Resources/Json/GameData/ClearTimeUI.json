@@ -1,0 +1,147 @@
+{
+    "ClearTimeUI": {
+        "BaseWorldTransform": {
+            "Rotate": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "Scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "Translate": [
+                640.0,
+                500.0,
+                0.0
+            ]
+        },
+        "DotSpriteSprite": {
+            "AnchorPoint": [
+                0.5,
+                0.5
+            ],
+            "Color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                0.0,
+                0.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                64.0,
+                64.0
+            ]
+        },
+        "NumSprite0Sprite": {
+            "AnchorPoint": [
+                0.5,
+                0.5
+            ],
+            "Color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                -128.0,
+                0.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                64.0,
+                64.0
+            ]
+        },
+        "NumSprite1Sprite": {
+            "AnchorPoint": [
+                0.5,
+                0.5
+            ],
+            "Color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                -64.0,
+                0.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                64.0,
+                64.0
+            ]
+        },
+        "NumSprite2Sprite": {
+            "AnchorPoint": [
+                0.5,
+                0.5
+            ],
+            "Color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                64.0,
+                0.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                64.0,
+                64.0
+            ]
+        },
+        "NumSprite3Sprite": {
+            "AnchorPoint": [
+                0.5,
+                0.5
+            ],
+            "Color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                128.0,
+                0.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                64.0,
+                64.0
+            ]
+        },
+        "SceneName": "Game"
+    }
+}

@@ -1,0 +1,318 @@
+{
+    "PauseUI": {
+        "BackTitleUI": {
+            "BaseWorldWorldTransform": {
+                "Rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "Translate": [
+                    128.0,
+                    624.0,
+                    0.0
+                ]
+            },
+            "FrameSprite": {
+                "AnchorPoint": [
+                    0.5,
+                    0.5
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "MeshSize": [
+                    1.0,
+                    1.0
+                ],
+                "Position": [
+                    0.0,
+                    0.0
+                ],
+                "Rotate": 0.0,
+                "Scale": [
+                    256.0,
+                    70.0
+                ]
+            },
+            "MaxTime": 1.0,
+            "ScaleRatio": 0.75,
+            "TextSprite": {
+                "AnchorPoint": [
+                    0.5,
+                    0.5
+                ],
+                "Color": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "MeshSize": [
+                    1.0,
+                    1.0
+                ],
+                "Position": [
+                    0.0,
+                    0.0
+                ],
+                "Rotate": 0.0,
+                "Scale": [
+                    143.4600067138672,
+                    63.029998779296875
+                ]
+            }
+        },
+        "BackUI": {
+            "BaseWorldWorldTransform": {
+                "Rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "Translate": [
+                    128.0,
+                    400.0,
+                    0.0
+                ]
+            },
+            "FrameSprite": {
+                "AnchorPoint": [
+                    0.5,
+                    0.5
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "MeshSize": [
+                    1.0,
+                    1.0
+                ],
+                "Position": [
+                    0.0,
+                    0.0
+                ],
+                "Rotate": 0.0,
+                "Scale": [
+                    256.0,
+                    70.0
+                ]
+            },
+            "MaxTime": 1.0,
+            "ScaleRatio": 0.75,
+            "TextSprite": {
+                "AnchorPoint": [
+                    0.5,
+                    0.5
+                ],
+                "Color": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "MeshSize": [
+                    1.0,
+                    1.0
+                ],
+                "Position": [
+                    0.0,
+                    0.0
+                ],
+                "Rotate": 0.0,
+                "Scale": [
+                    128.0,
+                    54.380001068115234
+                ]
+            }
+        },
+        "BgSprite": {
+            "AnchorPoint": [
+                0.0,
+                0.0
+            ],
+            "Color": [
+                0.0,
+                0.0,
+                0.0,
+                0.6509804129600525
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                0.0,
+                0.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                1280.0,
+                720.0
+            ]
+        },
+        "FrameSprite": {
+            "AnchorPoint": [
+                0.0,
+                0.0
+            ],
+            "Color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                0.0,
+                0.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                384.0,
+                720.0
+            ]
+        },
+        "PauseTextSprite": {
+            "AnchorPoint": [
+                0.5,
+                0.5
+            ],
+            "Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                192.0,
+                128.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                200.0,
+                80.0
+            ]
+        },
+        "PlayGuideSprite": {
+            "AnchorPoint": [
+                0.5,
+                0.5
+            ],
+            "Color": [
+                0.7876448035240173,
+                0.7876448035240173,
+                0.7876448035240173,
+                1.0
+            ],
+            "MeshSize": [
+                1.0,
+                1.0
+            ],
+            "Position": [
+                859.9000244140625,
+                250.0
+            ],
+            "Rotate": 0.0,
+            "Scale": [
+                800.0,
+                350.0
+            ]
+        },
+        "RetryUI": {
+            "BaseWorldWorldTransform": {
+                "Rotate": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "Translate": [
+                    128.0,
+                    510.0,
+                    0.0
+                ]
+            },
+            "FrameSprite": {
+                "AnchorPoint": [
+                    0.5,
+                    0.5
+                ],
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "MeshSize": [
+                    1.0,
+                    1.0
+                ],
+                "Position": [
+                    0.0,
+                    0.0
+                ],
+                "Rotate": 0.0,
+                "Scale": [
+                    256.0,
+                    70.0
+                ]
+            },
+            "MaxTime": 1.0,
+            "ScaleRatio": 0.75,
+            "TextSprite": {
+                "AnchorPoint": [
+                    0.5,
+                    0.5
+                ],
+                "Color": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "MeshSize": [
+                    1.0,
+                    1.0
+                ],
+                "Position": [
+                    0.0,
+                    0.0
+                ],
+                "Rotate": 0.0,
+                "Scale": [
+                    144.19000244140625,
+                    60.63999938964844
+                ]
+            }
+        },
+        "SceneName": "Game"
+    }
+}
