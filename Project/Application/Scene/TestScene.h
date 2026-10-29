@@ -59,10 +59,6 @@ private: // シーン機能
 	// メインカメラ
 	std::unique_ptr<GameEngine::Camera> mainCamera_;
 
-	// プリミティブのエフェクト
-	GameEngine::ParticleBehavior* primitiveEffect_;
-	GameEngine::Model* effectModel_ = nullptr;
-
 	GameEngine::Model* model_;
 	GameEngine::WorldTransform world_;
 	// アニメーションデータ
@@ -70,37 +66,15 @@ private: // シーン機能
 	// アニメーションを再生するクラス
 	std::unique_ptr<GameEngine::Animator> walkAnimator_;
 
+	// ライト
 	float intensity_ = 0.8f;
 	Vector3 dir_ = { 0.0f,-1.0f,0.0f };
 	Vector4 lightColor_ = { 1.0f,1.0f,1.0f,1.0f };
 
-	Vector4 playerColor_ = { 1.0f,1.0f,1.0f,1.0f };
-
 	// テキストのテスト
 	std::unique_ptr<GameEngine::Text> text_;
-
-	// 氷で共通のマテリアル
-	GameEngine::IceMaterial iceMaterial_;
-	
-	Vector4 color_ = {1.0f,1.0f,1.0f,1.0f};
-	float roughness_ = 0.5f;
-	// 屈折
-	float ior_ = 1.31f;
 
 	// 地面
 	GameEngine::Model* terrainModel_;
 	GameEngine::WorldTransform terrainWorld_;
-
-	// 中ポリゴン氷
-	GameEngine::Model* iceMiddleModel_;
-	GameEngine::WorldTransform iceMiddleWorld_;
-	// キューブ
-	GameEngine::Model* iceCubeModel_;
-	GameEngine::WorldTransform iceCubeWorld_;
-
-	GameEngine::Model* testModel_;
-
-	// 1つに集約していない破片モデルを描画
-	GameEngine::Model* noFractureModel_;
-	GameEngine::WorldTransform noFractureWorld_;
 };

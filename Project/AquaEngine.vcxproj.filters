@@ -1,245 +1,200 @@
 ﻿<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Application">
-      <UniqueIdentifier>{e63d6771-b510-46f5-8a45-c4cd8a990922}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Application\Camera">
-      <UniqueIdentifier>{11faec0c-00f5-4295-bfe6-5e0f476cce43}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Application\Camera\State">
-      <UniqueIdentifier>{526eb8b4-6495-4a51-8b86-7cd6590ea172}</UniqueIdentifier>
+      <UniqueIdentifier>{581797aa-3e1f-477c-b4b8-fe17aef9cf85}</UniqueIdentifier>
     </Filter>
     <Filter Include="Application\Demo">
-      <UniqueIdentifier>{b48165c6-1d51-4d4a-a90e-b91fca6a1653}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Application\Enemy">
-      <UniqueIdentifier>{c6278fd9-71ea-4fc8-9f78-1e27755bd6c0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Application\Enemy\BattleAction">
-      <UniqueIdentifier>{2f01bbe1-06de-4d14-9712-fd8acca3d04e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Application\Enemy\RangedAttack">
-      <UniqueIdentifier>{8d3a4b27-eb34-4368-9f1c-e2493cfc12ba}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Application\Enemy\State">
-      <UniqueIdentifier>{6d1ba0c7-c272-49ce-b638-0da6f837f9c9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Application\GamePlay">
-      <UniqueIdentifier>{7d5f6b1f-6779-413e-8578-668425cb7304}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Application\GamePlay\Phase">
-      <UniqueIdentifier>{6a83ecea-801d-4e4f-a6a4-5ab618566bc9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Application\Player">
-      <UniqueIdentifier>{5da0ba17-94f3-4d55-913b-ebebeb23dda9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Application\Player\Effect">
-      <UniqueIdentifier>{a0a5fbc5-453b-4273-ad5c-39b8d0978bad}</UniqueIdentifier>
+      <UniqueIdentifier>{a693a117-c9b0-441e-9104-ead2a5875503}</UniqueIdentifier>
     </Filter>
     <Filter Include="Application\Scene">
-      <UniqueIdentifier>{fc0b945f-42ac-44b1-b348-11742b44c3dc}</UniqueIdentifier>
+      <UniqueIdentifier>{e033db3b-8d0e-4634-bc76-3c9022cc8143}</UniqueIdentifier>
     </Filter>
     <Filter Include="Application\Scene\Register">
-      <UniqueIdentifier>{d85d07ca-a3a4-4248-9243-7d1e0db487f0}</UniqueIdentifier>
+      <UniqueIdentifier>{d255f858-e0ce-448d-91ae-e3e824b362a0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Application\Scene\Transition">
-      <UniqueIdentifier>{33b28e91-5c58-4f0a-be7c-9392fab08628}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Application\Stage">
-      <UniqueIdentifier>{031387be-6798-4c12-a346-fe51d4b3e6ed}</UniqueIdentifier>
+      <UniqueIdentifier>{f9006d88-8285-401f-95fb-6a014f7cb936}</UniqueIdentifier>
     </Filter>
     <Filter Include="Application\UI">
-      <UniqueIdentifier>{866cd206-9365-4825-8437-f77c398b6e2b}</UniqueIdentifier>
+      <UniqueIdentifier>{116a551e-b31c-4561-a8b4-1ae0d213533e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Application\UI\Effects">
-      <UniqueIdentifier>{7137c7b1-6dd8-4222-bd87-c19979ec2209}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Application\UI\Managers">
-      <UniqueIdentifier>{f6dbc747-b5b2-40ab-970e-9ac7c0bb87ce}</UniqueIdentifier>
+      <UniqueIdentifier>{ad8da5d3-bccd-47ad-92b2-8b8e6f6aba41}</UniqueIdentifier>
     </Filter>
     <Filter Include="Application\UI\Widgets">
-      <UniqueIdentifier>{566f8353-fbf9-4f3c-842e-f0bf1b0ef3d1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Application\Utils">
-      <UniqueIdentifier>{332eaf8d-d4c3-46cc-a24c-35511c077a09}</UniqueIdentifier>
+      <UniqueIdentifier>{e0559e77-5708-4246-b8bc-76a92d48e7fa}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource">
-      <UniqueIdentifier>{89060390-1743-4701-a35e-41c9e31af740}</UniqueIdentifier>
+      <UniqueIdentifier>{affc8697-1493-42b8-86f5-7c517208ed18}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\2D">
-      <UniqueIdentifier>{036afd7c-118a-44c5-92ce-13ce48818d28}</UniqueIdentifier>
+      <UniqueIdentifier>{419a724c-6480-4019-a3fd-a2425c541f96}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\3D">
-      <UniqueIdentifier>{c502d707-be77-4c2e-b220-d735b2ebd8c9}</UniqueIdentifier>
+      <UniqueIdentifier>{e4b2bea6-1ca8-4352-bead-3221597d6adb}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\3D\Animation">
-      <UniqueIdentifier>{53188b6d-2e5b-439e-b8a9-d5ba346078ae}</UniqueIdentifier>
+      <UniqueIdentifier>{8233112a-b9db-4ef8-9579-b678d0d75fa8}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\3D\Camera">
-      <UniqueIdentifier>{7c986285-eab1-4002-a60b-14e1cc257985}</UniqueIdentifier>
+      <UniqueIdentifier>{6ad70318-7fb1-4456-a094-3ea10e098979}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\3D\Effects">
-      <UniqueIdentifier>{12ddb10a-7758-4e17-aadb-0574e9676c33}</UniqueIdentifier>
+      <UniqueIdentifier>{13560291-1d70-47aa-a5cc-1f393e5aa45f}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\3D\Fracture">
-      <UniqueIdentifier>{0f8674aa-d80f-409d-b69f-4447df2d65c4}</UniqueIdentifier>
+      <UniqueIdentifier>{60ceb110-6050-488e-a405-620553981faa}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\3D\Light">
-      <UniqueIdentifier>{dbc320a4-b6e7-4a9e-a6ae-b465d54a8f7a}</UniqueIdentifier>
+      <UniqueIdentifier>{7e47ec9e-27a5-4695-a538-5bbb2116f561}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\3D\Material">
-      <UniqueIdentifier>{49697735-ba78-49a3-95e2-2ab9c840f774}</UniqueIdentifier>
+      <UniqueIdentifier>{61da2260-8909-45c4-ab0d-1ed7a04ed74c}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\3D\Model">
-      <UniqueIdentifier>{ddfb5eeb-1d66-485e-8cdf-fb3feee15194}</UniqueIdentifier>
+      <UniqueIdentifier>{d46d8a10-8f7f-405e-8c79-3d47421db36c}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\3D\ParticleSystem">
-      <UniqueIdentifier>{53274fd5-24a7-4166-878e-ca0365052c52}</UniqueIdentifier>
+      <UniqueIdentifier>{74df860d-964e-4736-8da9-1a20852912fe}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\3D\Renderer">
-      <UniqueIdentifier>{eb02257c-3515-4497-8b96-5bc9cda978ae}</UniqueIdentifier>
+      <UniqueIdentifier>{731ea1a3-56fb-4614-81b1-c116240dedf1}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\3D\Transform">
-      <UniqueIdentifier>{2e997ba7-17f0-4677-ad84-9657bc594710}</UniqueIdentifier>
+      <UniqueIdentifier>{b8662631-e4d6-42de-a5c4-17f694c5babd}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Audio">
-      <UniqueIdentifier>{7c6ae628-8597-48fb-9c02-dc423b07abd0}</UniqueIdentifier>
+      <UniqueIdentifier>{9f871b71-8ed9-4a44-a1e7-dd3cf48a9a18}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Collision">
-      <UniqueIdentifier>{67056ff1-d55c-453d-bf2b-02f06d6b0d60}</UniqueIdentifier>
+      <UniqueIdentifier>{6fd1b276-dfb2-4dec-ab7d-157de9de6ed1}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Common">
-      <UniqueIdentifier>{0bb6c8d5-3ad4-4dae-a006-df826b2b8f7a}</UniqueIdentifier>
+      <UniqueIdentifier>{2884157d-ee4a-4358-960d-4f580324ece2}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Core">
-      <UniqueIdentifier>{dab34cef-0088-4082-ad58-d8b2c98a3cfa}</UniqueIdentifier>
+      <UniqueIdentifier>{165aac69-ff81-4c4e-83da-7dff07b36cbe}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Core\Objects">
-      <UniqueIdentifier>{5e8e0679-32f7-4505-b7d3-3d3e6e8fb8d3}</UniqueIdentifier>
+      <UniqueIdentifier>{7a4eb2fa-beb9-4a6d-8531-90bed735129e}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Core\System">
-      <UniqueIdentifier>{d49aa01c-9012-4a2b-bfec-5ed21e0821b0}</UniqueIdentifier>
+      <UniqueIdentifier>{eeb7e401-3a07-4aa3-849c-b07c1db4cdc5}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Editor">
-      <UniqueIdentifier>{87b98001-37be-491d-a504-638ea5f1a6be}</UniqueIdentifier>
+      <UniqueIdentifier>{91f9084d-5216-4425-9793-0a74cfc4d98b}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Editor\Command">
-      <UniqueIdentifier>{36e6a756-86a6-4102-8d42-c173e984f5d4}</UniqueIdentifier>
+      <UniqueIdentifier>{dd3a6e3e-8a41-4a7e-b0d8-229ca0a86bd7}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Editor\EditorMenu">
-      <UniqueIdentifier>{b9ffdf17-26dd-444c-853b-2d5c76d80ba6}</UniqueIdentifier>
+      <UniqueIdentifier>{c0e74e89-1817-4584-ba56-62be9b40dc11}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Editor\NodeSystem">
-      <UniqueIdentifier>{1d41ea17-abb0-4de7-9243-7aa95a41a262}</UniqueIdentifier>
+      <UniqueIdentifier>{de1449af-a6b2-405b-9d32-96f948e7c828}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Editor\Windows">
-      <UniqueIdentifier>{484bacf7-442f-4e2a-8998-84ca05a3dddb}</UniqueIdentifier>
+      <UniqueIdentifier>{e77231b7-15ad-49eb-9d90-ae160599f73d}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics">
-      <UniqueIdentifier>{db956d35-a414-4a67-804b-73765f375e9f}</UniqueIdentifier>
+      <UniqueIdentifier>{11f79ca3-4b74-4614-94ca-7d8a43ba2ed5}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics\Buffers">
-      <UniqueIdentifier>{8edb4174-9070-4be1-9958-fc541d73ab6f}</UniqueIdentifier>
+      <UniqueIdentifier>{33d69f22-1347-410c-bd63-cc285afc4d7c}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics\Core">
-      <UniqueIdentifier>{d4ad8094-ab12-4b07-852e-7de3a45f40f1}</UniqueIdentifier>
+      <UniqueIdentifier>{62e1eec1-97fc-48a1-8d21-4c69527f82d6}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics\Debug">
-      <UniqueIdentifier>{3747bb15-6bc1-4783-843e-3e6360732c9b}</UniqueIdentifier>
+      <UniqueIdentifier>{9f478dd6-962e-48ff-9291-07f2ac472e04}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics\DirectX">
-      <UniqueIdentifier>{d8b9dc20-75a2-47f4-9f85-859fe549b752}</UniqueIdentifier>
+      <UniqueIdentifier>{4aa05099-6bf8-4f50-a844-19312ce184dd}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics\DirectX\Memory">
-      <UniqueIdentifier>{ac9a7460-ad2a-4bdf-adf3-17aeaf751018}</UniqueIdentifier>
+      <UniqueIdentifier>{485883bf-c6f7-4b2e-b96e-fc264b63fbca}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics\PostProcess">
-      <UniqueIdentifier>{c41428c0-d2f1-495d-a7fa-15bbe1107a0b}</UniqueIdentifier>
+      <UniqueIdentifier>{e8d13ca6-c183-40e5-8366-8bfae9d13f4f}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics\PSO">
-      <UniqueIdentifier>{f9fed01c-523c-4701-898c-d86ae66a9e5c}</UniqueIdentifier>
+      <UniqueIdentifier>{31c766ae-7c11-481d-9be0-1261e0ce3964}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics\PSO\Core">
-      <UniqueIdentifier>{54f7f0bb-abe6-4f08-b44b-1ed96ae85881}</UniqueIdentifier>
+      <UniqueIdentifier>{4812c994-350f-4edf-a3e2-b8ac9e849d17}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics\PSO\PostProcess">
-      <UniqueIdentifier>{da049406-6cff-480b-8d29-ac09df2027fe}</UniqueIdentifier>
+      <UniqueIdentifier>{422dcbaf-aad1-43a8-a8a5-42bb168d9f2f}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics\PSO\Rasterize">
-      <UniqueIdentifier>{11923b32-d179-4699-9cb5-4e49a9a23923}</UniqueIdentifier>
+      <UniqueIdentifier>{1ad18254-1982-4cd7-9a1c-2817a488cb65}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics\PSO\Raytracing">
-      <UniqueIdentifier>{3155f3c8-6c0e-454a-8026-ee715ff26ded}</UniqueIdentifier>
+      <UniqueIdentifier>{e02f710d-e40e-4baa-8c48-a7c0de8ae7a1}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics\RenderPass">
-      <UniqueIdentifier>{09be8a17-ffe4-4100-9d9f-6057ce391dfc}</UniqueIdentifier>
+      <UniqueIdentifier>{10d3609f-40e4-4c87-afed-8d0d8a2a6f95}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics\Resources">
-      <UniqueIdentifier>{8b5ec56b-538c-40e6-b247-cd0a20968cc6}</UniqueIdentifier>
+      <UniqueIdentifier>{9e261d69-33fb-49ea-8b78-887324f830d9}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Graphics\Texture">
-      <UniqueIdentifier>{d03faca4-57a3-4bf4-9490-06c51c080492}</UniqueIdentifier>
+      <UniqueIdentifier>{a3f1a31a-1c0b-4118-8ea2-07bdf4dbfe7e}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Input">
-      <UniqueIdentifier>{c63fb717-2dcd-47f1-8326-439283b47a6f}</UniqueIdentifier>
+      <UniqueIdentifier>{e8ab514f-36e8-42e9-86b6-8611e445c595}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Math">
-      <UniqueIdentifier>{cb7d059c-3b77-43ce-bf19-774413536fea}</UniqueIdentifier>
+      <UniqueIdentifier>{4b6b98bd-f4aa-4a82-9481-3e5ede1275a3}</UniqueIdentifier>
     </Filter>
     <Filter Include="EngineSource\Scene">
-      <UniqueIdentifier>{8247508f-ae10-49ed-a8ac-513f837e131f}</UniqueIdentifier>
+      <UniqueIdentifier>{2cd45317-3e20-479d-8c9f-689851557df0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Externals">
-      <UniqueIdentifier>{599eaa4c-c87f-47de-aa63-a81e2a33424d}</UniqueIdentifier>
+      <UniqueIdentifier>{bbccd6ca-5d55-4f6b-b277-968ab0e15378}</UniqueIdentifier>
     </Filter>
     <Filter Include="Externals\assimp">
-      <UniqueIdentifier>{dafa38c2-43a3-400d-b583-db5bdeedfa81}</UniqueIdentifier>
+      <UniqueIdentifier>{438cbe7c-1064-48af-8f5b-c978b6197fcf}</UniqueIdentifier>
     </Filter>
     <Filter Include="Externals\assimp\include">
-      <UniqueIdentifier>{ffcb78e4-c40f-4dde-a37c-588713063c96}</UniqueIdentifier>
+      <UniqueIdentifier>{f2a20b42-046b-430d-bc65-86190fb8077d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Externals\assimp\include\assimp">
-      <UniqueIdentifier>{daf0c116-1a51-4859-a942-ecc85773f17a}</UniqueIdentifier>
+      <UniqueIdentifier>{3ba5f592-37f1-4400-83ef-1e1af174ac92}</UniqueIdentifier>
     </Filter>
     <Filter Include="Externals\assimp\include\assimp\Compiler">
-      <UniqueIdentifier>{b6996b6c-5e51-4cda-bb6b-6535c596ef2e}</UniqueIdentifier>
+      <UniqueIdentifier>{3503b306-7e9a-4b5f-9b25-7fb41cf6e6cd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Externals\assimp\include\assimp\port">
-      <UniqueIdentifier>{4daf3e98-e272-4e42-b092-fa49be63f115}</UniqueIdentifier>
+      <UniqueIdentifier>{7288902e-250e-4817-811c-67d600c75e2f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Externals\assimp\include\assimp\port\AndroidJNI">
-      <UniqueIdentifier>{245f79ca-e83f-48b3-aab7-1deb07b57202}</UniqueIdentifier>
+      <UniqueIdentifier>{a41343d2-1031-4511-9f69-30aadacc0e19}</UniqueIdentifier>
     </Filter>
     <Filter Include="Externals\DirectXTex">
-      <UniqueIdentifier>{fd15f0d2-8e6e-490c-92dc-2698b7346c92}</UniqueIdentifier>
+      <UniqueIdentifier>{eeabd547-30b7-40b5-854f-cc39fd8dee59}</UniqueIdentifier>
     </Filter>
     <Filter Include="Externals\imgui">
-      <UniqueIdentifier>{2274c65c-75ed-4042-be99-09c32c20447c}</UniqueIdentifier>
+      <UniqueIdentifier>{0723cd5c-050b-4a7b-ac7f-2a5d7d13fcbe}</UniqueIdentifier>
     </Filter>
     <Filter Include="Externals\nlohmann">
-      <UniqueIdentifier>{2a07953a-f702-4ece-ada7-2623d0481b69}</UniqueIdentifier>
+      <UniqueIdentifier>{e7f5d5c7-7ac1-4206-b4c2-ad6c219176e6}</UniqueIdentifier>
     </Filter>
     <Filter Include="packages">
-      <UniqueIdentifier>{e3bde27b-19fc-4af1-b845-52e21079baae}</UniqueIdentifier>
+      <UniqueIdentifier>{0f85fba4-f1a3-40ff-9099-1b4b73a770c3}</UniqueIdentifier>
     </Filter>
     <Filter Include="packages\WinPixEventRuntime.1.0.240308001">
-      <UniqueIdentifier>{78170b13-8dab-4213-bc11-491937791668}</UniqueIdentifier>
+      <UniqueIdentifier>{db874595-f662-4f2e-8593-335501bf25f1}</UniqueIdentifier>
     </Filter>
     <Filter Include="packages\WinPixEventRuntime.1.0.240308001\Include">
-      <UniqueIdentifier>{4adb6e90-ef48-4827-a9af-6a2d900a9b4b}</UniqueIdentifier>
+      <UniqueIdentifier>{d140828d-cbf5-428d-820a-5f613542dfea}</UniqueIdentifier>
     </Filter>
     <Filter Include="packages\WinPixEventRuntime.1.0.240308001\Include\WinPixEventRuntime">
-      <UniqueIdentifier>{51f48128-fd5e-44a5-922f-fb9270f375c9}</UniqueIdentifier>
+      <UniqueIdentifier>{8741f0a6-4e1d-4ca1-886d-25031975cccf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Application\Camera\CameraController.cpp">
-      <Filter>Application\Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Camera\State\CameraState.cpp">
-      <Filter>Application\Camera\State</Filter>
-    </ClCompile>
     <ClCompile Include="Application\Demo\FructureDemo.cpp">
       <Filter>Application\Demo</Filter>
     </ClCompile>
@@ -255,63 +210,6 @@
     <ClCompile Include="Application\Demo\TestFructure.cpp">
       <Filter>Application\Demo</Filter>
     </ClCompile>
-    <ClCompile Include="Application\Enemy\BossAnimator.cpp">
-      <Filter>Application\Enemy</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Enemy\BossEnemy.cpp">
-      <Filter>Application\Enemy</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Enemy\BossRangedAttackManager.cpp">
-      <Filter>Application\Enemy</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Enemy\BattleAction\BossBattleAction.cpp">
-      <Filter>Application\Enemy\BattleAction</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Enemy\RangedAttack\IceFall.cpp">
-      <Filter>Application\Enemy\RangedAttack</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Enemy\RangedAttack\WindAttack.cpp">
-      <Filter>Application\Enemy\RangedAttack</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Enemy\State\BossStateBattle.cpp">
-      <Filter>Application\Enemy\State</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Enemy\State\BossStateIn.cpp">
-      <Filter>Application\Enemy\State</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Enemy\State\BossStateOut.cpp">
-      <Filter>Application\Enemy\State</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\GamePlay\GamePhaseManager.cpp">
-      <Filter>Application\GamePlay</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\GamePlay\Phase\ScenePhase.cpp">
-      <Filter>Application\GamePlay\Phase</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Player\Player.cpp">
-      <Filter>Application\Player</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Player\PlayerAction.cpp">
-      <Filter>Application\Player</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Player\PlayerAnimator.cpp">
-      <Filter>Application\Player</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Player\PlayerEffectManager.cpp">
-      <Filter>Application\Player</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Player\Effect\PlayerHitAttackEffect.cpp">
-      <Filter>Application\Player\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Player\Effect\ShockFloor.cpp">
-      <Filter>Application\Player\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Player\Effect\ShockWave.cpp">
-      <Filter>Application\Player\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Scene\DemoScene.cpp">
-      <Filter>Application\Scene</Filter>
-    </ClCompile>
     <ClCompile Include="Application\Scene\GameScene.cpp">
       <Filter>Application\Scene</Filter>
     </ClCompile>
@@ -321,38 +219,11 @@
     <ClCompile Include="Application\Scene\Transition\Fade.cpp">
       <Filter>Application\Scene\Transition</Filter>
     </ClCompile>
-    <ClCompile Include="Application\Stage\BgIceRock.cpp">
-      <Filter>Application\Stage</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Stage\Floor.cpp">
-      <Filter>Application\Stage</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Stage\StageManager.cpp">
-      <Filter>Application\Stage</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Stage\Wall.cpp">
-      <Filter>Application\Stage</Filter>
-    </ClCompile>
     <ClCompile Include="Application\UI\Effects\DimmerUI.cpp">
       <Filter>Application\UI\Effects</Filter>
     </ClCompile>
     <ClCompile Include="Application\UI\Effects\LetterboxUI.cpp">
       <Filter>Application\UI\Effects</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\UI\Managers\ClearUIManager.cpp">
-      <Filter>Application\UI\Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\UI\Managers\GameOverUIManager.cpp">
-      <Filter>Application\UI\Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\UI\Managers\PauseUIManager.cpp">
-      <Filter>Application\UI\Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\UI\Managers\PlayUIManager.cpp">
-      <Filter>Application\UI\Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\UI\Managers\TitleUIManager.cpp">
-      <Filter>Application\UI\Managers</Filter>
     </ClCompile>
     <ClCompile Include="Application\UI\Widgets\ArrowUI.cpp">
       <Filter>Application\UI\Widgets</Filter>
@@ -365,12 +236,6 @@
     </ClCompile>
     <ClCompile Include="Application\UI\Widgets\TimeUI.cpp">
       <Filter>Application\UI\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Utils\TimeController.cpp">
-      <Filter>Application\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Utils\Timer.cpp">
-      <Filter>Application\Utils</Filter>
     </ClCompile>
     <ClCompile Include="EngineSource\2D\Font.cpp">
       <Filter>EngineSource\2D</Filter>
@@ -508,6 +373,9 @@
       <Filter>EngineSource\Common</Filter>
     </ClCompile>
     <ClCompile Include="EngineSource\Common\LogManager.cpp">
+      <Filter>EngineSource\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineSource\Common\ParallelFor.cpp">
       <Filter>EngineSource\Common</Filter>
     </ClCompile>
     <ClCompile Include="EngineSource\Core\Engine.cpp">
@@ -852,20 +720,10 @@
     <ClCompile Include="Externals\imgui\imgui_widgets.cpp">
       <Filter>Externals\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="EngineSource\Common\ParallelFor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\CollisionConfig.h">
       <Filter>Application</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Camera\CameraController.h">
-      <Filter>Application\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Camera\ICameraState.h">
-      <Filter>Application\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Camera\State\CameraState.h">
-      <Filter>Application\Camera\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\Demo\FructureDemo.h">
       <Filter>Application\Demo</Filter>
@@ -882,75 +740,6 @@
     <ClInclude Include="Application\Demo\TestFructure.h">
       <Filter>Application\Demo</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Enemy\BossAnimator.h">
-      <Filter>Application\Enemy</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Enemy\BossEnemy.h">
-      <Filter>Application\Enemy</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Enemy\BossRangedAttackManager.h">
-      <Filter>Application\Enemy</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Enemy\IBossState.h">
-      <Filter>Application\Enemy</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Enemy\BattleAction\BossBattleAction.h">
-      <Filter>Application\Enemy\BattleAction</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Enemy\BattleAction\IBossBattleAction.h">
-      <Filter>Application\Enemy\BattleAction</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Enemy\RangedAttack\IceFall.h">
-      <Filter>Application\Enemy\RangedAttack</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Enemy\RangedAttack\WindAttack.h">
-      <Filter>Application\Enemy\RangedAttack</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Enemy\State\BossStateBattle.h">
-      <Filter>Application\Enemy\State</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Enemy\State\BossStateIn.h">
-      <Filter>Application\Enemy\State</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Enemy\State\BossStateOut.h">
-      <Filter>Application\Enemy\State</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\GamePlay\GamePhaseManager.h">
-      <Filter>Application\GamePlay</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\GamePlay\IScenePhase.h">
-      <Filter>Application\GamePlay</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\GamePlay\Phase\ScenePhase.h">
-      <Filter>Application\GamePlay\Phase</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Player\IPlayerAction.h">
-      <Filter>Application\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Player\Player.h">
-      <Filter>Application\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Player\PlayerAction.h">
-      <Filter>Application\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Player\PlayerAnimator.h">
-      <Filter>Application\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Player\PlayerEffectManager.h">
-      <Filter>Application\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Player\Effect\PlayerHitAttackEffect.h">
-      <Filter>Application\Player\Effect</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Player\Effect\ShockFloor.h">
-      <Filter>Application\Player\Effect</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Player\Effect\ShockWave.h">
-      <Filter>Application\Player\Effect</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Scene\DemoScene.h">
-      <Filter>Application\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Application\Scene\GameScene.h">
       <Filter>Application\Scene</Filter>
     </ClInclude>
@@ -963,38 +752,11 @@
     <ClInclude Include="Application\Scene\Transition\Fade.h">
       <Filter>Application\Scene\Transition</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Stage\BgIceRock.h">
-      <Filter>Application\Stage</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Stage\Floor.h">
-      <Filter>Application\Stage</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Stage\StageManager.h">
-      <Filter>Application\Stage</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Stage\Wall.h">
-      <Filter>Application\Stage</Filter>
-    </ClInclude>
     <ClInclude Include="Application\UI\Effects\DimmerUI.h">
       <Filter>Application\UI\Effects</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\Effects\LetterboxUI.h">
       <Filter>Application\UI\Effects</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\UI\Managers\ClearUIManager.h">
-      <Filter>Application\UI\Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\UI\Managers\GameOverUIManager.h">
-      <Filter>Application\UI\Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\UI\Managers\PauseUIManager.h">
-      <Filter>Application\UI\Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\UI\Managers\PlayUIManager.h">
-      <Filter>Application\UI\Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\UI\Managers\TitleUIManager.h">
-      <Filter>Application\UI\Managers</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\Widgets\ArrowUI.h">
       <Filter>Application\UI\Widgets</Filter>
@@ -1007,12 +769,6 @@
     </ClInclude>
     <ClInclude Include="Application\UI\Widgets\TimeUI.h">
       <Filter>Application\UI\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Utils\TimeController.h">
-      <Filter>Application\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Utils\Timer.h">
-      <Filter>Application\Utils</Filter>
     </ClInclude>
     <ClInclude Include="EngineSource\2D\Font.h">
       <Filter>EngineSource\2D</Filter>
@@ -1195,6 +951,9 @@
       <Filter>EngineSource\Common</Filter>
     </ClInclude>
     <ClInclude Include="EngineSource\Common\LogManager.h">
+      <Filter>EngineSource\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineSource\Common\ParallelFor.h">
       <Filter>EngineSource\Common</Filter>
     </ClInclude>
     <ClInclude Include="EngineSource\Common\ResourceLeakChecker.h">
@@ -1653,7 +1412,6 @@
     <ClInclude Include="Externals\imgui\imstb_truetype.h">
       <Filter>Externals\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="EngineSource\Common\ParallelFor.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\CS\ParticleUpdate.CS.hlsl" />

@@ -1,15 +1,3 @@
 {
-    "Walk": { "file": "walk.gltf", "directory": "Resources/Models/Walk" },
-
-    "PlayerWalk": { "file": "PlayerWalk.gltf", "directory": "Resources/Animations/Player/PlayerWalk" },
-    "PlayerAirMove": { "file": "PlayerAirMove.gltf", "directory": "Resources/Animations/Player/PlayerAirMove" },
-    "PlayerRush": { "file": "PlayerRush.gltf", "directory": "Resources/Animations/Player/PlayerRush" },
-    "PlayerDownAttack": { "file": "DownAttack.gltf", "directory": "Resources/Animations/Player/PlayerDownAttack" },
-
-    "BossBirdBaseMove": { "file": "BossBirdBaseMove.gltf", "directory": "Resources/Animations/Boss/BossBirdBaseMove" },
-    "BossBirdScream": { "file": "BossBird_Screamgltf.gltf", "directory": "Resources/Animations/Boss/BossBirdScream" },
-    "BossBirdRush": { "file": "BossBirdRush.gltf", "directory": "Resources/Animations/Boss/BossBirdRush" },
-    "BossBirdIceBreath": { "file": "BossBird_IceBreath.gltf", "directory": "Resources/Animations/Boss/BossBirdIceBreath" },
-    "BossBirdAppearance": { "file": "BossBird_Screamgltf.gltf", "directory": "Resources/Animations/Boss/BossBirdAppearance" },
-    "BossBirdShootDown": { "file": "ShootDown_Animation.gltf", "directory": "Resources/Animations/Boss/BossBirdShootDown" }
+    "Walk": { "file": "walk.gltf", "directory": "Resources/Models/Walk" }
 }

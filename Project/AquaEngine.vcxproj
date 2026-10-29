@@ -172,8 +172,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Application\Camera\CameraController.cpp" />
-    <ClCompile Include="Application\Camera\State\CameraState.cpp" />
     <ClCompile Include="Application\Demo\FructureDemo.cpp" />
     <ClCompile Include="Application\Demo\IceDemo.cpp" />
     <ClCompile Include="Application\Demo\PBRDemo.cpp">
@@ -188,48 +186,15 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Application\Enemy\BattleAction\BossBattleAction.cpp" />
-    <ClCompile Include="Application\Enemy\BossAnimator.cpp" />
-    <ClCompile Include="Application\Enemy\BossEnemy.cpp" />
-    <ClCompile Include="Application\Enemy\BossRangedAttackManager.cpp" />
-    <ClCompile Include="Application\Enemy\RangedAttack\IceFall.cpp" />
-    <ClCompile Include="Application\Enemy\RangedAttack\WindAttack.cpp" />
-    <ClCompile Include="Application\Enemy\State\BossStateBattle.cpp" />
-    <ClCompile Include="Application\Enemy\State\BossStateIn.cpp" />
-    <ClCompile Include="Application\Enemy\State\BossStateOut.cpp" />
-    <ClCompile Include="Application\GamePlay\GamePhaseManager.cpp" />
-    <ClCompile Include="Application\GamePlay\Phase\ScenePhase.cpp" />
-    <ClCompile Include="Application\Player\Effect\PlayerHitAttackEffect.cpp" />
-    <ClCompile Include="Application\Player\Effect\ShockFloor.cpp" />
-    <ClCompile Include="Application\Player\Effect\ShockWave.cpp" />
-    <ClCompile Include="Application\Player\Player.cpp" />
-    <ClCompile Include="Application\Player\PlayerAction.cpp" />
-    <ClCompile Include="Application\Player\PlayerAnimator.cpp" />
-    <ClCompile Include="Application\Player\PlayerEffectManager.cpp" />
     <ClCompile Include="Application\Scene\GameScene.cpp" />
     <ClCompile Include="Application\Scene\TestScene.cpp" />
-    <ClCompile Include="Application\Scene\DemoScene.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
     <ClCompile Include="Application\Scene\Transition\Fade.cpp" />
-    <ClCompile Include="Application\Stage\BgIceRock.cpp" />
-    <ClCompile Include="Application\Stage\Floor.cpp" />
-    <ClCompile Include="Application\Stage\StageManager.cpp" />
-    <ClCompile Include="Application\Stage\Wall.cpp" />
     <ClCompile Include="Application\UI\Effects\DimmerUI.cpp" />
-    <ClCompile Include="Application\UI\Managers\ClearUIManager.cpp" />
-    <ClCompile Include="Application\UI\Managers\GameOverUIManager.cpp" />
     <ClCompile Include="Application\UI\Widgets\ArrowUI.cpp" />
     <ClCompile Include="Application\UI\Widgets\HpBarUI.cpp" />
     <ClCompile Include="Application\UI\Widgets\HpContainer.cpp" />
     <ClCompile Include="Application\UI\Effects\LetterboxUI.cpp" />
-    <ClCompile Include="Application\UI\Managers\PauseUIManager.cpp" />
-    <ClCompile Include="Application\UI\Managers\PlayUIManager.cpp" />
     <ClCompile Include="Application\UI\Widgets\TimeUI.cpp" />
-    <ClCompile Include="Application\UI\Managers\TitleUIManager.cpp" />
-    <ClCompile Include="Application\Utils\TimeController.cpp" />
-    <ClCompile Include="Application\Utils\Timer.cpp" />
     <ClCompile Include="EngineSource\2D\Font.cpp" />
     <ClCompile Include="EngineSource\2D\FontManager.cpp" />
     <ClCompile Include="EngineSource\2D\ImGuiManager.cpp" />
@@ -624,58 +589,21 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application\Camera\CameraController.h" />
-    <ClInclude Include="Application\Camera\ICameraState.h" />
-    <ClInclude Include="Application\Camera\State\CameraState.h" />
     <ClInclude Include="Application\Demo\FructureDemo.h" />
     <ClInclude Include="Application\Demo\IceDemo.h" />
     <ClInclude Include="Application\Demo\PBRDemo.h" />
     <ClInclude Include="Application\Demo\Test.h" />
     <ClInclude Include="Application\Demo\TestFructure.h" />
-    <ClInclude Include="Application\Enemy\BattleAction\BossBattleAction.h" />
-    <ClInclude Include="Application\Enemy\BattleAction\IBossBattleAction.h" />
-    <ClInclude Include="Application\Enemy\BossAnimator.h" />
-    <ClInclude Include="Application\Enemy\BossEnemy.h" />
-    <ClInclude Include="Application\Enemy\BossRangedAttackManager.h" />
-    <ClInclude Include="Application\Enemy\IBossState.h" />
-    <ClInclude Include="Application\Enemy\RangedAttack\IceFall.h" />
-    <ClInclude Include="Application\Enemy\RangedAttack\WindAttack.h" />
-    <ClInclude Include="Application\Enemy\State\BossStateBattle.h" />
-    <ClInclude Include="Application\Enemy\State\BossStateIn.h" />
-    <ClInclude Include="Application\Enemy\State\BossStateOut.h" />
-    <ClInclude Include="Application\GamePlay\GamePhaseManager.h" />
-    <ClInclude Include="Application\GamePlay\IScenePhase.h" />
-    <ClInclude Include="Application\GamePlay\Phase\ScenePhase.h" />
-    <ClInclude Include="Application\Player\Effect\PlayerHitAttackEffect.h" />
-    <ClInclude Include="Application\Player\Effect\ShockFloor.h" />
-    <ClInclude Include="Application\Player\Effect\ShockWave.h" />
-    <ClInclude Include="Application\Player\IPlayerAction.h" />
-    <ClInclude Include="Application\Player\Player.h" />
-    <ClInclude Include="Application\Player\PlayerAction.h" />
-    <ClInclude Include="Application\Player\PlayerAnimator.h" />
-    <ClInclude Include="Application\Player\PlayerEffectManager.h" />
     <ClInclude Include="Application\Scene\GameScene.h" />
     <ClInclude Include="Application\Scene\Register\SetUpScenes.h" />
     <ClInclude Include="Application\Scene\TestScene.h" />
-    <ClInclude Include="Application\Scene\DemoScene.h" />
     <ClInclude Include="Application\Scene\Transition\Fade.h" />
-    <ClInclude Include="Application\Stage\BgIceRock.h" />
-    <ClInclude Include="Application\Stage\Floor.h" />
-    <ClInclude Include="Application\Stage\StageManager.h" />
-    <ClInclude Include="Application\Stage\Wall.h" />
     <ClInclude Include="Application\UI\Effects\DimmerUI.h" />
-    <ClInclude Include="Application\UI\Managers\ClearUIManager.h" />
-    <ClInclude Include="Application\UI\Managers\GameOverUIManager.h" />
     <ClInclude Include="Application\UI\Widgets\ArrowUI.h" />
     <ClInclude Include="Application\UI\Widgets\HpBarUI.h" />
     <ClInclude Include="Application\UI\Widgets\HpContainer.h" />
     <ClInclude Include="Application\UI\Effects\LetterboxUI.h" />
-    <ClInclude Include="Application\UI\Managers\PauseUIManager.h" />
-    <ClInclude Include="Application\UI\Managers\PlayUIManager.h" />
     <ClInclude Include="Application\UI\Widgets\TimeUI.h" />
-    <ClInclude Include="Application\UI\Managers\TitleUIManager.h" />
-    <ClInclude Include="Application\Utils\TimeController.h" />
-    <ClInclude Include="Application\Utils\Timer.h" />
     <ClInclude Include="EngineSource\2D\Font.h" />
     <ClInclude Include="EngineSource\2D\FontManager.h" />
     <ClInclude Include="EngineSource\2D\ImGuiManager.h" />

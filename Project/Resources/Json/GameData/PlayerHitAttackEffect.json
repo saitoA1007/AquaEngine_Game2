@@ -1,7 +1,0 @@
-{
-    "PlayerHitAttackEffect": {
-        "MaxTime": 0.20000000298023224,
-        "RotateSpeed": 15.0,
-        "SceneName": "Game"
-    }
-}
