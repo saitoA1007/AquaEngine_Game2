@@ -60,6 +60,8 @@ namespace GameEngine {
 		/// </summary>
 		void Update();
 
+	public:
+
 		/// <summary>
 		/// コマンドを登録する
 		/// </summary>
@@ -74,15 +76,45 @@ namespace GameEngine {
 		void UnregisterCommand(const std::string& commandName);
 
 		/// <summary>
+		/// 全てのコマンドを削除
+		/// </summary>
+		void ClearAllCommands();
+
+		/// <summary>
 		/// 指定したコマンドが押されているかをチェック
 		/// </summary>
 		/// <returns></returns>
 		bool IsCommandActive(const std::string& commandName) const;
 
 		/// <summary>
-		/// 全てのコマンドを削除
+		/// マウスの位置を取得する（ウィンドウ座標系）
 		/// </summary>
-		void ClearAllCommands();
+		/// <returns>マウスの位置</returns>
+		const Vector2& GetMousePosition() const;
+
+		/// <summary>
+		/// マウスの移動量を取得（ウィンドウ座標系）
+		/// </summary>
+		/// <returns></returns>
+		const Vector2& GetMouseDelta();
+
+		/// <summary>
+		/// ホイールスクロール量を取得する
+		/// </summary>
+		/// <returns>ホイールスクロール量。奥側に回したら+。Windowsの設定で逆にしてたら逆</returns>
+		int32_t GetWheel() const;
+
+		/// <summary>
+		/// パッドの左スティック座標を取得
+		/// </summary>
+		/// <returns></returns>
+		Vector2 GetLeftStick();
+
+		/// <summary>
+		/// パッドの右スティック座標を取得
+		/// </summary>
+		/// <returns></returns>
+		Vector2 GetRightStick();
 
 		/// <summary>
 		/// 振動させる(0~1の範囲を入れる)

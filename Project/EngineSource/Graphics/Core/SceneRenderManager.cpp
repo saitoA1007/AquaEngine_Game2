@@ -484,6 +484,21 @@ void SceneRenderManager::RaytracingExecute() {
 void SceneRenderManager::Draw2dExecute() {
 
     auto draw2dQueueList = renderQueue_->GetDraw2dQueue();
+
+    // レイトレのみの場合、RaytracingPassはUAV互換のためSRGBではない。
+    // 2DのPSO(SRGB)と形式が合わないので、SRGBのパスへカラーをコピーしてから描画する
+    if (finalPassName_ == raytracingFinalPassName_ && !draw2dQueueList.empty()) {
+        const std::string drawPassName = "LightingCompositePass";
+        renderPassController_->PrePass(drawPassName);
+        renderPassController_->ClearRenderPass(drawPassName);
+        currentPsoName_.clear();
+        PreDraw("ColorCopy");
+        commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        commandList_->SetGraphicsRootDescriptorTable(0, srvManager_->GetGPUHandle(renderPassController_->GetSrvIndex(raytracingFinalPassName_)));
+        commandList_->DrawInstanced(3, 1, 0, 0);
+        renderPassController_->PostPass(drawPassName);
+        finalPassName_ = drawPassName;
+    }
     
     renderPassController_->PrePass(finalPassName_);
     currentPsoName_.clear();
