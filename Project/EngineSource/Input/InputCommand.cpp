@@ -158,3 +158,23 @@ bool InputCommand::CheckCondition(const InputCondition& condition) {
 		break;
 	}
 }
+
+const Vector2& InputCommand::GetMousePosition() const {
+	return input_->GetMousePosition();
+}
+
+const Vector2& InputCommand::GetMouseDelta() {
+	return input_->GetMouseDelta();
+}
+
+int32_t InputCommand::GetWheel() const {
+	return input_->GetWheel();
+}
+
+Vector2 InputCommand::GetLeftStick() {
+	return input_->GetLeftStick();
+}
+
+Vector2 InputCommand::GetRightStick() {
+	return input_->GetRightStick();
+}
