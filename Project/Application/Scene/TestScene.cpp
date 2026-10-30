@@ -11,10 +11,10 @@ TestScene::~TestScene() {}
 
 TestScene::TestScene() {
 
-    // 決定ボタンコマンドを追加
+	// 決定ボタンコマンドを追加
 	inputCommand_->RegisterCommand("Decision", { {InputState::KeyTrigger, DIK_SPACE},{InputState::PadTrigger, XINPUT_GAMEPAD_X} });
-	inputCommand_->RegisterCommand("MoveUp", { {InputState::KeyPush, DIK_F }});
-	inputCommand_->RegisterCommand("MoveDown", { {InputState::KeyPush, DIK_G }});
+	inputCommand_->RegisterCommand("MoveUp", { {InputState::KeyPush, DIK_F } });
+	inputCommand_->RegisterCommand("MoveDown", { {InputState::KeyPush, DIK_G } });
 	inputCommand_->RegisterCommand("MoveLeft", { {InputState::KeyPush, DIK_A },{InputState::PadLeftStick,0,{-1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_LEFT } });
 	inputCommand_->RegisterCommand("MoveRight", { {InputState::KeyPush, DIK_D },{InputState::PadLeftStick,0,{1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_RIGHT } });
 	inputCommand_->RegisterCommand("MoveForward", { {InputState::KeyPush, DIK_W },{InputState::PadLeftStick,0,{0.0f,1.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_UP } });

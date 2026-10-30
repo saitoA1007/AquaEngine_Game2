@@ -341,3 +341,6 @@ docs/api/
 Resources/Textures/Cache/
 **/Textures/**/Cache/
 **/Textures/Cache/
+
+# Local AI notes and machine-specific settings
+.ai-local/
