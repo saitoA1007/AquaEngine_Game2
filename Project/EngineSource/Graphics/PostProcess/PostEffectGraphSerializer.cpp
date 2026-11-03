@@ -38,6 +38,9 @@ bool PostEffectGraphSerializer::Save(const std::string& filePath, const PostEffe
         case PostEffectNodeKind::kScene:
             n["kind"] = kKindScene;
             break;
+        case PostEffectNodeKind::kUI:
+            n["kind"] = kKindUI;
+            break;
         case PostEffectNodeKind::kOutput:
             n["kind"] = kKindOutput;
             break;

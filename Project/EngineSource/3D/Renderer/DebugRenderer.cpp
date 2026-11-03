@@ -240,8 +240,9 @@ void DebugRenderer::AddCircle(const Vector3& centerPos, const Vector3& normal, f
 }
 
 void DebugRenderer::Update() {
-    // 何も無ければ早期リターン
+    // 何も無ければ描画する頂点を0にして早期リターン
     if (!isEnabled_ || lines_.empty()) {
+        totalVertices_ = 0;
         return;
     }
     // すべての線の頂点データを1つのバッファにまとめる

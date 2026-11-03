@@ -19,6 +19,7 @@ namespace {
         if (!active) { return IM_COL32(110, 110, 115, 255); }
         switch (kind) {
         case PostEffectNodeKind::kScene:  return IM_COL32(130, 220, 150, 255);
+        case PostEffectNodeKind::kUI:     return IM_COL32(230, 200, 110, 255);
         case PostEffectNodeKind::kOutput: return IM_COL32(248, 140, 120, 255);
         default:                          return IM_COL32(128, 195, 248, 255);
         }
@@ -384,6 +385,10 @@ std::string PostEffectWindow::GetPreviewPassName(const PostEffectGraph& graph, c
         // 元のシーン画像
     case PostEffectNodeKind::kScene:
         return renderPassController_->GetSceneFinalPass();
+
+        // UIだけを描いた画像
+    case PostEffectNodeKind::kUI:
+        return renderPassController_->GetUIPass();
 
         // 各エフェクトのパス
     case PostEffectNodeKind::kEffect:

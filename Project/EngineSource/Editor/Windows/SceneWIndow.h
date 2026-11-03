@@ -5,11 +5,12 @@
 namespace GameEngine {
 
 	class AddObjectBar;
+	class DebugCamera;
 
 	class SceneWindow : public IEditorWindow {
 	public:
 
-		SceneWindow(RenderPassController* renderPassController, AddObjectBar* addObjectBar);
+		SceneWindow(RenderPassController* renderPassController, AddObjectBar* addObjectBar, DebugCamera* debugCamera);
 
 		void Draw() override;
 		std::string GetName() const override { return "SceneView"; };
@@ -17,6 +18,7 @@ namespace GameEngine {
 	private:
 		GameEngine::RenderPassController* renderPassController_ = nullptr;
 		AddObjectBar* addObjectBar_ = nullptr;
+		DebugCamera* debugCamera_ = nullptr;
 		// 固定したいアスペクト比 (16:9)
 		const float kTargetAspect = 1280.0f / 720.0f;
 	};

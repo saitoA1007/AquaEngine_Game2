@@ -64,6 +64,8 @@ namespace GameEngine {
 		std::string rasterizeFinalPassName_ = "";
 		// レイトレ描画で最終的に描画させるパス
 		std::string raytracingFinalPassName_ = "";
+		// UIを描画するパス
+		const std::string uiPassName_ = "UIPass";
 
 		// 描画の有効状態
 		bool enableDrawRaytracing_ = false;
@@ -112,7 +114,7 @@ namespace GameEngine {
 		// レイトレの描画コマンドを解放
 		void RaytracingExecute();
 
-		// 2Dのスプライトを描画
+		// 2Dのスプライトを描画。UIパスに描いてポストエフェクトで合成する
 		void Draw2dExecute();
 
 		// レイトレとラスタライズの描画を合成する

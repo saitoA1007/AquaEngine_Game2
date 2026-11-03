@@ -818,6 +818,10 @@ void PSOManager::DefaultLoadPostEffectPSO() {
     defaultPostEffect.psPath = L"Resources/Shaders/PostEffect/Dissolve/Dissolve.PS.hlsl";
     RegisterPSO("Dissolve", defaultPostEffect, &rootSigBuilder, &inputLayoutBuilder);
 
+    // UIの合成
+    defaultPostEffect.psPath = L"Resources/Shaders/PostEffect/UIComposite.PS.hlsl";
+    RegisterPSO("UIComposite", defaultPostEffect, &rootSigBuilder, &inputLayoutBuilder);
+
     // ラスタライズとレイトレの描画を合成する
     defaultPostEffect.rootSigName = "LightingComposite";
     defaultPostEffect.psPath = L"Resources/Shaders/PostEffect/LightingComposite.PS.hlsl";

@@ -18,6 +18,8 @@ void CollisionManager::CheckAllCollisions() {
 
 	// 何も無ければ早期リターン
 	if (colliders_.empty()) {
+		// 離れたペアに通知する
+		NotifyCollisionExit();
 		// 前フレームの情報も更新
 		preCollisions_.clear();
 		return;
@@ -45,8 +47,40 @@ void CollisionManager::CheckAllCollisions() {
 		}
 	}
 
+	// 離れたペアに通知する
+	NotifyCollisionExit();
+
 	// 現在の当たり判定内容を保存
 	preCollisions_ = currentCollisions_;
+}
+
+void CollisionManager::NotifyCollisionExit() {
+	// コールバック内でコライダーが削除されると履歴が書き換わるため、先に離れたペアを集める
+	std::vector<std::pair<Collider*, Collider*>> exitPairs;
+	for (const auto& collisionPair : preCollisions_) {
+		// 現フレームでも衝突していればスキップ
+		if (currentCollisions_.find(collisionPair) != currentCollisions_.end()) { continue; }
+		exitPairs.push_back(collisionPair);
+	}
+
+	for (const auto& collisionPair : exitPairs) {
+		Collider* colliderA = collisionPair.first;
+		Collider* colliderB = collisionPair.second;
+
+		// 相手のユーザーデータを渡す
+		CollisionResult resultA;
+		resultA.userData = colliderB->GetUserData();
+		CollisionResult resultB;
+		resultB.userData = colliderA->GetUserData();
+
+		// 衝突している間に呼び出す
+		colliderA->OnCollisionStay(resultA);
+		colliderB->OnCollisionStay(resultB);
+
+		// 離れた瞬間に呼び出す
+		colliderA->OnCollisionExit(resultA);
+		colliderB->OnCollisionExit(resultB);
+	}
 }
 
 void  CollisionManager::CheckCollisionPair(Collider* colliderA, Collider* colliderB) {
@@ -81,12 +115,12 @@ void  CollisionManager::CheckCollisionPair(Collider* colliderA, Collider* collid
 		// コライダーの衝突時コールバックを呼び出す
 		if (wasHit) {
 			// 衝突している間に呼び出す
-			colliderA->OnCollision(result);
-			colliderB->OnCollision(resultB);
+			colliderA->OnCollisionStay(result);
+			colliderB->OnCollisionStay(resultB);
 		} else {
 			// 衝突している間に呼び出す
-			colliderA->OnCollision(result);
-			colliderB->OnCollision(resultB);
+			colliderA->OnCollisionStay(result);
+			colliderB->OnCollisionStay(resultB);
 			// 衝突した瞬間に呼び出す
 			colliderA->OnCollisionEnter(result);
 			colliderB->OnCollisionEnter(resultB);

@@ -9,7 +9,7 @@
 
 namespace GameEngine {
 
-    enum class PostEffectNodeKind { kScene, kEffect, kOutput };
+    enum class PostEffectNodeKind { kScene, kUI, kEffect, kOutput };
 
     struct PostEffectNode {
         int id = 0;
@@ -40,6 +40,7 @@ namespace GameEngine {
 
         // ノード生成
         PostEffectNode* AddSceneNode();
+        PostEffectNode* AddUINode();
         PostEffectNode* AddOutputNode();
         PostEffectNode* AddEffectNode(const std::string& typeName, const std::string& name,
             const std::string& passName, IPostEffect* effect);

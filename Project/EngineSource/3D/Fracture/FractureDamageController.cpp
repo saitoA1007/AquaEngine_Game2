@@ -47,6 +47,12 @@ void FractureDamageController::Update(float deltaTime) {
 
 	SimulateCrackPhysics();
 
+	// 破片はローカル座標で動かすので、地面の高さもローカル座標に変換しておく
+	if (useGround_) {
+		Vector3 worldGroundPos = { worldMatrix_.m[3][0], groundWorldY_, worldMatrix_.m[3][2] };
+		groundLocalY_ = Matrix4x4::Transform(worldGroundPos, Matrix4x4::Inverse(worldMatrix_)).y;
+	}
+
 	// マクロ破片・Intact()はレイトレ提出時にworldTransformを掛けるので、ここでは何もしない
 	for (auto& batch : breakState_.MacroDebrisBatches()) {
 		SimulateFallingDebris(*batch, deltaTime);
@@ -89,12 +95,17 @@ void FractureDamageController::UpdateReassembly(float deltaTime) {
 	}
 
 	// 全てのマクロ破片が元の位置、回転へ収束したので、まとめて無傷状態へ復元する
+	ResetToIntact();
+}
+
+void FractureDamageController::ResetToIntact() {
 	destroyedChunkIds_.clear();
 	chunkDamage_.clear();
 	crackActiveChunkIds_.clear();
 	looseChunkIds_.clear();
 	breakState_.DentedChunks().clear();
 	breakState_.MacroDebrisBatches().clear();
+	breakState_.MicroDebrisBatches().clear();
 
 	// 壊れた、凹んだ、個別に描画するチャンクが全て空になったので、全チャンクが1つの静的なメッシュに戻る
 	RebuildStaticState();
@@ -279,6 +290,7 @@ void FractureDamageController::RebuildStaticState() {
 
 	if (!looseIds.empty()) {
 		breakState_.Intact().Initialize(looseIds, *buffer);
+		ApplyChunkPivots(breakState_.Intact(), looseIds);
 		RebuildIntactIndexMap(looseIds);
 
 		auto& transforms = breakState_.Intact().GetTransformDatas();
@@ -340,9 +352,11 @@ void FractureDamageController::ApplyDamage(const Vector3& impactPos, float damag
 		// 破壊イベントごとに新しいバッチとして追加する
 		FractureInstance& macroBatch = breakState_.AddMacroDebrisBatch();
 		macroBatch.Initialize(macroIds, *buffer);
+		ApplyChunkPivots(macroBatch, macroIds);
 
 		// 各破片に、衝撃点からの距離に応じた爆発の初速を与える
 		ApplyExplosionImpulse(macroBatch, macroIds, impactPos, damageRadius);
+		ApplyDebrisSpin(macroBatch, true);
 
 		breakState_.TrimMacroDebrisBatches(kMaxDebrisBatchesPerType_);
 	}
@@ -363,6 +377,7 @@ void FractureDamageController::ApplyDamage(const Vector3& impactPos, float damag
 
 	// シード由来の破片に爆発の初速を与える
 	ApplyExplosionImpulseUniform(microBatch, impactPos, 8.0f);
+	ApplyDebrisSpin(microBatch, true);
 
 	Log("microDebris numInstance = " + std::to_string(microBatch.GetNumInstance()));
 
@@ -395,7 +410,7 @@ void FractureDamageController::CollapseUnsupportedChunks() {
 
 	for (const auto& [id, entry] : chunksById_) {
 		if (destroyedChunkIds_.count(id)) { continue; }
-		if (!entry->info.isAnchored) { continue; }
+		if (!useAnchor_ || !entry->info.isAnchored) { continue; }
 		hasAnyAnchor = true;
 		if (reachable.insert(id).second) {
 			queue.push(id);
@@ -443,7 +458,9 @@ void FractureDamageController::CollapseUnsupportedChunks() {
 	// 崩落するチャンクも、事前分割のまま切り離すマクロ破片と同じ扱いで新しいバッチにする
 	FractureInstance& collapseBatch = breakState_.AddMacroDebrisBatch();
 	collapseBatch.Initialize(unsupportedIds, *buffer);
+	ApplyChunkPivots(collapseBatch, unsupportedIds);
 	ApplyCollapseImpulse(collapseBatch);
+	ApplyDebrisSpin(collapseBatch, false);
 	breakState_.TrimMacroDebrisBatches(kMaxDebrisBatchesPerType_);
 
 	for (uint32_t id : unsupportedIds) {
@@ -473,7 +490,7 @@ std::vector<uint32_t> FractureDamageController::SelectDetachedChunks(uint32_t se
 		const FractureChunkInfo& info = it->second->info;
 
 		// アンカーチャンクは境界として残し、切り離さない
-		if (info.isAnchored) {
+		if (useAnchor_ && info.isAnchored) {
 			continue;
 		}
 
@@ -526,12 +543,82 @@ std::optional<uint32_t> FractureDamageController::FindNearestChunk(const Vector3
 void FractureDamageController::SimulateFallingDebris(FractureInstance& instance, float deltaTime) {
 	auto& transforms = instance.GetTransformDatas();
 	for (auto& state : transforms) {
-		state.velocity.y -= 9.8f * deltaTime;
+		// 地面の上で止まった破片は動かさない
+		if (state.isSleeping) { continue; }
+
+		state.velocity.y -= kDebrisGravity_ * deltaTime;
 		state.transform.translate += state.velocity * deltaTime;
-		state.transform.rotate.x += 1.0f * deltaTime;
-		state.transform.rotate.y += 0.6f * deltaTime;
+		state.transform.rotate += state.angularVelocity * deltaTime;
+
+		if (useGround_) {
+			ResolveGroundBounce(state, deltaTime);
+		}
 	}
 	instance.Update();
+}
+
+void FractureDamageController::ResolveGroundBounce(FractureChunkState& state, float deltaTime) const {
+	// 回転は考慮せず、中心から底までの高さで破片の一番下を求める
+	float bottom = state.pivot.y + state.transform.translate.y - state.bottomOffset;
+
+	// 地面より下から飛び出した破片は、一度地面より上に出てから判定する(いきなり地面の上へ押し出さない)
+	if (!state.isGroundActive) {
+		if (bottom >= groundLocalY_) {
+			state.isGroundActive = true;
+		}
+		return;
+	}
+
+	// 地面より上にいる間は何もしない
+	if (bottom > groundLocalY_) { return; }
+
+	// 地面の上へ戻す
+	state.transform.translate.y += groundLocalY_ - bottom;
+
+	if (state.velocity.y < 0.0f) {
+		// 跳ね返る。水平方向と回転は地面との摩擦で弱める
+		state.velocity.y = -state.velocity.y * kBounceRestitution_;
+		state.velocity.x *= kBounceFriction_;
+		state.velocity.z *= kBounceFriction_;
+		state.angularVelocity *= kBounceFriction_;
+	}
+
+	// 跳ねる力が弱くなったら、地面を滑らせる
+	if (state.velocity.y < kSleepSpeed_) {
+		state.velocity.y = 0.0f;
+		float drag = std::max(0.0f, 1.0f - kGroundDrag_ * deltaTime);
+		state.velocity.x *= drag;
+		state.velocity.z *= drag;
+		state.angularVelocity *= drag;
+
+		// 十分遅くなったら止める
+		if (state.velocity.Length() < kSleepSpeed_) {
+			state.velocity = { 0.0f, 0.0f, 0.0f };
+			state.angularVelocity = { 0.0f, 0.0f, 0.0f };
+			state.isSleeping = true;
+		}
+	}
+}
+
+void FractureDamageController::ApplyChunkPivots(FractureInstance& instance, const std::vector<uint32_t>& chunkIds) const {
+	for (uint32_t i = 0; i < chunkIds.size(); ++i) {
+		auto it = chunksById_.find(chunkIds[i]);
+		if (it == chunksById_.end()) { continue; }
+		const FractureChunkInfo& info = it->second->info;
+		instance.SetPivot(i, info.centroid, info.centroid.y - info.aabb.min.y);
+	}
+}
+
+void FractureDamageController::ApplyDebrisSpin(FractureInstance& instance, bool isLaunch) const {
+	auto& transforms = instance.GetTransformDatas();
+	for (auto& state : transforms) {
+		state.angularVelocity = RandomGenerator::GetVector3(-kDebrisAngularSpeed_, kDebrisAngularSpeed_);
+
+		// 地面がある時は、下に飛ぶ破片も上向きに飛ばして地面の上で跳ねるようにする
+		if (useGround_ && isLaunch) {
+			state.velocity.y = std::max(std::fabs(state.velocity.y), kDebrisMinUpSpeed_);
+		}
+	}
 }
 
 void FractureDamageController::ApplyExplosionImpulse(FractureInstance& instance,

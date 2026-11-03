@@ -35,7 +35,11 @@ namespace GameEngine {
 		/// <summary>
 		/// コライダーリストをクリアする
 		/// </summary>
-		void ClearList() { colliders_.clear(); }
+		void ClearList() {
+			colliders_.clear();
+			preCollisions_.clear();
+			currentCollisions_.clear();
+		}
 
 		/// <summary>
 		/// コライダーをリストに追加する
@@ -93,5 +97,10 @@ namespace GameEngine {
 		/// 前フレームで衝突していたか確認
 		/// </summary>
 		bool WasCollidingLastFrame(Collider* a, Collider* b);
+
+		/// <summary>
+		/// 前フレームで衝突していて、現フレームで離れたペアのOnCollisionExitを呼び出す
+		/// </summary>
+		void NotifyCollisionExit();
 	};
 }

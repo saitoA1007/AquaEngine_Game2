@@ -51,41 +51,53 @@ void DebugCamera::Initialize(const Vector3& translate,int width, int height) {
 
 void DebugCamera::Update() {
 
-	// 中クリックで移動
-	if (input_->PushMouse(2)) {
+	// シーン画面上でクリックを始めた場合は、カーソルが画面外に出ても操作を継続する
+	if (isInputEnabled_ && (input_->TriggerMouse(1) || input_->TriggerMouse(2))) {
+		isDragging_ = true;
+	}
+	if (!input_->PushMouse(1) && !input_->PushMouse(2)) {
+		isDragging_ = false;
+	}
+	// 操作可能か
+	const bool canOperate = isInputEnabled_ || isDragging_;
 
-		// ターゲットの移動量
-		Vector3 targetMove{0.0f,0.0f,0.0f};
+	if (canOperate) {
+		// 中クリックで移動
+		if (input_->PushMouse(2)) {
 
-		// X軸の移動
-		if (input_->GetMouseDelta().x > 0.0f) { targetMove.x = -1.0f; }
-		if (input_->GetMouseDelta().x < 0.0f) { targetMove.x = 1.0f; }
-		// Y軸の移動
-		if (input_->GetMouseDelta().y < 0.0f) { targetMove.y = -1.0f; }
-		if (input_->GetMouseDelta().y > 0.0f) { targetMove.y = 1.0f; }
+			// ターゲットの移動量
+			Vector3 targetMove{ 0.0f,0.0f,0.0f };
 
-		// カメラの向き
-		Vector3 forward = Vector3::Normalize(targetPos_ - translate_);
-		// 上方向
-		Vector3 up = { 0.0f, 1.0f, 0.0f };
-		// 横方向
-		Vector3 right = Vector3::Normalize(up.Cross(forward));
-		// カメラから見てx,y軸に移動量を求める
-		Vector3 moveVec = right * targetMove.x + up * targetMove.y;
-		// ターゲットに加算
-		targetPos_ += moveVec * kTargetSpeed;
-	} else {
+			// X軸の移動
+			if (input_->GetMouseDelta().x > 0.0f) { targetMove.x = -1.0f; }
+			if (input_->GetMouseDelta().x < 0.0f) { targetMove.x = 1.0f; }
+			// Y軸の移動
+			if (input_->GetMouseDelta().y < 0.0f) { targetMove.y = -1.0f; }
+			if (input_->GetMouseDelta().y > 0.0f) { targetMove.y = 1.0f; }
 
-		// ホイールで距離を調整する
-		distance_ -= input_->GetWheel() * 0.05f;
-		distance_ = std::clamp(distance_, 0.5f, 500.0f);
+			// カメラの向き
+			Vector3 forward = Vector3::Normalize(targetPos_ - translate_);
+			// 上方向
+			Vector3 up = { 0.0f, 1.0f, 0.0f };
+			// 横方向
+			Vector3 right = Vector3::Normalize(up.Cross(forward));
+			// カメラから見てx,y軸に移動量を求める
+			Vector3 moveVec = right * targetMove.x + up * targetMove.y;
+			// ターゲットに加算
+			targetPos_ += moveVec * kTargetSpeed;
+		} else {
 
-		// 右クリックで回転する処理
-		if (input_->PushMouse(1)) {
-			mouseMove_ += input_->GetMouseDelta() * 0.05f;
+			// ホイールで距離を調整する
+			distance_ -= input_->GetWheel() * 0.05f;
+			distance_ = std::clamp(distance_, 0.5f, 500.0f);
+
+			// 右クリックで回転する処理
+			if (input_->PushMouse(1)) {
+				mouseMove_ += input_->GetMouseDelta() * 0.05f;
+			}
 		}
 	}
-	
+
 	// 球面座標系で移動
 	translate_.x = targetPos_.x + distance_ * std::sinf(mouseMove_.y) * std::sinf(mouseMove_.x);
 	translate_.y = targetPos_.y + distance_ * std::cosf(mouseMove_.y);
@@ -110,7 +122,7 @@ void DebugCamera::Update() {
 	cameraForGPU_->projectionMatrix = projectionMatrix_;
 
 	// 初期位置にリセットする
-	if (input_->PushKey(DIK_G) && input_->PushKey(DIK_LCONTROL)) {
+	if (canOperate && input_->PushKey(DIK_G) && input_->PushKey(DIK_LCONTROL)) {
 		targetPos_ = { 0.0f,0.0f,0.0f };
 		mouseMove_ = { 3.1f,1.0f };
 		distance_ = 40.0f;

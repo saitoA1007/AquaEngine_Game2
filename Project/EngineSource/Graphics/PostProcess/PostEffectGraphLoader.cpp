@@ -24,6 +24,8 @@ bool PostEffectGraphLoader::Run(const nlohmann::json& root) {
         LogGraph("Scene/Outputノードがありません");
         return false;
     }
+    // UIノードは消せないので、古いjsonで無ければ追加しておく
+    if (!hasUI_) { out_.graph.AddUINode(); }
     LoadLinks(root);
     Finish();
     return true;
@@ -53,6 +55,11 @@ PostEffectNode* PostEffectGraphLoader::LoadNode(const nlohmann::json& n) {
         if (hasScene_) { return nullptr; }
         hasScene_ = true;
         return out_.graph.AddSceneNode();
+    }
+    if (kind == kKindUI) {
+        if (hasUI_) { return nullptr; }
+        hasUI_ = true;
+        return out_.graph.AddUINode();
     }
     if (kind == kKindOutput) {
         if (hasOutput_) { return nullptr; }

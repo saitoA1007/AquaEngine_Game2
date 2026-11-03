@@ -32,9 +32,7 @@ void FractureInstance::Initialize(const std::vector<uint32_t>& chunkIds, const P
 		const GeometryRange& range = geometryBuffer.GetRange(chunkId);
 
 		// トランスフォームを初期化
-		transformData_[index].transform.scale = { 1.0f, 1.0f, 1.0f };
-		transformData_[index].transform.rotate = { 0.0f, 0.0f, 0.0f };
-		transformData_[index].transform.translate = { 0.0f, 0.0f, 0.0f };
+		ResetState(transformData_[index]);
 		instancingData_[index].world = Matrix4x4::MakeIdentity();
 		instancingData_[index].worldInverseTranspose = Matrix4x4::MakeIdentity();
 
@@ -57,7 +55,10 @@ void FractureInstance::Initialize(const std::vector<uint32_t>& chunkIds, const P
 void FractureInstance::Update() {
 	// 更新
 	for (uint32_t i = 0; i < transformData_.size(); ++i) {
-		Matrix4x4 localMatrix = Matrix4x4::MakeAffineMatrix(transformData_[i].transform.scale, transformData_[i].transform.rotate, transformData_[i].transform.translate);
+		const FractureChunkState& state = transformData_[i];
+		// 破片の中心を基準に回転させる
+		Matrix4x4 localMatrix = Matrix4x4::MakeTranslateMatrix(state.pivot * -1.0f) *
+			Matrix4x4::MakeAffineMatrix(state.transform.scale, state.transform.rotate, state.pivot + state.transform.translate);
 		instancingData_[i].world = localMatrix * parentWorldMatrix_;
 		instancingData_[i].worldInverseTranspose = Matrix4x4::InverseTranspose(instancingData_[i].world);
 	}
@@ -78,6 +79,24 @@ void FractureInstance::ApplyRuntimeCut(const Fragment& source, const Vector3& im
 	runtimeBuffer_ = std::make_unique<RuntimeFractureBuffer>();
 	std::vector<GeometryRange> ranges = runtimeBuffer_->Upload(fragments);
 	InitializeFromRanges(ranges);
+
+	// ランタイム破片は重心情報がないので、頂点のAABBから回転の中心と底までの高さを求める
+	for (uint32_t index = 0; index < numInstance_ && index < fragments.size(); ++index) {
+		const auto& vertices = fragments[index].vertices;
+		if (vertices.empty()) { continue; }
+		Vector3 min = { vertices[0].position.x, vertices[0].position.y, vertices[0].position.z };
+		Vector3 max = min;
+		for (const auto& vertex : vertices) {
+			min.x = std::min(min.x, vertex.position.x);
+			min.y = std::min(min.y, vertex.position.y);
+			min.z = std::min(min.z, vertex.position.z);
+			max.x = std::max(max.x, vertex.position.x);
+			max.y = std::max(max.y, vertex.position.y);
+			max.z = std::max(max.z, vertex.position.z);
+		}
+		Vector3 center = (min + max) * 0.5f;
+		SetPivot(index, center, center.y - min.y);
+	}
 }
 
 void FractureInstance::AllocateBuffers(uint32_t count) {
@@ -105,9 +124,7 @@ void FractureInstance::AllocateBuffers(uint32_t count) {
 }
 
 void FractureInstance::WriteInstance(uint32_t index, const GeometryRange& range, uint32_t chunkId) {
-	transformData_[index].transform.scale = { 1.0f, 1.0f, 1.0f };
-	transformData_[index].transform.rotate = { 0.0f, 0.0f, 0.0f };
-	transformData_[index].transform.translate = { 0.0f, 0.0f, 0.0f };
+	ResetState(transformData_[index]);
 
 	instancingData_[index].world = Matrix4x4::MakeIdentity();
 	instancingData_[index].worldInverseTranspose = Matrix4x4::MakeIdentity();
@@ -122,4 +139,19 @@ void FractureInstance::WriteInstance(uint32_t index, const GeometryRange& range,
 	argumentData_[index].drawArguments.StartIndexLocation = range.indexOffset;
 	argumentData_[index].drawArguments.BaseVertexLocation = static_cast<INT>(range.vertexOffset);
 	argumentData_[index].drawArguments.StartInstanceLocation = 0;
+}
+
+void FractureInstance::ResetState(FractureChunkState& state) {
+	state.transform.scale = { 1.0f, 1.0f, 1.0f };
+	state.transform.rotate = { 0.0f, 0.0f, 0.0f };
+	state.transform.translate = { 0.0f, 0.0f, 0.0f };
+	state.velocity = { 0.0f, 0.0f, 0.0f };
+	state.crackVelocity = { 0.0f, 0.0f, 0.0f };
+	state.crackAngularVelocity = { 0.0f, 0.0f, 0.0f };
+	state.crackRestOffset = { 0.0f, 0.0f, 0.0f };
+	state.pivot = { 0.0f, 0.0f, 0.0f };
+	state.bottomOffset = 0.0f;
+	state.angularVelocity = { 0.0f, 0.0f, 0.0f };
+	state.isGroundActive = false;
+	state.isSleeping = false;
 }

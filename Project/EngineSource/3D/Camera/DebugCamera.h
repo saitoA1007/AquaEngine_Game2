@@ -57,8 +57,19 @@ namespace GameEngine {
 		ID3D12Resource* GetResource() const { return constBuffer_.GetResource(); }
 		ConstantBuffer<CameraForGPU>* GetConstantBuffer() { return &constBuffer_; }
 
+		/// <summary>
+		/// 入力を受け付けるかを設定
+		/// </summary>
+		/// <param name="isEnabled"></param>
+		void SetIsInputEnabled(bool isEnabled) { isInputEnabled_ = isEnabled; }
+
 	private:
 		Input* input_ = nullptr;
+
+		// 入力を受け付けるか
+		bool isInputEnabled_ = true;
+		// シーン画面上でドラッグ操作を開始したか
+		bool isDragging_ = false;
 
 		// 拡縮
 		Vector3 scale_ = { 1.0f,1.0f,1.0f };

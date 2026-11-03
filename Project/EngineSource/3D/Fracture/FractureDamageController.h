@@ -29,6 +29,18 @@ namespace GameEngine {
 		void BeginReassembly();
 		bool IsReassembling() const { return isReassembling_; }
 
+		// 破片を全て消し、アニメーションせずにすぐ無傷の状態へ戻す
+		void ResetToIntact();
+
+		// 最下層のチャンクを地面に固定されたアンカーとして扱うか
+		void SetUseAnchor(bool isUse) { useAnchor_ = isUse; }
+
+		// 破片が跳ねる地面の高さを設定する。設定すると地面との判定を行う
+		void SetGroundHeight(float worldY) {
+			useGround_ = true;
+			groundWorldY_ = worldY;
+		}
+
 		// チャンクの破壊された割合を取得
 		float GetDestroyedRatio() const {
 			if (chunksById_.empty()) { return 0.0f; }
@@ -83,6 +95,16 @@ namespace GameEngine {
 		// これ未満なら元の位置・回転へ収束したとみなす
 		float kReassemblySettleThreshold_ = 0.02f;
 
+		// 落下する破片のパラメータ
+		float kDebrisGravity_ = 9.8f;           // 重力
+		float kDebrisAngularSpeed_ = 3.0f;      // 飛び散る時の回転速度の最大値
+		// 地面で跳ねる時のパラメータ
+		float kBounceRestitution_ = 0.4f;       // 反発係数
+		float kBounceFriction_ = 0.7f;          // 跳ねた時に水平方向、回転の速度に掛ける値
+		float kGroundDrag_ = 4.0f;              // 地面を滑っている時の減速
+		float kSleepSpeed_ = 0.3f;              // これ未満の速さになったら止める
+		float kDebrisMinUpSpeed_ = 4.0f;        // 地面がある時、飛び散る破片に与える最低限の上向きの速さ
+
 	private:
 		// モデル
 		Model* model_ = nullptr;
@@ -122,6 +144,16 @@ namespace GameEngine {
 		// 元の姿へ戻るアニメーションを再生中か
 		bool isReassembling_ = false;
 
+		// アンカーを使用するか
+		bool useAnchor_ = true;
+
+		// 地面との判定を行うか
+		bool useGround_ = false;
+		// 地面の高さ(ワールド座標)
+		float groundWorldY_ = 0.0f;
+		// 地面の高さ(ローカル座標)。毎フレームワールド行列から求める
+		float groundLocalY_ = 0.0f;
+
 		// 生成元オブジェクトの現在のワールド行列
 		Matrix4x4 worldMatrix_ = Matrix4x4::MakeIdentity();
 
@@ -154,6 +186,18 @@ namespace GameEngine {
 
 		// 破片に落下運動を与える
 		void SimulateFallingDebris(FractureInstance& instance, float deltaTime);
+
+		// 破片を地面で跳ねさせる
+		void ResolveGroundBounce(FractureChunkState& state, float deltaTime) const;
+
+		// 事前分割のチャンクの重心を、回転の中心として設定する
+		void ApplyChunkPivots(FractureInstance& instance, const std::vector<uint32_t>& chunkIds) const;
+
+		/// <summary>
+		/// 飛び散る破片に回転速度を与える
+		/// </summary>
+		/// <param name="isLaunch">地面がある時に上向きへ飛ばすか</param>
+		void ApplyDebrisSpin(FractureInstance& instance, bool isLaunch) const;
 
 		// 破片の爆発
 		void ApplyExplosionImpulse(FractureInstance& instance,

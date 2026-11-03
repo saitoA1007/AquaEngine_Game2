@@ -6,6 +6,7 @@ namespace GameEngine::PostEffectGraphFormat {
 
     // PostEffectGraphのjsonで使うノードの種類
     inline constexpr const char* kKindScene = "Scene";
+    inline constexpr const char* kKindUI = "UI";
     inline constexpr const char* kKindOutput = "Output";
     inline constexpr const char* kKindEffect = "Effect";
 

@@ -133,6 +133,12 @@ void EffectObject::StopImmediate() {
 	isEmitFinished_ = true;
 }
 
+void EffectObject::SetParent(const Matrix4x4* parentMatrix, ParticleSimulationSpace space) {
+	for (auto& module : modules_) {
+		module->GetParticle()->SetParent(parentMatrix, space);
+	}
+}
+
 void EffectObject::UpdateEmission(float prevTime, float time) {
 	for (auto& module : modules_) {
 		module->UpdateEmission(prevTime, time, position_);

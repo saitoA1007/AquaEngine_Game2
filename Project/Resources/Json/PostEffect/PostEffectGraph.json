@@ -3,42 +3,52 @@
         {
             "from": 1,
             "slot": 0,
-            "to": 5
+            "to": 7
         },
         {
-            "from": 5,
+            "from": 7,
             "slot": 0,
-            "to": 8
+            "to": 10
         },
         {
-            "from": 8,
+            "from": 10,
             "slot": 0,
-            "to": 11
+            "to": 13
         },
         {
-            "from": 11,
+            "from": 13,
             "slot": 0,
-            "to": 14
+            "to": 16
         },
         {
             "from": 1,
             "slot": 1,
-            "to": 14
+            "to": 16
         },
         {
-            "from": 14,
+            "from": 16,
             "slot": 0,
-            "to": 18
+            "to": 20
         },
         {
-            "from": 18,
+            "from": 20,
             "slot": 0,
-            "to": 21
+            "to": 26
         },
         {
-            "from": 21,
+            "from": 3,
+            "slot": 1,
+            "to": 26
+        },
+        {
+            "from": 26,
             "slot": 0,
-            "to": 3
+            "to": 23
+        },
+        {
+            "from": 23,
+            "slot": 0,
+            "to": 5
         }
     ],
     "nodes": [
@@ -52,19 +62,27 @@
         },
         {
             "id": 3,
+            "kind": "UI",
+            "pos": [
+                1096.0,
+                620.0
+            ]
+        },
+        {
+            "id": 5,
             "kind": "Output",
             "pos": [
-                1656.0,
+                2072.0,
                 252.0
             ]
         },
         {
             "active": true,
-            "id": 5,
+            "id": 7,
             "kind": "Effect",
             "name": "HighLumMask",
             "params": {
-                "highLumMask": 0.9340000152587891
+                "highLumMask": 0.800000011920929
             },
             "passName": "HighLumMaskPass",
             "pos": [
@@ -75,7 +93,7 @@
         },
         {
             "active": true,
-            "id": 8,
+            "id": 10,
             "kind": "Effect",
             "name": "GaussVertical",
             "params": {
@@ -90,7 +108,7 @@
         },
         {
             "active": true,
-            "id": 11,
+            "id": 13,
             "kind": "Effect",
             "name": "GaussHorizontal",
             "params": {
@@ -105,7 +123,7 @@
         },
         {
             "active": true,
-            "id": 14,
+            "id": 16,
             "kind": "Effect",
             "name": "Bloom",
             "params": {
@@ -120,7 +138,7 @@
         },
         {
             "active": true,
-            "id": 18,
+            "id": 20,
             "kind": "Effect",
             "name": "ColorGrading",
             "params": {
@@ -142,7 +160,7 @@
         },
         {
             "active": true,
-            "id": 21,
+            "id": 23,
             "kind": "Effect",
             "name": "Dissolve",
             "params": {
@@ -150,10 +168,23 @@
             },
             "passName": "",
             "pos": [
-                1368.0,
+                1784.0,
                 244.0
             ],
             "type": "Dissolve"
+        },
+        {
+            "active": true,
+            "id": 26,
+            "kind": "Effect",
+            "name": "UIComposite",
+            "params": {},
+            "passName": "",
+            "pos": [
+                1496.0,
+                244.0
+            ],
+            "type": "UIComposite"
         }
     ],
     "version": 1

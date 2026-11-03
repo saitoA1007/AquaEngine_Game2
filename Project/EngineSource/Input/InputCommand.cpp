@@ -178,3 +178,7 @@ Vector2 InputCommand::GetLeftStick() {
 Vector2 InputCommand::GetRightStick() {
 	return input_->GetRightStick();
 }
+
+void InputCommand::PlayPadVibration(float left, float right) {
+	input_->SetVibration(left, right);
+}

@@ -51,7 +51,7 @@ void EditorSubsystem::Initialize() {
         graphics->GetRenderQueue(), viewOptionsBar_->GetDebugCamera(), resource->GetGameParamEditor());
 
     // ウィンドウの内容を登録する
-    windowManager_->RegisterWindow(std::make_unique<SceneWindow>(graphics->GetRenderPassCtrl(), addObjectBar_.get()));
+    windowManager_->RegisterWindow(std::make_unique<SceneWindow>(graphics->GetRenderPassCtrl(), addObjectBar_.get(), viewOptionsBar_->GetDebugCamera()));
     windowManager_->RegisterWindow(std::make_unique<AssetWindow>(resource->GetTextureManager()));
     windowManager_->RegisterWindow(std::make_unique<HierarchyWindow>(resource->GetGameParamEditor()));
     windowManager_->RegisterWindow(std::make_unique<InspectorWindow>(resource->GetGameParamEditor(), resource->GetTextureManager()));

@@ -66,8 +66,19 @@ DestructibleObject::DestructibleObject(std::string name, Model* model, uint32_t 
 	debugParameter_->Register("CrackAngularSpringStiffness", damageController_.kCrackAngularSpringStiffness_, 0, subGroup);
 	debugParameter_->Register("CrackAngularDamping", damageController_.kCrackAngularDamping_, 0, subGroup);
 	debugParameter_->Register("CrackImpulseStrength", damageController_.kCrackImpulseStrength_, 0, subGroup);
+	// 破片の落下、地面で跳ねる動き
+	subGroup = "Debris";
+	debugParameter_->Register("Gravity", damageController_.kDebrisGravity_, 0, subGroup);
+	debugParameter_->Register("AngularSpeed", damageController_.kDebrisAngularSpeed_, 0, subGroup);
+	debugParameter_->Register("BounceRestitution", damageController_.kBounceRestitution_, 0, subGroup);
+	debugParameter_->Register("BounceFriction", damageController_.kBounceFriction_, 0, subGroup);
+	debugParameter_->Register("GroundDrag", damageController_.kGroundDrag_, 0, subGroup);
+	debugParameter_->Register("SleepSpeed", damageController_.kSleepSpeed_, 0, subGroup);
+	debugParameter_->Register("MinUpSpeed", damageController_.kDebrisMinUpSpeed_, 0, subGroup);
 
 	debugParameter_->Apply();
+
+	iceMaterial_.GetMaterialData()->dissolveThreshold = 0.0f;
 }
 
 void DestructibleObject::Initialize() {
@@ -135,4 +146,14 @@ void DestructibleObject::OnCollisionEnter(const GameEngine::CollisionResult& res
 
 	damageController_.ApplyChipDamage(localImpactPos, damageAmount_, craterRadius_, planeCount_,
 		localImpactDirection, result.penetrationDepth);
+}
+
+void DestructibleObject::ApplyDamage(const Vector3& worldImpactPos, const Vector3& worldImpactDirection, float damageAmount, float craterRadius) {
+	// ワールド座標をローカル座標へ変換してから渡す
+	Matrix4x4 inverseWorld = Matrix4x4::Inverse(worldTransform_.GetWorldMatrix());
+	Vector3 localImpactPos = Matrix4x4::Transform(worldImpactPos, inverseWorld);
+	Vector3 localImpactDirection = Matrix4x4::TransformNormal(worldImpactDirection, inverseWorld);
+
+	damageController_.ApplyChipDamage(localImpactPos, damageAmount, craterRadius, planeCount_,
+		localImpactDirection, 0.0f);
 }

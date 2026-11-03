@@ -2,14 +2,19 @@
 #include "SceneWIndow.h"
 #include "ImGuiManager.h"
 #include "EditorMenu/AddObjectBar.h"
+#include "DebugCamera.h"
 using namespace GameEngine;
 
-SceneWindow::SceneWindow(RenderPassController* renderPassController, AddObjectBar* addObjectBar) {
+SceneWindow::SceneWindow(RenderPassController* renderPassController, AddObjectBar* addObjectBar, DebugCamera* debugCamera) {
 	renderPassController_ = renderPassController;
 	addObjectBar_ = addObjectBar;
+	debugCamera_ = debugCamera;
 }
 
 void SceneWindow::Draw() {
+	// ウィンドウが表示されていない場合はデバックカメラを操作できないようにする
+	debugCamera_->SetIsInputEnabled(false);
+
     ImGui::Begin("GameScene", &isActive);
 	// 描画した結果を移す
 	ImVec2 sceneWindowSize = ImGui::GetContentRegionAvail();
@@ -37,6 +42,9 @@ void SceneWindow::Draw() {
 	ImGui::SetCursorScreenPos(ImVec2(cursorPos.x + offsetX, cursorPos.y));
 
 	ImGui::Image((ImTextureID)srvHandle.ptr, imageSize);
+
+	// マウスカーソルがゲーム画面上にある時のみデバックカメラを操作できるようにする
+	debugCamera_->SetIsInputEnabled(ImGui::IsItemHovered());
 
 	// Assetウィンドウからドラッグされたファイルをこの画像上にドロップした時の処理
 	if (ImGui::BeginDragDropTarget()) {

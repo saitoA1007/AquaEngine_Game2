@@ -40,6 +40,10 @@ namespace GameEngine {
 		void SetPostProcessFinalPass(const std::string& name);
 		const std::string& GetPostProcessFinalPass() const { return postProcessFinalPassName_; }
 
+		// UIを描画するパスの設定。ポストエフェクトで合成する
+		void SetUIPass(const std::string& name) { uiPassName_ = name; }
+		const std::string& GetUIPass() const { return uiPassName_; }
+
 		// 最終的に画面に出すためのパスの設定
 		void SetPresentPass(const std::string& name);
 		const std::string& GetPresentPass() const { return presentPassName_; }
@@ -79,6 +83,8 @@ namespace GameEngine {
 		// ポストエフェクトの最終パス
 		std::string postProcessFinalPassName_ = "";
 		CD3DX12_GPU_DESCRIPTOR_HANDLE postProcessFinalPassSrvHandle_;
+		// UIを描画するパス
+		std::string uiPassName_ = "";
 		// 最終的に画面に出すためのパス
 		std::string presentPassName_ = "";
 		CD3DX12_GPU_DESCRIPTOR_HANDLE presentPassSrvHandle_;

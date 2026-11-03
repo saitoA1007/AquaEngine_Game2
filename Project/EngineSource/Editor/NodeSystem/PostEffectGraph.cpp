@@ -52,6 +52,12 @@ PostEffectNode* PostEffectGraph::AddSceneNode() {
     return  &n;
 }
 
+PostEffectNode* PostEffectGraph::AddUINode() {
+    PostEffectNode& n = EmplaceNode(PostEffectNodeKind::kUI, "UI");
+    n.output = MakePin("UI", PinKind::kOutput, n.id);
+    return &n;
+}
+
 PostEffectNode* PostEffectGraph::AddOutputNode() {
     PostEffectNode& n = EmplaceNode(PostEffectNodeKind::kOutput, "Output");
     n.inputs.push_back(MakePin("Result", PinKind::kInput, n.id));

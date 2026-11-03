@@ -35,6 +35,24 @@ namespace GameEngine {
 		// 元に戻るアニメーションを再生中か
 		bool IsReassembling() const { return damageController_.IsReassembling(); }
 
+		// 破片を全て消し、すぐに無傷の状態へ戻す
+		void ResetToIntact() { damageController_.ResetToIntact(); }
+
+		// 最下層のチャンクをアンカーとして切り離さないようにするか
+		void SetUseAnchor(bool isUse) { damageController_.SetUseAnchor(isUse); }
+
+		// 破片が跳ねる地面の高さ(ワールド座標)を設定する
+		void SetGroundHeight(float worldY) { damageController_.SetGroundHeight(worldY); }
+
+		/// <summary>
+		/// ワールド座標で指定した位置にダメージを与える
+		/// </summary>
+		/// <param name="worldImpactPos">当たった位置</param>
+		/// <param name="worldImpactDirection">当たった方向</param>
+		/// <param name="damageAmount">与えるダメージ</param>
+		/// <param name="craterRadius">ダメージを与える範囲</param>
+		void ApplyDamage(const Vector3& worldImpactPos, const Vector3& worldImpactDirection, float damageAmount, float craterRadius);
+
 		// チャンクの破壊された割合
 		float GetDestroyedRatio() const { return damageController_.GetDestroyedRatio(); }
 
@@ -61,15 +79,15 @@ namespace GameEngine {
 		// 切る数
 		int planeCount_ = 8;
 
+		// 氷のマテリアル
+		IceMaterial iceMaterial_;
+
 	private:
 		// 名前
 		std::string name_ = "noName";
 
 		// モデル
 		Model* model_ = nullptr;
-
-		// 氷のマテリアル
-		IceMaterial iceMaterial_;
 
 		// aabbの当たり判定
 		AABBCollider collider_;

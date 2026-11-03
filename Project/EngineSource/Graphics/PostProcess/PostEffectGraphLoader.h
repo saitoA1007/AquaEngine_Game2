@@ -37,6 +37,7 @@ namespace GameEngine {
         std::vector<Pending> pending_;
 
         bool hasScene_ = false;
+        bool hasUI_ = false;
         bool hasOutput_ = false;
 
     private:

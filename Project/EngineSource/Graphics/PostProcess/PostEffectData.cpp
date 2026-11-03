@@ -228,6 +228,19 @@ void Dissolve::LoadParams(const nlohmann::json& j) {
     d->threshold = j.value("threshold", d->threshold);
 }
 
+UIComposite::UIComposite() {
+    // 作成
+    buffer_.Create();
+
+    isActive_ = true;
+}
+
+void UIComposite::Draw(ID3D12GraphicsCommandList* commandList, SrvManager* srvManager) {
+    commandList->SetGraphicsRootDescriptorTable(0, srvManager->GetSRVHeap()->GetGPUDescriptorHandleForHeapStart());
+    commandList->SetGraphicsRootConstantBufferView(1, buffer_.GetGpuVirtualAddress());
+    commandList->DrawInstanced(3, 1, 0, 0);
+}
+
 OutLine::OutLine() {
     // 作成
     buffer_.Create();

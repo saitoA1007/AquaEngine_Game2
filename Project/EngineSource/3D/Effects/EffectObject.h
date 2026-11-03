@@ -56,6 +56,13 @@ namespace GameEngine {
 		// 再生中か
 		bool IsPlaying() const { return isPlaying_; }
 
+		/// <summary>
+		/// 親子付けする。設定中は位置が親からの相対位置になる
+		/// </summary>
+		/// <param name="parentMatrix">親のワールド行列</param>
+		/// <param name="space">kLocal:発生後も親に追従する、kWorld:発生時の親の姿勢だけを反映する</param>
+		void SetParent(const Matrix4x4* parentMatrix, ParticleSimulationSpace space = ParticleSimulationSpace::kLocal);
+
 		// 位置を設定
 		void SetPosition(const Vector3& pos) { position_ = pos; }
 		const Vector3& GetPosition() const { return position_; }

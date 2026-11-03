@@ -16,6 +16,12 @@ namespace GameEngine {
 		Vector3 crackVelocity;         // 位置ばねの速度
 		Vector3 crackAngularVelocity;  // 回転ばねの速度
 		Vector3 crackRestOffset;	   // ばねの収束目標位置
+
+		Vector3 pivot;                 // 破片の中心のローカル座標で回転の中心
+		float bottomOffset;            // 中心から破片の底までの高さ
+		Vector3 angularVelocity;       // 落下中の回転速度
+		bool isGroundActive;           // 地面との判定を行うか
+		bool isSleeping;               // 地面の上で止まったか
 	};
 
 	struct FractureForGPU {
@@ -80,6 +86,12 @@ namespace GameEngine {
 		// トランスフォーム
 		std::vector<FractureChunkState>& GetTransformDatas() { return transformData_; }
 
+		// 回転の中心と、中心から底までの高さを設定する
+		void SetPivot(uint32_t index, const Vector3& pivot, float bottomOffset) {
+			transformData_[index].pivot = pivot;
+			transformData_[index].bottomOffset = bottomOffset;
+		}
+
 		StructuredBuffer<FractureForGPU>& GetBuffer() { return buffer_; }
 
 		ConstantBuffer<FractureIndirectCommand>& GetArgumentBuffer() { return argumentBuffer_; }
@@ -127,6 +139,8 @@ namespace GameEngine {
 	private:
 
 		void AllocateBuffers(uint32_t count);
+		// 破片の状態を初期値に戻す
+		void ResetState(FractureChunkState& state);
 		void WriteInstance(uint32_t index, const GeometryRange& range, uint32_t chunkId);
 	};
 }
