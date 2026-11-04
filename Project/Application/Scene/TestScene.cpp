@@ -5,11 +5,16 @@
 #include "RandomGenerator.h"
 #include "FPSCounter.h"
 #include "Application/CollisionConfig.h"
+#include "Application/Demo/CellFractureTest.h"
+#include <cassert>
 using namespace GameEngine;
 
 TestScene::~TestScene() {}
 
 TestScene::TestScene() {
+
+    // 全破片を同時に飛ばす入力を登録する。
+    inputCommand_->RegisterCommand("BreakCellFractureCube", { {InputState::KeyTrigger, DIK_B} });
 
 	// 決定ボタンコマンドを追加
 	inputCommand_->RegisterCommand("Decision", { {InputState::KeyTrigger, DIK_SPACE},{InputState::PadTrigger, XINPUT_GAMEPAD_X} });
@@ -57,6 +62,11 @@ TestScene::TestScene() {
 	// テキスト
 	text_ = std::make_unique<Text>(fontManager_->GetFont("源直ゴシック EMG 2 - Medium"), "馬力強い馬にマタガーリ");
 	text_->Update();
+
+    // 専用モデルを取得し、生成・更新・描画は管理クラスへ任せる。
+    Model* fractureModel = modelManager_->GetNameByModel("CellFractureCube.gltf");
+    assert(fractureModel != nullptr);
+    gameObjectManager_->AddObject<CellFractureTest>(fractureModel, inputCommand_);
 }
 
 void TestScene::Initialize() {

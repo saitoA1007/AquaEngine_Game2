@@ -195,6 +195,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Application\Demo\CellFractureTest.cpp">
+      <Filter>Application\Demo</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Demo\FructureDemo.cpp">
       <Filter>Application\Demo</Filter>
     </ClCompile>
@@ -724,6 +727,9 @@
   <ItemGroup>
     <ClInclude Include="Application\CollisionConfig.h">
       <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Demo\CellFractureTest.h">
+      <Filter>Application\Demo</Filter>
     </ClInclude>
     <ClInclude Include="Application\Demo\FructureDemo.h">
       <Filter>Application\Demo</Filter>

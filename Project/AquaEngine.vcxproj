@@ -172,6 +172,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application\Demo\CellFractureTest.cpp" />
     <ClCompile Include="Application\Demo\FructureDemo.cpp" />
     <ClCompile Include="Application\Demo\IceDemo.cpp" />
     <ClCompile Include="Application\Demo\PBRDemo.cpp">
@@ -589,6 +590,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application\Demo\CellFractureTest.h" />
     <ClInclude Include="Application\Demo\FructureDemo.h" />
     <ClInclude Include="Application\Demo\IceDemo.h" />
     <ClInclude Include="Application\Demo\PBRDemo.h" />
