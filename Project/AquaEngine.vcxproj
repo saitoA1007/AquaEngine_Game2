@@ -189,6 +189,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ClCompile>
     <ClCompile Include="Application\Scene\GameScene.cpp" />
     <ClCompile Include="Application\Scene\TestScene.cpp" />
+    <ClCompile Include="Application\Game\Camera\GameCamera.cpp" />
+    <ClCompile Include="Application\Game\Field\Field.cpp" />
+    <ClCompile Include="Application\Game\Player\Player.cpp" />
     <ClCompile Include="Application\Scene\Transition\Fade.cpp" />
     <ClCompile Include="Application\UI\Effects\DimmerUI.cpp" />
     <ClCompile Include="Application\UI\Widgets\ArrowUI.cpp" />
@@ -599,6 +602,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\GameScene.h" />
     <ClInclude Include="Application\Scene\Register\SetUpScenes.h" />
     <ClInclude Include="Application\Scene\TestScene.h" />
+    <ClInclude Include="Application\Game\Camera\GameCamera.h" />
+    <ClInclude Include="Application\Game\Field\Field.h" />
+    <ClInclude Include="Application\Game\Player\Player.h" />
+    <ClInclude Include="Application\Game\Player\PlayerStats.h" />
     <ClInclude Include="Application\Scene\Transition\Fade.h" />
     <ClInclude Include="Application\UI\Effects\DimmerUI.h" />
     <ClInclude Include="Application\UI\Widgets\ArrowUI.h" />

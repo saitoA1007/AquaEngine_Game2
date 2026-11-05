@@ -4,6 +4,7 @@
 using namespace GameEngine;
 
 #include "PostProcess/PostEffectData.h"
+#include <cassert>
 
 GameScene::~GameScene() {
 }
@@ -12,32 +13,92 @@ GameScene::GameScene() {
 	// 入力コマンド設定s
 	InputRegisterCommand();
 
-	// 背景を設定
-	uint32_t skyboxGH = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
-	renderQueue_->SetSkyboxTexture(skyboxGH);
+	// アセットを取得する
+	LoadAssets();
 
-	// メインカメラの初期化
-	mainCamera_ = std::make_unique<Camera>();
-	mainCamera_->Initialize({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} }, 1280, 720);
-	// 描画に使用するカメラを設定
-	renderQueue_->SetCamera(mainCamera_.get());
+	// 調整値を登録する
+	RegisterDebugParameters();
 
-	// ライトを設定
-	auto* light = renderQueue_->GetLightManager();
-	light->directionalLight_->directionalLightData_.intensity = 0.9f;
+	// 背景・カメラ・ライトを設定する
+	SetUpEnvironment();
+
+	// ゲームオブジェクトを生成する
+	CreateGameObjects(cylinderModel_, sphereModel_);
 }
 
 void GameScene::Initialize() {
 
-	
+
 }
 
 void GameScene::Update() {
-	mainCamera_->Update();
+	debugParam_->ApplyIfDirty();
+
+	// ライトの調整値を反映する
+	UpdateLight();
+
+	// シーン更新はオブジェクト更新の後に走るため、更新後のプレイヤー位置を使える
+	gameCamera_->Update(player_->GetPosition());
 }
 
 void GameScene::Draw() {
-	
+
+}
+
+void GameScene::LoadAssets() {
+	// モデルを取得する
+	cylinderModel_ = modelManager_->GetNameByModel("Cylinder");
+	sphereModel_ = modelManager_->GetNameByModel("sphere.obj");
+
+	// 背景のテクスチャを取得する
+	skyboxTextureHandle_ = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
+
+	// 取得できなかったモデルがないか確認する
+	assert(cylinderModel_ != nullptr);
+	assert(sphereModel_ != nullptr);
+}
+
+void GameScene::RegisterDebugParameters() {
+	// サブグループ名。ここを書き換えれば登録の全てに反映される
+	const std::string kLightGroup = "Light";
+	const std::string kPlayerStatsGroup = "PlayerStats";
+
+	debugParam_ = std::make_unique<DebugParameter>("GameScene");
+
+	// ライト
+	debugParam_->Register("lightIntensity", lightIntensity_, 0, kLightGroup);
+	debugParam_->Register("lightDirection", lightDirection_, 1, kLightGroup);
+
+	// プレイヤーの強化値
+	debugParam_->Register("moveSpeed", playerStats_.moveSpeed, 0, kPlayerStatsGroup);
+
+	debugParam_->Apply();
+}
+
+void GameScene::SetUpEnvironment() {
+	// 背景を設定
+	renderQueue_->SetSkyboxTexture(skyboxTextureHandle_);
+
+	// ゲーム専用カメラを生成し、描画に使用するカメラとして設定
+	gameCamera_ = std::make_unique<GameCamera>(1280, 720);
+	renderQueue_->SetCamera(gameCamera_->GetCamera());
+
+	// ライトを設定
+	UpdateLight();
+}
+
+void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
+	// フィールド
+	field_ = gameObjectManager_->AddObject<Field>(cylinderModel);
+
+	// プレイヤー
+	player_ = gameObjectManager_->AddObject<Player>(sphereModel, inputCommand_, field_, &playerStats_);
+}
+
+void GameScene::UpdateLight() {
+	LightManager* light = renderQueue_->GetLightManager();
+	light->directionalLight_->SetLightIntensity(lightIntensity_);
+	light->SetDirectionalDirction(lightDirection_);
 }
 
 void GameScene::InputRegisterCommand() {

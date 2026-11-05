@@ -18,5 +18,5 @@ void SetupScenes(SceneRegistry& factory) {
     factory.RegisterScene<GameScene>("Game");
 
     // 立ち上げ時に起動するシーン
-    factory.SetDefaultScene("Test");
+    factory.SetDefaultScene("Game");
 }

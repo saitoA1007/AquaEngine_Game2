@@ -3,6 +3,18 @@
     <Filter Include="Application">
       <UniqueIdentifier>{581797aa-3e1f-477c-b4b8-fe17aef9cf85}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Application\Game">
+      <UniqueIdentifier>{3f1a6c52-7d0e-4b8a-9a31-5c2e8d4f1b07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Game\Camera">
+      <UniqueIdentifier>{a7d35e81-2c4b-4f19-8e60-1b9c0d7f3a52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Game\Field">
+      <UniqueIdentifier>{8b2d9e14-6a3c-4f70-b5d1-0e7a9c3f2d68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Game\Player">
+      <UniqueIdentifier>{c4e7a0b9-1d52-4e86-8f3a-92b6d0a5e1c3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Application\Demo">
       <UniqueIdentifier>{a693a117-c9b0-441e-9104-ead2a5875503}</UniqueIdentifier>
     </Filter>
@@ -215,6 +227,15 @@
     </ClCompile>
     <ClCompile Include="Application\Scene\GameScene.cpp">
       <Filter>Application\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Game\Camera\GameCamera.cpp">
+      <Filter>Application\Game\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Game\Field\Field.cpp">
+      <Filter>Application\Game\Field</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Game\Player\Player.cpp">
+      <Filter>Application\Game\Player</Filter>
     </ClCompile>
     <ClCompile Include="Application\Scene\TestScene.cpp">
       <Filter>Application\Scene</Filter>
@@ -748,6 +769,18 @@
     </ClInclude>
     <ClInclude Include="Application\Scene\GameScene.h">
       <Filter>Application\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Camera\GameCamera.h">
+      <Filter>Application\Game\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Field\Field.h">
+      <Filter>Application\Game\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Player\Player.h">
+      <Filter>Application\Game\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Player\PlayerStats.h">
+      <Filter>Application\Game\Player</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\TestScene.h">
       <Filter>Application\Scene</Filter>
