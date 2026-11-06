@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "Player.h"
 #include "FPSCounter.h"
+#include <algorithm>
 #include <cmath>
 using namespace GameEngine;
 
-Player::Player(Model* model, InputCommand* inputCommand, const Field* field, const PlayerStats* stats)
-    : inputCommand_(inputCommand), field_(field), stats_(stats), modelComponent_(model) {
+Player::Player(Model* model, Model* discModel, InputCommand* inputCommand, const Field* field, const PlayerStats* stats)
+    : inputCommand_(inputCommand), field_(field), stats_(stats), modelComponent_(model), iceAreaView_(discModel) {
 
     RegisterDebugParameters();
 
@@ -16,7 +17,14 @@ void Player::RegisterDebugParameters() {
     debugParam_ = std::make_unique<DebugParameter>("Player");
     debugParam_->Register("radius", radius_);
     debugParam_->Register("color", color_);
+    debugParam_->Register("iceAreaRadius", iceAreaRadius_);
+    debugParam_->Register("iceAreaColor", iceAreaColor_);
+    debugParam_->Register("initialHp", initialHp_);
+    debugParam_->Register("invincibleTime", invincibleTime_);
     debugParam_->Apply();
+
+    // 保存済みの初期HPを反映してから開始する
+    hp_ = initialHp_;
 }
 
 void Player::Initialize() {
@@ -53,6 +61,9 @@ void Player::Update() {
     debugParam_->ApplyIfDirty();
     modelComponent_.materialData_->color = color_;
 
+    // 無敵時間を進める
+    invincibleTimer_ = (std::max)(invincibleTimer_ - FpsCounter::gameDeltaTime, 0.0f);
+
     // 加減速なしで、入力方向へ即座に移動する
     Vector3 direction = GetMoveDirection();
     position_ += direction * (stats_->moveSpeed * FpsCounter::gameDeltaTime);
@@ -68,6 +79,30 @@ void Player::Update() {
     modelComponent_.Update();
 }
 
+void Player::TakeDamage(int32_t damage) {
+    // 無敵時間中、またはダメージがないときは何もしない
+    if (IsInvincible() || damage <= 0) {
+        return;
+    }
+
+    hp_ = (std::max)(hp_ - damage, 0);
+    invincibleTimer_ = invincibleTime_;
+}
+
+void Player::ApplyPushback(const Vector3& offset) {
+    // 押し戻したあともフィールド内に収める
+    position_.x += offset.x;
+    position_.z += offset.z;
+    position_ = field_->ClampToField(position_, radius_);
+    position_.y = radius_;
+
+    // Updateの後に呼ばれるため、見た目の位置もここで更新する
+    modelComponent_.worldTransform_.transform_.translate = position_;
+    modelComponent_.Update();
+}
+
 void Player::Draw() {
+    // 氷エリアはプレイヤーを中心に常に描く
+    iceAreaView_.Draw(renderQueue_, position_, iceAreaRadius_, iceAreaColor_);
     modelComponent_.DrawRaytracing(renderQueue_);
 }

@@ -1,0 +1,180 @@
+#pragma once
+#include <memory>
+#include <vector>
+#include "IGameObject.h"
+#include "DebugParameter.h"
+#include "ModelManager.h"
+#include "RefBuffer.h"
+#include "Material.h"
+#include "IceMaterial.h"
+#include "WorldTransform.h"
+#include "Vector4.h"
+#include "Application/Game/Enemy/Enemy.h"
+#include "Application/Game/Enemy/EnemyDefinition.h"
+#include "Application/Game/Enemy/EnemyGrid.h"
+#include "Application/Game/Enemy/EnemyGaugeView.h"
+#include "Application/Game/Enemy/EnemyIO.h"
+#ifdef USE_IMGUI
+#include "Application/Game/Enemy/EnemyListEditor.h"
+#endif
+
+/// <summary>
+/// 全敵の更新・描画・凍結・スポーンを担当する唯一の敵用IGameObject。
+/// Playerを知らず、EnemyInputを受け取ってEnemyOutputを返す。
+/// 敵の更新はUpdateEnemiesで行い、IGameObject::Updateでは行わない（GameSceneからの手動呼び出しとの重複を避ける）。
+/// </summary>
+class EnemyManager : public GameEngine::IGameObject {
+public:
+    /// <summary>
+    /// 敵一覧を読み込み、種類ごとの個体と見た目を事前に確保する。
+    /// 一覧が不正、またはモデルが見つからないときは例外を投げる。
+    /// </summary>
+    /// <param name="modelManager">モデル取得用。コンストラクタの間だけ使い、保持しない。</param>
+    /// <param name="fieldRadius">グリッドの範囲を決めるフィールド半径</param>
+    /// <param name="camera">氷ゲージの表示位置を求めるカメラ。シーンが所有し、このオブジェクトより長く生存する。</param>
+    /// <param name="whiteTextureHandle">氷ゲージの矩形に使う白いテクスチャのハンドル</param>
+    EnemyManager(GameEngine::ModelManager* modelManager, float fieldRadius, const GameEngine::Camera* camera, uint32_t whiteTextureHandle);
+    ~EnemyManager() override = default;
+
+    /// <summary>
+    /// 調整値の反映と、氷の殻の色の更新だけを行う。敵の更新はUpdateEnemiesで行う。
+    /// </summary>
+    void Update() override;
+
+    /// <summary>
+    /// 使用中の敵と、凍結中の氷の殻を描画キューへ登録する。
+    /// </summary>
+    void Draw() override;
+
+    /// <summary>
+    /// 敵一覧の編集画面を表示する。USE_IMGUIのときだけ動く。
+    /// </summary>
+    void DebugUpdate() override;
+
+    /// <summary>
+    /// 全敵を1フレーム分更新する。スポーン、凍結の進行と行動、凍った敵との重なりの解消、プレイヤーとの接触を処理する。
+    /// 更新順に頼らないよう、プレイヤーの更新後にGameSceneが呼ぶ。
+    /// </summary>
+    /// <param name="input">プレイヤーの情報。保持しない。</param>
+    /// <returns>プレイヤーが受けるダメージと押し戻し量</returns>
+    EnemyOutput UpdateEnemies(const EnemyInput& input);
+
+private:
+    /// <summary>
+    /// 調整値をDebugParameterへ登録する。
+    /// </summary>
+    void RegisterDebugParameters();
+
+    /// <summary>
+    /// 敵一覧の各行に対して、個体の事前確保と見た目の準備を行う。
+    /// </summary>
+    void CreatePools(GameEngine::ModelManager* modelManager);
+
+    /// <summary>
+    /// 氷の殻の見た目（氷マテリアルと参照バッファ）を準備する。
+    /// </summary>
+    void CreateShell(GameEngine::ModelManager* modelManager);
+
+    /// <summary>
+    /// 一定間隔で、プレイヤーの周囲の円周上に敵を出す。
+    /// </summary>
+    void SpawnEnemies(const EnemyInput& input, float deltaTime);
+
+    /// <summary>
+    /// 空きのある種類をランダムに選び、1体出す。全種類が上限なら出さない。
+    /// </summary>
+    void SpawnOne(const EnemyInput& input);
+
+    /// <summary>
+    /// 使用中の敵を集める。
+    /// </summary>
+    void CollectActiveEnemies();
+
+    /// <summary>
+    /// 各個体の氷ゲージと行動を更新する。
+    /// </summary>
+    void UpdateEnemyBehaviors(const EnemyInput& input, float deltaTime);
+
+    /// <summary>
+    /// 動いている敵と凍った敵の重なりを解消し、壁を回り込ませる。
+    /// </summary>
+    void ResolveWalls(const EnemyInput& input, float deltaTime);
+
+    /// <summary>
+    /// 敵をフィールドの円内へ収める。
+    /// </summary>
+    void ClampEnemiesToField(float fieldRadius);
+
+    /// <summary>
+    /// 凍った敵によるプレイヤーの押し戻しと、動く敵との接触ダメージを求める。
+    /// </summary>
+    void ResolvePlayerContact(const EnemyInput& input, EnemyOutput& output);
+
+private:
+    // 種類ごとの見た目。同じ種類の個体は1つのマテリアルを共有する
+    struct EnemyVisual {
+        GameEngine::Model* model = nullptr;
+        std::vector<GameEngine::RefBuffer> refBuffers;
+        std::vector<GameEngine::Material> materials;
+    };
+
+    // 種類ごとの事前確保した個体
+    struct EnemyPool {
+        std::vector<std::unique_ptr<Enemy>> enemies;
+        std::unique_ptr<EnemyVisual> visual;
+        size_t searchStart = 0; // 空きを探し始める位置
+    };
+
+    /// <summary>
+    /// プールから空いている個体を取り出す。空きがなければnullptr。
+    /// </summary>
+    Enemy* AcquireEnemy(EnemyPool& pool);
+
+private:
+    // 調整値
+    float spawnInterval_ = 0.5f;     // スポーンの間隔（秒）
+    int32_t spawnPerInterval_ = 3;   // 1回のスポーンで出す数
+    float spawnDistance_ = 28.0f;    // プレイヤーからのスポーン距離
+    float freezeRate_ = 1.0f;        // 氷エリア内で氷ゲージが進む速さ（ゲージ/秒）
+    float decayRate_ = 0.5f;         // 氷エリア外で氷ゲージが減る速さ（ゲージ/秒）
+    float frozenDuration_ = 10.0f;   // 凍ってから解放までの時間（秒）
+    float shellScale_ = 1.4f;        // 氷の殻の大きさ（見た目の大きさに対する倍率）
+    Vector4 shellColor_ = { 0.6f, 0.85f, 1.0f, 1.0f }; // 氷の殻の色
+    bool enableEnemyWall_ = false;       // 動く敵が凍った敵を押し出されて避けるか（密度が高いため既定では無効。後で重なりの対応を決める）
+    bool enableWallPushPlayer_ = false;  // 凍った敵がプレイヤーを押し戻すか（同上）
+    EnemyGaugeView::Settings gaugeSettings_; // 氷ゲージの表示の調整値
+    float slideStrength_ = 1.0f;     // 壁に真正面からぶつかったときの横滑りの強さ（移動速度に対する倍率）
+
+    // 定数
+    static constexpr float kGridCellSize = 2.0f;     // グリッドのセルの一辺
+    static constexpr float kGridMargin = 5.0f;       // グリッドの範囲をフィールド半径より広げる量
+    static constexpr float kGridLag = 0.25f;         // グリッドが1フレーム古いことを補う検索の余白
+    static constexpr int32_t kResolveIterations = 2; // 壁の重なりを解消する繰り返し回数
+    inline static const char* kShellModelName = "sphere.obj"; // 氷の殻に使うモデル名
+    inline static const char* kGaugeModelName = "plane.obj";  // 氷ゲージに使う平面モデル名
+
+    // 状態
+    std::vector<EnemyDefinition> definitions_;
+    std::vector<EnemyPool> pools_;
+    std::vector<Enemy*> active_;     // 使用中の個体（毎フレーム集め直す）
+    std::vector<Enemy*> neighbors_;  // 範囲検索の結果（使い回す）
+    float spawnTimer_ = 0.0f;
+    float maxEnemyRadius_ = 0.0f;    // 全種類の当たり半径の最大値
+    Vector3 lastPlayerPosition_ = { 0.0f, 0.0f, 0.0f }; // 直近のプレイヤー位置（ゲージの表示数を絞る基準。表示のためだけにコピーを持つ）
+    EnemyGrid grid_;
+    std::unique_ptr<EnemyGaugeView> gaugeView_; // 氷ゲージの仮表示（平面モデルが要るためコンストラクタで作る）
+
+    // 描画
+    GameEngine::WorldTransform drawTransform_; // 全個体で使い回す（行列は登録時に取り込まれる）
+    GameEngine::Model* shellModel_ = nullptr;
+    GameEngine::IceMaterial iceMaterial_;
+    std::vector<GameEngine::RefBuffer> shellRefBuffers_;
+
+    // 調整値の機能
+    std::unique_ptr<GameEngine::DebugParameter> debugParam_;
+
+#ifdef USE_IMGUI
+    // 敵一覧の編集画面
+    std::unique_ptr<EnemyListEditor> listEditor_;
+#endif
+};

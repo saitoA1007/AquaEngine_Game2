@@ -9,6 +9,7 @@
 #include "Application/Game/Player/PlayerStats.h"
 #include "Application/Game/Player/Player.h"
 #include "Application/Game/Field/Field.h"
+#include "Application/Game/Enemy/EnemyManager.h"
 
 class GameScene : public GameEngine::IScene {
 public:
@@ -62,6 +63,9 @@ private: // アセット
 	// 背景のテクスチャハンドル
 	uint32_t skyboxTextureHandle_ = 0;
 
+	// 氷ゲージの矩形に使う白いテクスチャのハンドル
+	uint32_t whiteTextureHandle_ = 0;
+
 private: // ゲームの状態
 
 	// プレイヤーの強化値（Playerが参照する）
@@ -70,6 +74,7 @@ private: // ゲームの状態
 	// GameObjectManagerが所有するオブジェクトへの非所有ポインタ。シーン終了まで有効
 	Player* player_ = nullptr;
 	Field* field_ = nullptr;
+	EnemyManager* enemyManager_ = nullptr;
 
 private: // 調整値
 
@@ -108,6 +113,12 @@ private:
 	/// <param name="cylinderModel">フィールドに使うモデル</param>
 	/// <param name="sphereModel">プレイヤーに使うモデル</param>
 	void CreateGameObjects(GameEngine::Model* cylinderModel, GameEngine::Model* sphereModel);
+
+	/// <summary>
+	/// プレイヤーの情報を敵へ渡して更新し、結果（被弾と押し戻し）をプレイヤーへ反映する。
+	/// 構造体はこの関数のローカル変数で、プレイヤーの更新後に呼ぶ。
+	/// </summary>
+	void StepEnemies();
 
 	/// <summary>
 	/// ライトの調整値を反映する。

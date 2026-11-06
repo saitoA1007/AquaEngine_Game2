@@ -12,6 +12,9 @@
     <Filter Include="Application\Game\Field">
       <UniqueIdentifier>{8b2d9e14-6a3c-4f70-b5d1-0e7a9c3f2d68}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Application\Game\Enemy">
+      <UniqueIdentifier>{5e2b7c90-3a41-4d68-9f0e-7c1d8a4b6e25}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Application\Game\Player">
       <UniqueIdentifier>{c4e7a0b9-1d52-4e86-8f3a-92b6d0a5e1c3}</UniqueIdentifier>
     </Filter>
@@ -236,6 +239,30 @@
     </ClCompile>
     <ClCompile Include="Application\Game\Player\Player.cpp">
       <Filter>Application\Game\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Game\Player\IceAreaView.cpp">
+      <Filter>Application\Game\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Game\Enemy\ChaseEnemy.cpp">
+      <Filter>Application\Game\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Game\Enemy\Enemy.cpp">
+      <Filter>Application\Game\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Game\Enemy\EnemyDefinition.cpp">
+      <Filter>Application\Game\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Game\Enemy\EnemyGrid.cpp">
+      <Filter>Application\Game\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Game\Enemy\EnemyGaugeView.cpp">
+      <Filter>Application\Game\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Game\Enemy\EnemyListEditor.cpp">
+      <Filter>Application\Game\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Game\Enemy\EnemyManager.cpp">
+      <Filter>Application\Game\Enemy</Filter>
     </ClCompile>
     <ClCompile Include="Application\Scene\TestScene.cpp">
       <Filter>Application\Scene</Filter>
@@ -781,6 +808,33 @@
     </ClInclude>
     <ClInclude Include="Application\Game\Player\PlayerStats.h">
       <Filter>Application\Game\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Player\IceAreaView.h">
+      <Filter>Application\Game\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Enemy\ChaseEnemy.h">
+      <Filter>Application\Game\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Enemy\Enemy.h">
+      <Filter>Application\Game\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Enemy\EnemyDefinition.h">
+      <Filter>Application\Game\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Enemy\EnemyGrid.h">
+      <Filter>Application\Game\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Enemy\EnemyGaugeView.h">
+      <Filter>Application\Game\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Enemy\EnemyIO.h">
+      <Filter>Application\Game\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Enemy\EnemyListEditor.h">
+      <Filter>Application\Game\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Enemy\EnemyManager.h">
+      <Filter>Application\Game\Enemy</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\TestScene.h">
       <Filter>Application\Scene</Filter>

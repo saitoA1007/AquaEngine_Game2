@@ -37,7 +37,10 @@ void GameScene::Update() {
 	// ライトの調整値を反映する
 	UpdateLight();
 
-	// シーン更新はオブジェクト更新の後に走るため、更新後のプレイヤー位置を使える
+	// シーン更新はオブジェクト更新の後に走るため、更新後のプレイヤー位置を敵が使える
+	StepEnemies();
+
+	// 押し戻し後のプレイヤー位置を追従する
 	gameCamera_->Update(player_->GetPosition());
 }
 
@@ -52,6 +55,9 @@ void GameScene::LoadAssets() {
 
 	// 背景のテクスチャを取得する
 	skyboxTextureHandle_ = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
+
+	// 氷ゲージの矩形に使う白いテクスチャを取得する
+	whiteTextureHandle_ = textureManager_->GetHandleByName("white2x2.png");
 
 	// 取得できなかったモデルがないか確認する
 	assert(cylinderModel_ != nullptr);
@@ -92,7 +98,26 @@ void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
 	field_ = gameObjectManager_->AddObject<Field>(cylinderModel);
 
 	// プレイヤー
-	player_ = gameObjectManager_->AddObject<Player>(sphereModel, inputCommand_, field_, &playerStats_);
+	player_ = gameObjectManager_->AddObject<Player>(sphereModel, sphereModel, inputCommand_, field_, &playerStats_);
+
+	// 敵（敵一覧とモデルの読み込みに失敗すると例外を投げる）
+	enemyManager_ = gameObjectManager_->AddObject<EnemyManager>(modelManager_, field_->GetRadius(), gameCamera_->GetCamera(), whiteTextureHandle_);
+}
+
+void GameScene::StepEnemies() {
+	// 敵が見るプレイヤーの情報をまとめる
+	EnemyInput input;
+	input.playerPosition = player_->GetPosition();
+	input.playerRadius = player_->GetRadius();
+	input.iceAreaRadius = player_->GetIceAreaRadius();
+	input.fieldRadius = field_->GetRadius();
+
+	// 敵を更新し、結果を受け取る
+	EnemyOutput output = enemyManager_->UpdateEnemies(input);
+
+	// 結果をプレイヤーへ反映する
+	player_->TakeDamage(output.damage);
+	player_->ApplyPushback(output.pushback);
 }
 
 void GameScene::UpdateLight() {
