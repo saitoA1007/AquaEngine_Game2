@@ -25,7 +25,7 @@ void ArrowUI::Initialize() {
 void ArrowUI::Update() {
 	debugParame_->ApplyIfDirty();
 
-	timer_ += FpsCounter::gameDeltaTime / maxTime_;
+	timer_ += FpsCounter::GetGameDeltaTime() / maxTime_;
 
 	float offsetY = 0.0f;
 	if (timer_ <= 0.5f) {

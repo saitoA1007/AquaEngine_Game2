@@ -64,7 +64,7 @@ void HpBarUI::EffectUpdate() {
 		// 先頭要素を取得する
 		auto& point = *points_.begin();
 
-		point.timer += FpsCounter::deltaTime / effectmaxTime_;
+		point.timer += FpsCounter::GetDeltaTime() / effectmaxTime_;
 
 		effectSprite_.scale_.x = Lerp(point.start, point.end, point.timer, EaseType::kEaseInQuad);
 

@@ -29,7 +29,7 @@ void Animator::Initialize(Model* model, const AnimationData* animationData) {
 
 void Animator::Update() {
 
-	timer_ += FpsCounter::deltaTime;
+	timer_ += FpsCounter::GetDeltaTime();
 
 	if (isLoop_) {
 		timer_ = std::fmodf(timer_, animationData_->duration);
@@ -64,7 +64,7 @@ void Animator::Update(const float& time) {
 }
 
 void Animator::ComputeUpdate() {
-	timer_ += FpsCounter::deltaTime;
+	timer_ += FpsCounter::GetDeltaTime();
 
 	if (isLoop_) {
 		timer_ = std::fmodf(timer_, animationData_->duration);

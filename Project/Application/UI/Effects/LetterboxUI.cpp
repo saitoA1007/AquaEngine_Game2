@@ -55,7 +55,7 @@ void LetterboxUI::BarAnimation() {
 	if (isBarActive_) {
 		// 帯を出現させる
 		if (timer_ >= 1.0f) { return; }
-		timer_ += FpsCounter::gameDeltaTime / maxTime_;
+		timer_ += FpsCounter::GetGameDeltaTime() / maxTime_;
 
 		upBarSprite_.position_.y = Lerp(upBarEndPosY_, upBarStartPosY_, timer_, EaseType::kEaseInQuad);
 		downBarSprite_.position_.y = Lerp(downBarEndPosY_, downBarStartPosY_, timer_, EaseType::kEaseInQuad);
@@ -67,7 +67,7 @@ void LetterboxUI::BarAnimation() {
 	} else {
 		// 帯を元に戻す
 		if (timer_ >= 1.0f) { return; }
-		timer_ += FpsCounter::gameDeltaTime / maxTime_;
+		timer_ += FpsCounter::GetGameDeltaTime() / maxTime_;
 
 		upBarSprite_.position_.y = Lerp(upBarStartPosY_, upBarEndPosY_, timer_, EaseType::kEaseOutQuad);
 		downBarSprite_.position_.y = Lerp(downBarStartPosY_, downBarEndPosY_, timer_, EaseType::kEaseOutQuad);

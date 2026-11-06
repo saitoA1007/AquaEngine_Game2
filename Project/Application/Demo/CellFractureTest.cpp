@@ -62,7 +62,7 @@ void CellFractureTest::Update() {
 
     // 重力や追加の分割は行わず、それぞれの初速度で直線的に移動する。
     for (FractureChunkState& state : fractureInstance_.GetTransformDatas()) {
-        state.transform.translate += state.velocity * FpsCounter::gameDeltaTime;
+        state.transform.translate += state.velocity * FpsCounter::GetGameDeltaTime();
     }
     fractureInstance_.Update();
 }

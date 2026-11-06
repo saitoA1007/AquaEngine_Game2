@@ -14,18 +14,18 @@ TestScene::~TestScene() {}
 TestScene::TestScene() {
 
     // 全破片を同時に飛ばす入力を登録する。
-    inputCommand_->RegisterCommand("BreakCellFractureCube", { {InputState::KeyTrigger, DIK_B} });
+    inputCommand_->RegisterCommand("BreakCellFractureCube", { KeyBinding{ DIK_B, PressType::kTrigger } });
 
 	// 決定ボタンコマンドを追加
-	inputCommand_->RegisterCommand("Decision", { {InputState::KeyTrigger, DIK_SPACE},{InputState::PadTrigger, XINPUT_GAMEPAD_X} });
-	inputCommand_->RegisterCommand("MoveUp", { {InputState::KeyPush, DIK_F } });
-	inputCommand_->RegisterCommand("MoveDown", { {InputState::KeyPush, DIK_G } });
-	inputCommand_->RegisterCommand("MoveLeft", { {InputState::KeyPush, DIK_A },{InputState::PadLeftStick,0,{-1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_LEFT } });
-	inputCommand_->RegisterCommand("MoveRight", { {InputState::KeyPush, DIK_D },{InputState::PadLeftStick,0,{1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_RIGHT } });
-	inputCommand_->RegisterCommand("MoveForward", { {InputState::KeyPush, DIK_W },{InputState::PadLeftStick,0,{0.0f,1.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_UP } });
-	inputCommand_->RegisterCommand("MoveBack", { {InputState::KeyPush, DIK_S },{InputState::PadLeftStick,0,{0.0f,-1.0f},0.2f}, {InputState::PadPush, XINPUT_GAMEPAD_DPAD_DOWN} });
+	inputCommand_->RegisterCommand("Decision", { KeyBinding{ DIK_SPACE, PressType::kTrigger },PadButtonBinding{ XINPUT_GAMEPAD_X, PressType::kTrigger } });
+	inputCommand_->RegisterCommand("MoveUp", { KeyBinding{ DIK_F } });
+	inputCommand_->RegisterCommand("MoveDown", { KeyBinding{ DIK_G } });
+	inputCommand_->RegisterCommand("MoveLeft", { KeyBinding{ DIK_A },PadStickBinding{ PadSide::kLeft, {-1.0f,0.0f} }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_LEFT } });
+	inputCommand_->RegisterCommand("MoveRight", { KeyBinding{ DIK_D },PadStickBinding{ PadSide::kLeft, {1.0f,0.0f} }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_RIGHT } });
+	inputCommand_->RegisterCommand("MoveForward", { KeyBinding{ DIK_W },PadStickBinding{ PadSide::kLeft, {0.0f,1.0f} }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_UP } });
+	inputCommand_->RegisterCommand("MoveBack", { KeyBinding{ DIK_S },PadStickBinding{ PadSide::kLeft, {0.0f,-1.0f} }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_DOWN } });
 	// 破壊オブジェクトを元の姿へ戻す
-	inputCommand_->RegisterCommand("Reassemble", { {InputState::KeyTrigger, DIK_R } });
+	inputCommand_->RegisterCommand("Reassemble", { KeyBinding{ DIK_R, PressType::kTrigger } });
 
 	// メインカメラの初期化
 	mainCamera_ = std::make_unique<Camera>();

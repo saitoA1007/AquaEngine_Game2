@@ -100,7 +100,7 @@ void ParticleBehavior::Initialize() {
 }
 
 void ParticleBehavior::Update() {
-    Update(FpsCounter::deltaTime);
+    Update(FpsCounter::GetGameDeltaTime());
 }
 
 void ParticleBehavior::Update(float deltaTime) {

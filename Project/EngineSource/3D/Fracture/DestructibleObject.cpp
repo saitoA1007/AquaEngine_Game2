@@ -96,7 +96,7 @@ void DestructibleObject::Update() {
 
 	// マイクロ破片・凹んだチャンクのラスタライズ描画で使うワールド行列を渡す
 	damageController_.SetWorldMatrix(worldTransform_.GetWorldMatrix());
-	damageController_.Update(FpsCounter::gameDeltaTime);
+	damageController_.Update(FpsCounter::GetGameDeltaTime());
 }
 
 void DestructibleObject::Draw() {
