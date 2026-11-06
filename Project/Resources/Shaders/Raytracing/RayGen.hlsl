@@ -31,7 +31,7 @@ void MainRayGen()
     uint rayMask = 0xFF;
 
     TraceRay(
-        gRtScene,
+        GetScene(),
         flags,
         rayMask,
         0, // ray index
@@ -41,6 +41,6 @@ void MainRayGen()
         payload);
     float3 col = payload.color;
 
-    gOutput[launchIndex.xy] = float4(col, 1);
-    gDepthOutput[launchIndex.xy] = payload.depth;
+    GetOutput()[launchIndex.xy] = float4(col, 1);
+    GetDepthOutput()[launchIndex.xy] = payload.depth;
 }

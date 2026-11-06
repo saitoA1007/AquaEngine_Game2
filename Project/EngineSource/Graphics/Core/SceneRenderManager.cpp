@@ -28,9 +28,6 @@ void SceneRenderManager::Initialize(ID3D12GraphicsCommandList4* commandList, Srv
     fractureCommandSignature_ = psoManager->GetCommandSignature("DrawIndexedIndirect");
     iceFractureCommandSignature_ = psoManager->GetCommandSignature("IceDrawIndexedIndirect");
 
-    // bufferのsrvIndexのスタート位置を設定
-    bufferStartSrvIndex_ = srvManager_->GetStartSrvIndex(SrvHeapType::Buffer);
-
     // tlasを作成
     tlas_.Create(commandList_, maxRayInstanceNum_);
 }
@@ -259,27 +256,24 @@ void SceneRenderManager::Execute2dRequest(const Draw2dRequest& request) {
 
 void SceneRenderManager::DrawRaytracing() {
     commandList_->SetComputeRootSignature(raytracingPipeline_->GetGlobalRootSignature());
-    // TLASのセット
-    commandList_->SetComputeRootDescriptorTable(0, tlas_.GetSrvHandleGPU());
-    // テスクチャのセット
-    commandList_->SetComputeRootDescriptorTable(1, srvManager_->GetSRVHeap()->GetGPUDescriptorHandleForHeapStart());
-    // BufferRefのセット
-    commandList_->SetComputeRootDescriptorTable(2, bufferRefManager_->GetSrvHandleGPU());
-    // Bufferのセット
-    commandList_->SetComputeRootDescriptorTable(3, srvManager_->GetGPUHandle(bufferStartSrvIndex_));
+    // シェーダー側でResourceDescriptorHeapから取得するリソースのインデックス
+    RaytracingGlobalIndices indices{};
+    indices.tlas = tlas_.GetSrvIndex();
+    indices.bufferRefs = bufferRefManager_->GetSrvIndex();
+    indices.output = renderPassController_->GetUavIndex("RaytracingPass");
+    indices.depthOutput = renderPassController_->GetUavIndex("RaytracingPassDepth");
+    indices.skybox = renderQueue_->GetSkyboxTexture();
+    commandList_->SetComputeRoot32BitConstants(static_cast<UINT>(RaytracingRootParam::kIndices),
+        sizeof(indices) / sizeof(uint32_t), &indices, 0);
     // カメラのセット
+    UINT cameraParam = static_cast<UINT>(RaytracingRootParam::kCamera);
     if (renderQueue_->GetUseDebugCamera()) {
-        commandList_->SetComputeRootConstantBufferView(4, renderQueue_->GetDebugCameraResource()->GetGpuVirtualAddress());
+        commandList_->SetComputeRootConstantBufferView(cameraParam, renderQueue_->GetDebugCameraResource()->GetGpuVirtualAddress());
     } else {
-        commandList_->SetComputeRootConstantBufferView(4, renderQueue_->GetCameraResource()->GetGpuVirtualAddress());
+        commandList_->SetComputeRootConstantBufferView(cameraParam, renderQueue_->GetCameraResource()->GetGpuVirtualAddress());
     }
     // ライトのセット
-    commandList_->SetComputeRootConstantBufferView(5, renderQueue_->GetLightResource()->GetGpuVirtualAddress());
-    // 出力画像を設定
-    commandList_->SetComputeRootDescriptorTable(6, srvManager_->GetGPUHandle(renderPassController_->GetUavIndex("RaytracingPass")));
-    commandList_->SetComputeRootDescriptorTable(7, srvManager_->GetGPUHandle(renderPassController_->GetUavIndex("RaytracingPassDepth")));
-    // 背景画像
-    commandList_->SetComputeRootDescriptorTable(8, srvManager_->GetGPUHandle(renderQueue_->GetSkyboxTexture()));
+    commandList_->SetComputeRootConstantBufferView(static_cast<UINT>(RaytracingRootParam::kLight), renderQueue_->GetLightResource()->GetGpuVirtualAddress());
 
     // レイトレーシングを開始
     commandList_->SetPipelineState1(raytracingPipeline_->GetStateObject());

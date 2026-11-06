@@ -732,13 +732,13 @@ void FractureDamageController::SimulateCrackPhysics() {
 		// 位置のばね
 		Vector3 displacement = state.transform.translate - state.crackRestOffset;
 		Vector3 accel = displacement * -kCrackSpringStiffness_ - state.crackVelocity * kCrackDamping_;
-		state.crackVelocity += accel * FpsCounter::gameDeltaTime;
-		state.transform.translate += state.crackVelocity * FpsCounter::gameDeltaTime;
+		state.crackVelocity += accel * FpsCounter::GetGameDeltaTime();
+		state.transform.translate += state.crackVelocity * FpsCounter::GetGameDeltaTime();
 
 		// 回転のばね
 		Vector3 rotAccel = state.transform.rotate * -kCrackAngularSpringStiffness_ - state.crackAngularVelocity * kCrackAngularDamping_;
-		state.crackAngularVelocity += rotAccel * FpsCounter::gameDeltaTime;
-		state.transform.rotate += state.crackAngularVelocity * FpsCounter::gameDeltaTime;
+		state.crackAngularVelocity += rotAccel * FpsCounter::GetGameDeltaTime();
+		state.transform.rotate += state.crackAngularVelocity * FpsCounter::GetGameDeltaTime();
 
 		// 十分収まったらアクティブリストから外す
 		bool settled = displacement.Length() < kSettleThreshold

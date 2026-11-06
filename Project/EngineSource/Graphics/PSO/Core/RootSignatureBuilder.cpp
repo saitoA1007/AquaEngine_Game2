@@ -126,25 +126,65 @@ void RootSignatureBuilder::AddDescriptorTable(ParameterType paramType,uint32_t s
 }
 
 void RootSignatureBuilder::SerializeAndCreate(D3D12_ROOT_SIGNATURE_FLAGS flags) {
+    // ResourceDescriptorHeapを使用するフラグはVersion1.1で作成する必要があるため、1.1の形式に変換する
+    // 1.0と同じ振る舞いにするため、ディスクリプタとデータはVOLATILEとして扱う
+    std::vector<D3D12_DESCRIPTOR_RANGE1> ranges1(descriptorRanges_.size());
+    for (size_t i = 0; i < descriptorRanges_.size(); ++i) {
+        const D3D12_DESCRIPTOR_RANGE& src = descriptorRanges_[i];
+        D3D12_DESCRIPTOR_RANGE1& dst = ranges1[i];
+        dst.RangeType = src.RangeType;
+        dst.NumDescriptors = src.NumDescriptors;
+        dst.BaseShaderRegister = src.BaseShaderRegister;
+        dst.RegisterSpace = src.RegisterSpace;
+        dst.OffsetInDescriptorsFromTableStart = src.OffsetInDescriptorsFromTableStart;
+        dst.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+        // サンプラーにはDATA_VOLATILEを設定できない
+        if (src.RangeType != D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER) {
+            dst.Flags |= D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+        }
+    }
+
+    std::vector<D3D12_ROOT_PARAMETER1> params1(rootParameters_.size());
+    for (size_t i = 0; i < rootParameters_.size(); ++i) {
+        const D3D12_ROOT_PARAMETER& src = rootParameters_[i];
+        D3D12_ROOT_PARAMETER1& dst = params1[i];
+        dst.ParameterType = src.ParameterType;
+        dst.ShaderVisibility = src.ShaderVisibility;
+        switch (src.ParameterType) {
+        case D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS:
+            dst.Constants = src.Constants;
+            break;
+        case D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE:
+            dst.DescriptorTable.NumDescriptorRanges = src.DescriptorTable.NumDescriptorRanges;
+            break;
+        default:
+            dst.Descriptor.ShaderRegister = src.Descriptor.ShaderRegister;
+            dst.Descriptor.RegisterSpace = src.Descriptor.RegisterSpace;
+            dst.Descriptor.Flags = D3D12_ROOT_DESCRIPTOR_FLAG_DATA_VOLATILE;
+            break;
+        }
+    }
+
     // ポインタを設定する
     for (const auto& pt : pendingTables_) {
-        rootParameters_[pt.paramIndex].DescriptorTable.pDescriptorRanges = &descriptorRanges_[pt.rangeIndex];
+        params1[pt.paramIndex].DescriptorTable.pDescriptorRanges = &ranges1[pt.rangeIndex];
     }
 
     // ルートシグネチャの作成
-    D3D12_ROOT_SIGNATURE_DESC desc{};
-    if (!rootParameters_.empty()) {
-        desc.NumParameters = static_cast<UINT>(rootParameters_.size());
-        desc.pParameters = rootParameters_.data();
+    D3D12_VERSIONED_ROOT_SIGNATURE_DESC desc{};
+    desc.Version = D3D_ROOT_SIGNATURE_VERSION_1_1;
+    if (!params1.empty()) {
+        desc.Desc_1_1.NumParameters = static_cast<UINT>(params1.size());
+        desc.Desc_1_1.pParameters = params1.data();
     }
     if (!staticSamplers_.empty()) {
-        desc.NumStaticSamplers = static_cast<UINT>(staticSamplers_.size());
-        desc.pStaticSamplers = staticSamplers_.data();
+        desc.Desc_1_1.NumStaticSamplers = static_cast<UINT>(staticSamplers_.size());
+        desc.Desc_1_1.pStaticSamplers = staticSamplers_.data();
     }
-    desc.Flags = flags;
+    desc.Desc_1_1.Flags = flags;
 
     Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob, errorBlob;
-    HRESULT hr = D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1_0, &signatureBlob, &errorBlob);
+    HRESULT hr = D3D12SerializeVersionedRootSignature(&desc, &signatureBlob, &errorBlob);
     if (FAILED(hr)) {
         if (errorBlob) {
             LogManager::GetInstance().Log(reinterpret_cast<const char*>(errorBlob->GetBufferPointer()));

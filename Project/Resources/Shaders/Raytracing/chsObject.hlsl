@@ -42,9 +42,9 @@ VertexData GetHitVertex(MyAttribute attrib, uint vertexHandle, uint indexHandle)
     float4 tangents[3];
 
     for (int i = 0; i < 3; ++i) {
-        uint index = gBufferData[indexHandle].Load<uint>((start + i) * 4);
+        uint index = GetBuffer(indexHandle).Load<uint>((start + i) * 4);
         
-        VertexData v = gBufferData[vertexHandle].Load<VertexData>(index * VERTEX_STRIDE);
+        VertexData v = GetBuffer(vertexHandle).Load<VertexData>(index * VERTEX_STRIDE);
         
         positions[i] = v.position.xyz;
         normals[i] = v.normal;
@@ -71,9 +71,9 @@ void MainObjectCHS(inout Payload payload, MyAttribute attrib) {
     
     // アクセスデータを取得
     uint refHandle = InstanceID();
-    BufferRef ref = gBufferRefs[refHandle];
+    BufferRef ref = GetBufferRefs()[refHandle];
     // マテリアルデータを取得
-    MaterialData material = gBufferData[ref.MaterialIndex].Load<MaterialData>(0);
+    MaterialData material = GetBuffer(ref.MaterialIndex).Load<MaterialData>(0);
     
     // 頂点データを取得する
     VertexData vtx = GetHitVertex(attrib, ref.vertexHandle, ref.indexHandle);
@@ -84,7 +84,7 @@ void MainObjectCHS(inout Payload payload, MyAttribute attrib) {
     // ノーマルマップがあれば法線に適応
     if (material.normalTextureHandle != 0)
     {
-        float4 normalMapColor = gTexture[material.normalTextureHandle].SampleLevel(gSampler, transformedUV.xy, 0);
+        float4 normalMapColor = GetTexture(material.normalTextureHandle).SampleLevel(gSampler, transformedUV.xy, 0);
         vtx.tangent.xyz = normalize(vtx.tangent.xyz);
         localNormal = GetNormalFromMap(normalMapColor, vtx.normal, vtx.tangent);
     }
@@ -105,7 +105,7 @@ void MainObjectCHS(inout Payload payload, MyAttribute attrib) {
     if (dot(worldNormal, viewDir) < 0.0f) { worldNormal = -worldNormal;}
     
     // テクスチャカラーを取得
-    float4 textureColor = gTexture[material.textureHandle].SampleLevel(gSampler, transformedUV.xy, 0);
+    float4 textureColor = GetTexture(material.textureHandle).SampleLevel(gSampler, transformedUV.xy, 0);
     // アルベド色を取得
     float3 albedoColor = material.color.rgb * textureColor.rgb;
     

@@ -78,7 +78,7 @@ DestructibleObject::DestructibleObject(std::string name, Model* model, uint32_t 
 
 	debugParameter_->Apply();
 
-	iceMaterial_.GetMaterialData()->dissolveThreshold = 0.0f;
+	iceMaterial_.GetMaterialData()->dissolveThreshold = 0.2f;
 }
 
 void DestructibleObject::Initialize() {
@@ -96,7 +96,7 @@ void DestructibleObject::Update() {
 
 	// マイクロ破片・凹んだチャンクのラスタライズ描画で使うワールド行列を渡す
 	damageController_.SetWorldMatrix(worldTransform_.GetWorldMatrix());
-	damageController_.Update(FpsCounter::gameDeltaTime);
+	damageController_.Update(FpsCounter::GetGameDeltaTime());
 }
 
 void DestructibleObject::Draw() {

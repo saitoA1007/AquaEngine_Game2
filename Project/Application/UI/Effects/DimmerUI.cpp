@@ -35,7 +35,7 @@ void DimmerUI::Initialize() {
 void DimmerUI::Update() {
 
 	if (isPlay_) {
-		timer_ += FpsCounter::gameDeltaTime / maxTime_;
+		timer_ += FpsCounter::GetGameDeltaTime() / maxTime_;
 
 		if (timer_ <= 0.5f) {
 			float localT = timer_ / 0.5f;

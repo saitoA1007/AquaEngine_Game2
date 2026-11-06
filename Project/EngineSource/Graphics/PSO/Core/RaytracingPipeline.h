@@ -11,6 +11,22 @@ namespace GameEngine {
 		static const std::wstring IceModel = L"IceModel";
 	}
 
+	// レイトレで使用するリソースのヒープインデックス
+	struct RaytracingGlobalIndices {
+		uint32_t tlas;        // TLAS
+		uint32_t bufferRefs;  // BufferRefのStructuredBuffer
+		uint32_t output;      // 出力画像(UAV)
+		uint32_t depthOutput; // 出力深度(UAV)
+		uint32_t skybox;      // 背景のキューブマップ
+	};
+
+	// グローバルルートシグネチャのパラメータ番号
+	enum class RaytracingRootParam : uint32_t {
+		kIndices, // ヒープインデックス
+		kCamera,  // カメラ
+		kLight,   // ライト
+	};
+
 	class RaytracingPipeline {
 	public:
 		RaytracingPipeline() = default;

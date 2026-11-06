@@ -822,6 +822,10 @@ void PSOManager::DefaultLoadPostEffectPSO() {
     defaultPostEffect.psPath = L"Resources/Shaders/PostEffect/UIComposite.PS.hlsl";
     RegisterPSO("UIComposite", defaultPostEffect, &rootSigBuilder, &inputLayoutBuilder);
 
+    // 距離フォグ
+    defaultPostEffect.psPath = L"Resources/Shaders/PostEffect/Fog.PS.hlsl";
+    RegisterPSO("Fog", defaultPostEffect, &rootSigBuilder, &inputLayoutBuilder);
+
     // ラスタライズとレイトレの描画を合成する
     defaultPostEffect.rootSigName = "LightingComposite";
     defaultPostEffect.psPath = L"Resources/Shaders/PostEffect/LightingComposite.PS.hlsl";
