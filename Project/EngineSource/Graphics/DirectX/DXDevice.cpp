@@ -95,6 +95,22 @@ void DXDevice::CheckRaytracingEnable() {
     }
 
     LogManager::GetInstance().Log("Raytracing is supported");
+
+    // ShaderModel6.6以上が使用出来るか確認
+    D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = { D3D_SHADER_MODEL_6_6 };
+    hr = device_->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel));
+    if (FAILED(hr) || shaderModel.HighestShaderModel < D3D_SHADER_MODEL_6_6) {
+        assert(false && "dont support shader model 6.6");
+    }
+
+    // ResourceBindingTier3が使用出来るか確認
+    D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
+    hr = device_->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options));
+    if (FAILED(hr) || options.ResourceBindingTier < D3D12_RESOURCE_BINDING_TIER_3) {
+        assert(false && "dont support resource binding tier 3");
+    }
+
+    LogManager::GetInstance().Log("Dynamic Resources are supported");
 }
 
 #ifdef _DEBUG

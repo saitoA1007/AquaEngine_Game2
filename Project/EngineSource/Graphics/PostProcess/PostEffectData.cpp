@@ -241,6 +241,63 @@ void UIComposite::Draw(ID3D12GraphicsCommandList* commandList, SrvManager* srvMa
     commandList->DrawInstanced(3, 1, 0, 0);
 }
 
+Fog::Fog() {
+    // 作成
+    buffer_.Create();
+    auto* d = buffer_.GetData();
+    // カメラの射影行列と合わせる
+    d->nearZ = 0.1f;
+    d->farZ = 200.0f;
+    d->color = { 0.72f, 0.8f, 0.9f, 1.0f };
+    d->density = 0.02f;
+    d->startDistance = 15.0f;
+    d->maxOpacity = 0.85f;
+    d->skyOpacity = 0.3f;
+
+    isActive_ = true;
+}
+
+void Fog::Draw(ID3D12GraphicsCommandList* commandList, SrvManager* srvManager) {
+    buffer_.GetData()->depthTextureHandle = depthTextureIndex_;
+    commandList->SetGraphicsRootDescriptorTable(0, srvManager->GetSRVHeap()->GetGPUDescriptorHandleForHeapStart());
+    commandList->SetGraphicsRootConstantBufferView(1, buffer_.GetGpuVirtualAddress());
+    commandList->DrawInstanced(3, 1, 0, 0);
+}
+
+void Fog::DrawParamUI() {
+#ifdef USE_IMGUI
+    auto* d = buffer_.GetData();
+    ImGui::ColorEdit3("Color", &d->color.x);
+    ImGui::DragFloat("Density", &d->density, 0.001f, 0.0f, 1.0f);
+    ImGui::DragFloat("Start Distance", &d->startDistance, 0.1f, 0.0f, 200.0f);
+    ImGui::SliderFloat("Max Opacity", &d->maxOpacity, 0.0f, 1.0f);
+    ImGui::SliderFloat("Sky Opacity", &d->skyOpacity, 0.0f, 1.0f);
+#endif
+}
+
+void Fog::SaveParams(nlohmann::json& j) {
+    auto* d = buffer_.GetData();
+    j["color"] = { d->color.x, d->color.y, d->color.z };
+    j["density"] = d->density;
+    j["startDistance"] = d->startDistance;
+    j["maxOpacity"] = d->maxOpacity;
+    j["skyOpacity"] = d->skyOpacity;
+}
+
+void Fog::LoadParams(const nlohmann::json& j) {
+    if (!j.is_object()) { return; }
+    auto* d = buffer_.GetData();
+    if (j.contains("color") && j["color"].is_array() && j["color"].size() == 3) {
+        d->color.x = j["color"][0].get<float>();
+        d->color.y = j["color"][1].get<float>();
+        d->color.z = j["color"][2].get<float>();
+    }
+    d->density = j.value("density", d->density);
+    d->startDistance = j.value("startDistance", d->startDistance);
+    d->maxOpacity = j.value("maxOpacity", d->maxOpacity);
+    d->skyOpacity = j.value("skyOpacity", d->skyOpacity);
+}
+
 OutLine::OutLine() {
     // 作成
     buffer_.Create();

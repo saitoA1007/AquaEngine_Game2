@@ -39,18 +39,14 @@ namespace GameEngine {
 		// バッファの使用タイプを設定
 		void SetBufferMaterial(const uint32_t& type,const uint32_t& materialSrvIndex) {
 			refData_->type = type;
-			refData_->materialIndex = materialSrvIndex - bufferStartIndex_;
+			// ResourceDescriptorHeapで参照するため、ヒープの絶対インデックスを保持する
+			refData_->materialIndex = materialSrvIndex;
 		}
 
 		// モデル情報を設定する
-		//void SetModelData(const uint32_t& vertexHandle, const uint32_t& indexHandle) {
-		//	refData_->indexHandle = indexHandle - bufferStartIndex_;
-		//	refData_->vertexHandle = vertexHandle - bufferStartIndex_;
-		//}
-
 		void SetModelData(const uint32_t& vertexHandle, const uint32_t& indexHandle, uint32_t vertexOffset = 0, uint32_t indexOffset = 0) {
-			refData_->indexHandle = indexHandle - bufferStartIndex_;
-			refData_->vertexHandle = vertexHandle - bufferStartIndex_;
+			refData_->indexHandle = indexHandle;
+			refData_->vertexHandle = vertexHandle;
 			refData_->vertexOffset = vertexOffset;
 			refData_->indexOffset = indexOffset;
 		}

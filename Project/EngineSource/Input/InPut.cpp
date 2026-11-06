@@ -30,7 +30,7 @@ void Input::Initialize(HINSTANCE hInstance, HWND hwnd) {
 	result = keyboard_->SetDataFormat(&c_dfDIKeyboard); // 標準形式
 	assert(SUCCEEDED(result));
 	// 排他制御レベルのセット
-	result = keyboard_->SetCooperativeLevel(hwnd_, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	result = keyboard_->SetCooperativeLevel(hwnd_, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
 	assert(SUCCEEDED(result));
 
 	// マウスデバイスの生成

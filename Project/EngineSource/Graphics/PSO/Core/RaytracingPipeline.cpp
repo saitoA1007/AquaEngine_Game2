@@ -22,23 +22,16 @@ void RaytracingPipeline::Initialize(ID3D12Device5* device, SrvManager* srvManage
 
 void RaytracingPipeline::CreateGlobalRootsignature() {
 
-	// tlasの設定、カメラ、ライトの設定、マテリアルアクセスデータ、バッファデータの設定
-	uint32_t texMaxNum = static_cast<uint32_t>(SrvHeapTypeCount::TextureMaxCount); // テクスチャ
-	uint32_t bufferMaxNum = static_cast<uint32_t>(SrvHeapTypeCount::BufferMaxCount); // データ
+	// SRV/UAVはResourceDescriptorHeapから直接取得するため、ヒープのインデックスだけをルート定数で渡す
+	const uint32_t indexCount = sizeof(RaytracingGlobalIndices) / sizeof(uint32_t);
 
 	RootSignatureBuilder builder;
 	builder.Initialize(device_);
-	builder.AddSRVDescriptorTable(0, 1, 0, D3D12_SHADER_VISIBILITY_ALL); // tlas
-	builder.AddSRVDescriptorTable(0, texMaxNum, 1, D3D12_SHADER_VISIBILITY_ALL); // テクスチャ
-	builder.AddSRVDescriptorTable(0, 1, 2, D3D12_SHADER_VISIBILITY_ALL); // アクセスデータ
-	builder.AddSRVDescriptorTable(0, bufferMaxNum, 3, D3D12_SHADER_VISIBILITY_ALL); // マテリアルなどのデータ
+	builder.Add32BitConstantsParameter(indexCount, 2, D3D12_SHADER_VISIBILITY_ALL); // ヒープのインデックス
 	builder.AddCBVParameter(0, D3D12_SHADER_VISIBILITY_ALL); // camera
 	builder.AddCBVParameter(1, D3D12_SHADER_VISIBILITY_ALL); // light
-	builder.AddUAVDescriptorTable(0, 1, 0, D3D12_SHADER_VISIBILITY_ALL); // UAV gOutput
-	builder.AddUAVDescriptorTable(1, 1, 0, D3D12_SHADER_VISIBILITY_ALL); // UAV gOutputDepth
-	builder.AddSRVDescriptorTable(1, 1, 0, D3D12_SHADER_VISIBILITY_ALL); // skybox
 	builder.AddSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_SHADER_VISIBILITY_ALL);
-	builder.CreateRootSignature();
+	builder.CreateRootSignature(D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED);
 	rootSignatureGlobal_ = builder.MoveOwnerRootSignature();
 }
 

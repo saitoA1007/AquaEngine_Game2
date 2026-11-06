@@ -48,7 +48,7 @@ void GraphicsSubsystem::Initialize() {
     bufferRefManager_->Initialize();
 
     // アクセスデータ管理機能を登録する
-    BufferRefResource::StaticInitialize(bufferRefManager_.get(), graphicsDevice_->GetSrvManager()->GetStartSrvIndex(SrvHeapType::Buffer));
+    BufferRefResource::StaticInitialize(bufferRefManager_.get());
 
     {
         ScopedTimer t("PSO");
