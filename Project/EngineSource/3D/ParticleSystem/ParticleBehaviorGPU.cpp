@@ -72,7 +72,7 @@ void ParticleBehaviorGPU::Update() {
 
 	// エミッター
 	auto* emitData = emitterSphere_.GetData();
-	emitData->frequencyTime += FpsCounter::gameDeltaTime;
+	emitData->frequencyTime += FpsCounter::GetGameDeltaTime();
 	// 射出間隔を上回ったら射出許可を出して時間を調整
 	if (emitData->frequency <= emitData->frequencyTime) {
 		emitData->frequencyTime -= emitData->frequency;
@@ -85,8 +85,8 @@ void ParticleBehaviorGPU::Update() {
 	emitData->translate = emitPos_;
 
 	// 時間
-	perFrame_.GetData()->deltaTime = FpsCounter::gameDeltaTime;
-	perFrame_.GetData()->time += FpsCounter::gameDeltaTime;
+	perFrame_.GetData()->deltaTime = FpsCounter::GetGameDeltaTime();
+	perFrame_.GetData()->time += FpsCounter::GetGameDeltaTime();
 
 	// コンピュートシェーダーを更新
 	UpdateCompute();

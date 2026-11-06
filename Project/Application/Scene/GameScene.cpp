@@ -43,29 +43,33 @@ void GameScene::Draw() {
 void GameScene::InputRegisterCommand() {
 
 	// 決定ボタン
-	inputCommand_->RegisterCommand("PauseAction", { {InputState::KeyTrigger, DIK_M},{InputState::PadTrigger, XINPUT_GAMEPAD_START} });
-	inputCommand_->RegisterCommand("Decision", { {InputState::KeyTrigger, DIK_SPACE},{InputState::PadTrigger, XINPUT_GAMEPAD_A} });
-	inputCommand_->RegisterCommand("SelectUp", { {InputState::KeyTrigger, DIK_W },{InputState::PadLeftStick,0,{0.0f,1.0f},0.2f}, { InputState::PadTrigger, XINPUT_GAMEPAD_DPAD_UP } });
-	inputCommand_->RegisterCommand("SelectDown", { {InputState::KeyTrigger, DIK_S },{InputState::PadLeftStick,0,{0.0f,-1.0f},0.2f}, {InputState::PadTrigger, XINPUT_GAMEPAD_DPAD_DOWN} });
+	inputCommand_->RegisterCommand("PauseAction", { KeyBinding{ DIK_M, PressType::kTrigger },PadButtonBinding{ XINPUT_GAMEPAD_START, PressType::kTrigger } });
+	inputCommand_->RegisterCommand("Decision", { KeyBinding{ DIK_SPACE, PressType::kTrigger },PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kTrigger } });
+	// 入りのムービーを飛ばす
+	inputCommand_->RegisterCommand("SkipMovie", { KeyBinding{ DIK_SPACE, PressType::kTrigger },PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kTrigger } });
+	inputCommand_->RegisterCommand("SelectUp", { KeyBinding{ DIK_W, PressType::kTrigger },PadStickBinding{ PadSide::kLeft, {0.0f,1.0f} }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_UP, PressType::kTrigger } });
+	inputCommand_->RegisterCommand("SelectDown", { KeyBinding{ DIK_S, PressType::kTrigger },PadStickBinding{ PadSide::kLeft, {0.0f,-1.0f} }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_DOWN, PressType::kTrigger } });
 
 	// 移動の入力コマンドを登録する
-	inputCommand_->RegisterCommand("MoveUp", { {InputState::KeyPush, DIK_W },{InputState::PadLeftStick,0,{0.0f,1.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_UP } });
-	inputCommand_->RegisterCommand("MoveDown", { {InputState::KeyPush, DIK_S },{InputState::PadLeftStick,0,{0.0f,-1.0f},0.2f}, {InputState::PadPush, XINPUT_GAMEPAD_DPAD_DOWN} });
-	inputCommand_->RegisterCommand("MoveLeft", { {InputState::KeyPush, DIK_A },{InputState::PadLeftStick,0,{-1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_LEFT } });
-	inputCommand_->RegisterCommand("MoveRight", { {InputState::KeyPush, DIK_D },{InputState::PadLeftStick,0,{1.0f,0.0f},0.2f}, { InputState::PadPush, XINPUT_GAMEPAD_DPAD_RIGHT } });
+	inputCommand_->RegisterCommand("MoveUp", { KeyBinding{ DIK_W },PadStickBinding{ PadSide::kLeft, {0.0f,1.0f} }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_UP } });
+	inputCommand_->RegisterCommand("MoveDown", { KeyBinding{ DIK_S },PadStickBinding{ PadSide::kLeft, {0.0f,-1.0f} }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_DOWN } });
+	inputCommand_->RegisterCommand("MoveLeft", { KeyBinding{ DIK_A },PadStickBinding{ PadSide::kLeft, {-1.0f,0.0f} }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_LEFT } });
+	inputCommand_->RegisterCommand("MoveRight", { KeyBinding{ DIK_D },PadStickBinding{ PadSide::kLeft, {1.0f,0.0f} }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_RIGHT } });
 	// ジャンプコマンドを登録する
-	inputCommand_->RegisterCommand("Jump", { {InputState::KeyTrigger, DIK_SPACE},{InputState::PadTrigger, XINPUT_GAMEPAD_A} });
+	inputCommand_->RegisterCommand("Jump", { KeyBinding{ DIK_SPACE, PressType::kTrigger },PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kTrigger } });
 
 	// カメラ操作のコマンドを登録する
-	inputCommand_->RegisterCommand("CameraMoveLeft", { { InputState::KeyPush, DIK_LEFT },{InputState::PadRightStick,0,{-1.0f,0.0f},0.2f} });
-	inputCommand_->RegisterCommand("CameraMoveRight", { { InputState::KeyPush, DIK_RIGHT },{InputState::PadRightStick,0,{1.0f,0.0f},0.2f} });
+	inputCommand_->RegisterCommand("CameraMoveLeft", { KeyBinding{ DIK_LEFT },PadStickBinding{ PadSide::kRight, {-1.0f,0.0f} } });
+	inputCommand_->RegisterCommand("CameraMoveRight", { KeyBinding{ DIK_RIGHT },PadStickBinding{ PadSide::kRight, {1.0f,0.0f} } });
+	inputCommand_->RegisterCommand("CameraMoveUp", { KeyBinding{ DIK_UP },PadStickBinding{ PadSide::kRight, {0.0f,1.0f} } });
+	inputCommand_->RegisterCommand("CameraMoveDown", { KeyBinding{ DIK_DOWN },PadStickBinding{ PadSide::kRight, {0.0f,-1.0f} } });
 	// ロックオン
-	inputCommand_->RegisterCommand("CameraLockOn", { {InputState::KeyTrigger, DIK_L},{InputState::PadTriggerRightTrigger,0,{0.0f,0.0f},0.2f},{InputState::PadTriggerLeftTrigger,0,{0.0f,0.0f},0.2f} });
+	inputCommand_->RegisterCommand("CameraLockOn", { KeyBinding{ DIK_L, PressType::kTrigger },PadTriggerBinding{ PadSide::kRight, PressType::kTrigger },PadTriggerBinding{ PadSide::kLeft, PressType::kTrigger } });
 
 	// AttackDownコマンド
-	inputCommand_->RegisterCommand("AttackDown", { {InputState::MouseTrigger, 1}, {InputState::PadTrigger, XINPUT_GAMEPAD_X} });
+	inputCommand_->RegisterCommand("AttackDown", { MouseBinding{ 1, PressType::kTrigger }, PadButtonBinding{ XINPUT_GAMEPAD_X, PressType::kTrigger } });
 	// RushChargeコマンド
-	inputCommand_->RegisterCommand("RushCharge", { {InputState::MouseTrigger, 1}, {InputState::PadTrigger, XINPUT_GAMEPAD_X} });
+	inputCommand_->RegisterCommand("RushCharge", { MouseBinding{ 1, PressType::kTrigger }, PadButtonBinding{ XINPUT_GAMEPAD_X, PressType::kTrigger } });
 	// RushStartコマンド
-	inputCommand_->RegisterCommand("RushStart", { {InputState::MouseRelease, 1}, {InputState::PadRelease, XINPUT_GAMEPAD_X} });
+	inputCommand_->RegisterCommand("RushStart", { MouseBinding{ 1, PressType::kRelease }, PadButtonBinding{ XINPUT_GAMEPAD_X, PressType::kRelease } });
 }

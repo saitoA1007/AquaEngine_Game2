@@ -39,7 +39,7 @@ void EffectObject::ApplyTiming(const EffectAsset& asset) {
 }
 
 void EffectObject::Update() {
-	Update(FpsCounter::deltaTime);
+	Update(FpsCounter::GetDeltaTime());
 }
 
 void EffectObject::Seek(float targetTime, float step) {

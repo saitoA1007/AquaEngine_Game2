@@ -40,14 +40,18 @@ struct BufferRef
     float2 pad;
 };
 
+// ResourceDescriptorHeapで参照するリソースのインデックス
+struct GlobalIndices
+{
+    uint tlas;        // TLAS
+    uint bufferRefs;  // BufferRefのStructuredBuffer
+    uint output;      // 出力画像
+    uint depthOutput; // 出力深度
+    uint skybox;      // 背景のキューブマップ
+};
+
 // Global Root Signature
-RWTexture2D<float4> gOutput : register(u0);
-RWTexture2D<float> gDepthOutput : register(u1);
-RaytracingAccelerationStructure gRtScene : register(t0, space0);
-Texture2D<float4> gTexture[] : register(t0, space1);
-StructuredBuffer<BufferRef> gBufferRefs : register(t0, space2);
-ByteAddressBuffer gBufferData[] : register(t0, space3);
-TextureCube<float4> gBackgroundTexture : register(t1, space0);
+ConstantBuffer<GlobalIndices> gIndices : register(b2);
 SamplerState gSampler : register(s0);
 
 ConstantBuffer<Camera> gCamera : register(b0);
@@ -59,6 +63,42 @@ cbuffer LightGroup : register(b1)
     uint environmentTexture;
     int isActiveEnvironment;
 };
+
+// ResourceDescriptorHeapからリソースを取得する
+RaytracingAccelerationStructure GetScene()
+{
+    return ResourceDescriptorHeap[gIndices.tlas];
+}
+
+StructuredBuffer<BufferRef> GetBufferRefs()
+{
+    return ResourceDescriptorHeap[gIndices.bufferRefs];
+}
+
+RWTexture2D<float4> GetOutput()
+{
+    return ResourceDescriptorHeap[gIndices.output];
+}
+
+RWTexture2D<float> GetDepthOutput()
+{
+    return ResourceDescriptorHeap[gIndices.depthOutput];
+}
+
+TextureCube<float4> GetBackgroundTexture()
+{
+    return ResourceDescriptorHeap[gIndices.skybox];
+}
+
+Texture2D<float4> GetTexture(uint index)
+{
+    return ResourceDescriptorHeap[NonUniformResourceIndex(index)];
+}
+
+ByteAddressBuffer GetBuffer(uint index)
+{
+    return ResourceDescriptorHeap[NonUniformResourceIndex(index)];
+}
 
 // レイのフィルタリングに使うインスタンスマスク
 #define RAY_MASK_OPAQUE 0x01 // 不透明。影レイを完全に遮る
@@ -110,7 +150,7 @@ inline bool checkRecursiveLimit(inout Payload payload)
     if (payload.recursive >= 4)
     {
         // 背景画像を返す
-        payload.color = gBackgroundTexture.SampleLevel(
+        payload.color = GetBackgroundTexture().SampleLevel(
             gSampler, WorldRayDirection(), 0.0).rgb;
         return true;
     }
@@ -136,7 +176,7 @@ float3 Reflection(float3 worldPosition, float3 worldNormal, int recursive)
     reflectPayload.color = float3(0, 0, 0);
     reflectPayload.recursive = recursive;
     TraceRay(
-        gRtScene,
+        GetScene(),
         flags,
         rayMask,
         0, // ray index
@@ -187,7 +227,7 @@ float3 TranslucentRefraction(float3 worldPosition, float3 worldNormal, int recur
         refractPayload.color = float3(0, 0, 0);
         refractPayload.recursive = recursive;
         TraceRay(
-            gRtScene,
+            GetScene(),
             flags,
             rayMask,
             0, // ray index
@@ -217,7 +257,7 @@ bool ShootShadowRay(float3 origin, float3 direction, uint rayMask = RAY_MASK_ALL
     flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
 
     TraceRay(
-        gRtScene,
+        GetScene(),
         flags,
         rayMask,
         0, // ray index
@@ -283,7 +323,7 @@ float3 GlassBSDF(float3 worldPos, float3 worldNormal, int recursive, float ior, 
     refractPayload.color = float3(0.0f, 0.0f, 0.0f);
     refractPayload.recursive = recursive;
     refractPayload.depth = 0.0f;
-    TraceRay(gRtScene, RAY_FLAG_NONE, 0xFF, 0, 1, 0, refractRay, refractPayload);
+    TraceRay(GetScene(), RAY_FLAG_NONE, 0xFF, 0, 1, 0, refractRay, refractPayload);
     
     // ガラス色で透過光をティント
     float3 refractColor = refractPayload.color * glassColor;
@@ -349,7 +389,7 @@ float3 IceBSDF(float3 worldPos, float3 worldNormal, int recursive, float ior, fl
     refractPayload.color = float3(0.0f, 0.0f, 0.0f);
     refractPayload.recursive = recursive;
     refractPayload.depth = 0.0f;
-    TraceRay(gRtScene, RAY_FLAG_NONE, 0xFF, 0, 1, 0, refractRay, refractPayload);
+    TraceRay(GetScene(), RAY_FLAG_NONE, 0xFF, 0, 1, 0, refractRay, refractPayload);
 
     // 透過光にBeer-Lambert吸収とiceColorティントを適用
     float3 refractColor = refractPayload.color * transmittance * iceColor;

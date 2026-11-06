@@ -67,9 +67,9 @@ VertexData GetHitVertex(MyAttribute attrib, uint vertexHandle, uint indexHandle,
 
     for (int i = 0; i < 3; ++i)
     {
-        uint localIndex = gBufferData[indexHandle].Load<uint>((start + i) * 4 + indexOffset * 4);
+        uint localIndex = GetBuffer(indexHandle).Load<uint>((start + i) * 4 + indexOffset * 4);
         uint index = localIndex + vertexOffset;
-        VertexData v = gBufferData[vertexHandle].Load<VertexData>(index * VERTEX_STRIDE);
+        VertexData v = GetBuffer(vertexHandle).Load<VertexData>(index * VERTEX_STRIDE);
         
         positions[i] = v.position.xyz;
         normals[i] = v.normal;
@@ -97,9 +97,9 @@ void MainIceObjectCHS(inout Payload payload, MyAttribute attrib)
     
     // アクセスデータを取得
     uint refHandle = InstanceID();
-    BufferRef ref = gBufferRefs[refHandle];
+    BufferRef ref = GetBufferRefs()[refHandle];
     // マテリアルデータを取得
-    IceMaterialData material = gBufferData[ref.MaterialIndex].Load<IceMaterialData>(0);
+    IceMaterialData material = GetBuffer(ref.MaterialIndex).Load<IceMaterialData>(0);
     
     // 頂点データを取得する
     VertexData vtx = GetHitVertex(attrib, ref.vertexHandle, ref.indexHandle, ref.vertexOffset, ref.indexOffset);
@@ -132,7 +132,7 @@ void MainIceObjectCHS(inout Payload payload, MyAttribute attrib)
         float3 tangentViewDir = normalize(mul(tbn, localViewDir));
         
         parallaxUV = ParallaxOcclusionMapping(
-            gTexture[material.heightTextureHandle], gSampler,
+            GetTexture(material.heightTextureHandle), gSampler,
             transformedUV.xy, tangentViewDir, material.heightScale);
     }
     
@@ -184,36 +184,38 @@ void MainIceObjectCHS(inout Payload payload, MyAttribute attrib)
     // ノーマルマップがあれば法線に適応
     if (material.normalTextureHandle != 0)
     {
-        float4 normalMapColor = gTexture[material.normalTextureHandle].SampleLevel(gSampler, parallaxUV, 0);
+        float4 normalMapColor = GetTexture(material.normalTextureHandle).SampleLevel(gSampler, parallaxUV, 0);
         localNormal = GetNormalFromMap(normalMapColor, vtx.normal, vtx.tangent);
     }
-    float3 worldNormal = mul(localNormal, (float3x3) ObjectToWorld4x3());
-    worldNormal = normalize(worldNormal);
-    
-     // 裏面の法線を視線側に向け直す
-    if (dot(worldNormal, viewDir) < 0.0f)
-    {
-        worldNormal = -worldNormal;
-    }
-    
-    // テクスチャカラーを取得
-    float4 textureColor = gTexture[material.textureHandle].SampleLevel(gSampler, parallaxUV, 0);
-    // アルベド色を取得
-    float3 albedoColor = material.color.rgb * textureColor.rgb;
-    
+
+    // 粗い表面
     if (material.dissolveThreshold > 0.0f)
     {
-        float mask = FBMNoise(worldPosition * 2.0f, 1);
+        float mask = FBMNoise(vtx.position.xyz * 2.0f, 1);
         if (mask <= material.dissolveThreshold)
         {
              // 法線を取得
-            worldNormal = ChiseledIceNormal(worldNormal, worldPosition,
+            localNormal = ChiseledIceNormal(localNormal, vtx.position.xyz,
                                     material.chipScale, material.chipStrength,
                                     material.edgeWidth, material.edgeStrength,
                                     material.microScale, material.microStrength);
         }
     }
-    
+
+    float3 worldNormal = mul(localNormal, (float3x3) ObjectToWorld4x3());
+    worldNormal = normalize(worldNormal);
+
+     // 裏面の法線を視線側に向け直す
+    if (dot(worldNormal, viewDir) < 0.0f)
+    {
+        worldNormal = -worldNormal;
+    }
+
+    // テクスチャカラーを取得
+    float4 textureColor = GetTexture(material.textureHandle).SampleLevel(gSampler, parallaxUV, 0);
+    // アルベド色を取得
+    float3 albedoColor = material.color.rgb * textureColor.rgb;
+
     float3 lightDir = normalize(-gDirectionalLight.direction);
     // 影を取る
     float shadowFactor = ComputeShadowFactor(worldPosition, lightDir);

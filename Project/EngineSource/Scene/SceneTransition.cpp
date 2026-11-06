@@ -13,7 +13,7 @@ void SceneTransition::Update() {
 		return;
 	}
 
-	timer_ += FpsCounter::deltaTime / maxTime_;
+	timer_ += FpsCounter::GetDeltaTime() / maxTime_;
 
 	// 演出の更新処理
 	currentEffect_->Update(timer_);

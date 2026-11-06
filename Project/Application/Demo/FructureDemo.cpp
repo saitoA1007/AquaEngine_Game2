@@ -93,7 +93,7 @@ void FructureDemo::Move() {
 		desiredVelocityXZ = dir * 1.0f;
 	}
 
-	testPos_ += desiredVelocityXZ * (5.0f * FpsCounter::gameDeltaTime);
+	testPos_ += desiredVelocityXZ * (5.0f * FpsCounter::GetGameDeltaTime());
 
 	// 当たり判定を更新
 	testCollider_.SetWorldPosition(testPos_);
