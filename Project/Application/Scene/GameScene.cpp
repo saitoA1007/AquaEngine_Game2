@@ -18,16 +18,15 @@ GameScene::GameScene() {
 
 	// 調整値を登録する
 	RegisterDebugParameters();
+}
+
+void GameScene::Initialize() {
 
 	// 背景・カメラ・ライトを設定する
 	SetUpEnvironment();
 
 	// ゲームオブジェクトを生成する
 	CreateGameObjects(cylinderModel_, sphereModel_);
-}
-
-void GameScene::Initialize() {
-
 
 }
 
@@ -36,6 +35,11 @@ void GameScene::Update() {
 
 	// ライトの調整値を反映する
 	UpdateLight();
+
+	// 検証用：同時破砕の計測を始める
+	if (inputCommand_->IsCommandActive("ShatterBenchmark")) {
+		shatterEffect_->StartBenchmark();
+	}
 
 	// シーン更新はオブジェクト更新の後に走るため、更新後のプレイヤー位置を敵が使える
 	StepEnemies();
@@ -52,6 +56,8 @@ void GameScene::LoadAssets() {
 	// モデルを取得する
 	cylinderModel_ = modelManager_->GetNameByModel("Cylinder");
 	sphereModel_ = modelManager_->GetNameByModel("sphere.obj");
+	planeModel_ = modelManager_->GetNameByModel("plane.obj");
+	shellShardModel_ = modelManager_->GetNameByModel(kShellShardModelName);
 
 	// 背景のテクスチャを取得する
 	skyboxTextureHandle_ = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
@@ -62,6 +68,8 @@ void GameScene::LoadAssets() {
 	// 取得できなかったモデルがないか確認する
 	assert(cylinderModel_ != nullptr);
 	assert(sphereModel_ != nullptr);
+	assert(planeModel_ != nullptr);
+	assert(shellShardModel_ != nullptr);
 }
 
 void GameScene::RegisterDebugParameters() {
@@ -100,8 +108,25 @@ void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
 	// プレイヤー
 	player_ = gameObjectManager_->AddObject<Player>(sphereModel, sphereModel, inputCommand_, field_, &playerStats_);
 
+	// 氷霧の発生を受け取る。氷霧の見た目と破片は敵より先に作る
+	iceMistEffect_ = gameObjectManager_->AddObject<IceMistEffect>(planeModel_, textureManager_);
+	shatterEffect_ = gameObjectManager_->AddObject<ShatterEffectManager>(shellShardModel_);
+	player_->SetIceMistCallback([this](const IceMistInfo& info) { OnIceMist(info); });
+
 	// 敵（敵一覧とモデルの読み込みに失敗すると例外を投げる）
-	enemyManager_ = gameObjectManager_->AddObject<EnemyManager>(modelManager_, field_->GetRadius(), gameCamera_->GetCamera(), whiteTextureHandle_);
+	enemyManager_ = gameObjectManager_->AddObject<EnemyManager>(modelManager_, field_->GetRadius(), gameCamera_->GetCamera(), whiteTextureHandle_, shatterEffect_);
+}
+
+void GameScene::OnIceMist(const IceMistInfo& info) {
+	// 処理の順番はここで決める（更新順には頼らない）。敵へ当て、氷塊へ通知し、見た目を出す
+	enemyManager_->ApplyIceMist(info);
+	NotifyIceShards(info);
+	iceMistEffect_->Play(info.center, info.radius);
+}
+
+void GameScene::NotifyIceShards(const IceMistInfo& info) {
+	// B4でIceShardManagerを呼ぶ場所。B3では何もしない
+	(void)info;
 }
 
 void GameScene::StepEnemies() {
@@ -133,5 +158,12 @@ void GameScene::InputRegisterCommand() {
 	inputCommand_->RegisterCommand("MoveDown", { KeyBinding{ DIK_S },PadStickBinding{ PadSide::kLeft, {0.0f,-1.0f} }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_DOWN } });
 	inputCommand_->RegisterCommand("MoveLeft", { KeyBinding{ DIK_A },PadStickBinding{ PadSide::kLeft, {-1.0f,0.0f} }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_LEFT } });
 	inputCommand_->RegisterCommand("MoveRight", { KeyBinding{ DIK_D },PadStickBinding{ PadSide::kLeft, {1.0f,0.0f} }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_RIGHT } });
+
+	// Aボタン（仮の割り当て：Spaceとパッドの A）。押している間のチャージと、離した瞬間の発生に分ける
+	inputCommand_->RegisterCommand("IceMistCharge", { KeyBinding{ DIK_SPACE, PressType::kPush }, PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kPush } });
+	inputCommand_->RegisterCommand("IceMistRelease", { KeyBinding{ DIK_SPACE, PressType::kRelease }, PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kRelease } });
+
+	// 同時破砕の計測の開始（検証用）
+	inputCommand_->RegisterCommand("ShatterBenchmark", { KeyBinding{ DIK_F9, PressType::kTrigger } });
 
 }

@@ -13,6 +13,9 @@ void Enemy::Spawn(const EnemyDefinition* definition, const Vector3& position) {
     iceGauge_ = 0.0f;
     frozenTimer_ = 0.0f;
     wallSense_ = 0;
+    lastMistId_ = 0;
+    brokenCount_ = 0;
+    justReleased_ = false;
 
     OnSpawn();
 }
@@ -51,14 +54,47 @@ void Enemy::UpdateIceGauge(const EnemyContext& context) {
 
     // 閾値に達したら凍る
     if (iceGauge_ >= definition_->iceThreshold) {
-        Freeze(context);
+        Freeze(context.frozenDuration);
     }
 }
 
-void Enemy::Freeze(const EnemyContext& context) {
+void Enemy::ApplyIceDamage(float amount, uint32_t mistId, float frozenDuration) {
+    // 凍っている敵への氷ダメージは、砕く処理が扱う
+    if (state_ == EnemyState::kFrozen) {
+        return;
+    }
+
+    iceGauge_ += amount;
+    if (iceGauge_ < definition_->iceThreshold) {
+        return;
+    }
+
+    // この氷霧で凍ったことを覚え、同じ氷霧では砕かれないようにする
+    Freeze(frozenDuration);
+    lastMistId_ = mistId;
+}
+
+bool Enemy::Shatter() {
+    brokenCount_++;
+
+    // 必要な回数に達したら撃破。個体を使い終える
+    if (brokenCount_ >= definition_->breakCount) {
+        isActive_ = false;
+        return true;
+    }
+
+    // 未満なら氷だけ砕けて解放される
+    // 氷霧で砕かれた解放だけ、殻の破片のイベントを残す（自然解放は溶ける表現で、破片は出さない）
+    Release();
+    justReleased_ = true;
+    return false;
+}
+
+void Enemy::Freeze(float frozenDuration) {
     state_ = EnemyState::kFrozen;
     iceGauge_ = definition_->iceThreshold;
-    frozenTimer_ = context.frozenDuration;
+    frozenTimer_ = frozenDuration;
+    lastMistId_ = 0;
     moveDirection_ = { 0.0f, 0.0f, 0.0f };
     OnFrozen();
 }
@@ -67,5 +103,6 @@ void Enemy::Release() {
     state_ = EnemyState::kNormal;
     iceGauge_ = 0.0f;
     frozenTimer_ = 0.0f;
+    lastMistId_ = 0;
     OnReleased();
 }

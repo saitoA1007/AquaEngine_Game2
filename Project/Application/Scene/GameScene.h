@@ -10,6 +10,8 @@
 #include "Application/Game/Player/Player.h"
 #include "Application/Game/Field/Field.h"
 #include "Application/Game/Enemy/EnemyManager.h"
+#include "Application/Game/Effect/ShatterEffectManager.h"
+#include "Application/Game/Effect/IceMistEffect.h"
 
 class GameScene : public GameEngine::IScene {
 public:
@@ -59,6 +61,8 @@ private: // アセット
 	// 管理クラスが所有するモデルへの非所有ポインタ。LoadAssetsで取得する
 	GameEngine::Model* cylinderModel_ = nullptr; // フィールドの地面と縁
 	GameEngine::Model* sphereModel_ = nullptr;   // プレイヤーの仮の見た目
+	GameEngine::Model* planeModel_ = nullptr;    // 氷霧のパーティクルの板
+	GameEngine::Model* shellShardModel_ = nullptr;  // 氷の殻の破片（15分割）
 
 	// 背景のテクスチャハンドル
 	uint32_t skyboxTextureHandle_ = 0;
@@ -75,6 +79,13 @@ private: // ゲームの状態
 	Player* player_ = nullptr;
 	Field* field_ = nullptr;
 	EnemyManager* enemyManager_ = nullptr;
+	ShatterEffectManager* shatterEffect_ = nullptr;
+	IceMistEffect* iceMistEffect_ = nullptr;
+
+private: // 定数
+
+	// 破片モデルの名前（拡張子つき。モデルはファイル名で取得する）
+	inline static const char* kShellShardModelName = "CellFractureCube8.gltf";
 
 private: // 調整値
 
@@ -119,6 +130,18 @@ private:
 	/// 構造体はこの関数のローカル変数で、プレイヤーの更新後に呼ぶ。
 	/// </summary>
 	void StepEnemies();
+
+	/// <summary>
+	/// 氷霧が発生したときの処理順を決める。敵へ当て、氷塊（B4）へ通知し、見た目を出す。
+	/// </summary>
+	/// <param name="info">氷霧の情報</param>
+	void OnIceMist(const IceMistInfo& info);
+
+	/// <summary>
+	/// 氷塊の管理（B4）へ氷霧を通知する呼び出し口。B3では何もしない。
+	/// </summary>
+	/// <param name="info">氷霧の情報</param>
+	void NotifyIceShards(const IceMistInfo& info);
 
 	/// <summary>
 	/// ライトの調整値を反映する。

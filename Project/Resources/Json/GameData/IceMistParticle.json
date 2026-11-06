@@ -1,0 +1,63 @@
+{
+    "IceMistParticle": {
+        "SceneName": "Game",
+        "Emitter": {
+            "SpawnMaxCount": 70,
+            "SpawnCoolTime": 0.0,
+            "IsLoop": false,
+            "IsBillBoard": true,
+            "IsActiveBlendAdd": false,
+            "IsEmitByDistance": false,
+            "SpawnDistance": 0.5,
+            "Defalut": {
+                "LifeTime": 1.8,
+                "EmittePos": [0.0, 0.0, 0.0],
+                "Rotate": [0.0, 0.0, 0.0],
+                "Scale": [1.0, 1.0, 1.0],
+                "Color": [1.0, 1.0, 1.0, 1.0]
+            },
+            "TextureEmit": {
+                "Enable": true,
+                "Texture": { "_TextureName": "smoke.png" }
+            },
+            "DirectionEmit": {
+                "Enable": true,
+                "Direction": [0.0, 1.0, 0.0],
+                "MinSpeed": 1.2,
+                "MaxSpeed": 3.0,
+                "SpreadAngle": 6.0
+            },
+            "ShapeEmit": {
+                "Enable": true,
+                "Shape": { "_ShapeType": "Circle", "_radius": 4.0, "_emitFromShell": false, "_boxSize": [1.0, 1.0, 1.0] }
+            },
+            "ColorEmit": {
+                "Enable": true,
+                "MinColor": [0.70, 0.90, 1.0, 0.30],
+                "MaxColor": [0.90, 0.97, 1.0, 0.50]
+            },
+            "LifeTimeEmit": {
+                "Enable": true,
+                "MinLifeTime": 1.2,
+                "MaxLifeTime": 2.2
+            },
+            "ScaleEmit": {
+                "Enable": true,
+                "SeparateAxes": false,
+                "RangeScale": { "_Min": [0.8, 0.8, 0.8], "_Max": [1.4, 1.4, 1.4] }
+            }
+        },
+        "Particle": {
+            "SizeOverLifeTime": {
+                "Enable": true,
+                "EndSize": 3.0,
+                "SeparateAxes": false,
+                "SeparateAxesEndSize": [0.0, 0.0, 0.0]
+            },
+            "AlphaOverLifeTime": {
+                "Enable": true,
+                "EndAlpha": 0.0
+            }
+        }
+    }
+}

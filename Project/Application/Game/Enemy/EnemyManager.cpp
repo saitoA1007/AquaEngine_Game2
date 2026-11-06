@@ -23,7 +23,8 @@ namespace {
     }
 }
 
-EnemyManager::EnemyManager(ModelManager* modelManager, float fieldRadius, const Camera* camera, uint32_t whiteTextureHandle) {
+EnemyManager::EnemyManager(ModelManager* modelManager, float fieldRadius, const Camera* camera, uint32_t whiteTextureHandle, ShatterEffectManager* shatterEffect)
+    : shatterEffect_(shatterEffect) {
     // 敵一覧を読み込む（不正なら例外）
     definitions_ = EnemyDefinitionIO::Load(EnemyDefinitionIO::kEnemyListPath);
 
@@ -76,6 +77,7 @@ void EnemyManager::RegisterDebugParameters() {
     debugParam_->Register("frozenDuration", frozenDuration_, 2, kIceGroup);
     debugParam_->Register("shellScale", shellScale_, 3, kIceGroup);
     debugParam_->Register("shellColor", shellColor_, 4, kIceGroup);
+    debugParam_->Register("meltTime", meltTime_, 5, kIceGroup);
 
     // 壁
     debugParam_->Register("enableEnemyWall", enableEnemyWall_, 0, kWallGroup);
@@ -195,6 +197,7 @@ EnemyOutput EnemyManager::UpdateEnemies(const EnemyInput& input) {
     grid_.Rebuild(active_);
 
     UpdateEnemyBehaviors(input, deltaTime);
+    EmitReleaseShatters();
 
     if (enableEnemyWall_) {
         ResolveWalls(input, deltaTime);
@@ -272,6 +275,56 @@ void EnemyManager::UpdateEnemyBehaviors(const EnemyInput& input, float deltaTime
 
     for (Enemy* enemy : active_) {
         enemy->Update(context);
+    }
+}
+
+void EnemyManager::EmitReleaseShatters() {
+    for (Enemy* enemy : active_) {
+        if (!enemy->ConsumeReleasedEvent()) {
+            continue;
+        }
+
+        // 解放では氷の殻だけが砕ける
+        float scale = enemy->GetVisualScale();
+        shatterEffect_->Spawn(enemy->GetPosition(), scale * shellScale_);
+    }
+}
+
+void EnemyManager::ApplyIceMist(const IceMistInfo& info) {
+    // グリッドは直前のUpdateEnemiesで作ったもの。まだ一度も作っていなければ敵はいない
+    if (active_.empty()) {
+        return;
+    }
+
+    // グリッドは候補を絞るためだけに使い、範囲との重なりは現在の位置で判定する
+    grid_.Query(info.center, info.radius + maxEnemyRadius_ + kGridLag, neighbors_);
+    for (Enemy* enemy : neighbors_) {
+        if (!enemy->IsActive()) {
+            continue;
+        }
+
+        float dx = enemy->GetPosition().x - info.center.x;
+        float dz = enemy->GetPosition().z - info.center.z;
+        float reach = info.radius + enemy->GetRadius();
+        if (dx * dx + dz * dz > reach * reach) {
+            continue;
+        }
+
+        // 凍っていない敵は凍結を進める。凍った敵は、別の氷霧で凍っていたときだけ砕く
+        if (!enemy->IsFrozen()) {
+            enemy->ApplyIceDamage(info.power, info.id, frozenDuration_);
+            continue;
+        }
+        if (!enemy->CanShatter(info.id)) {
+            continue;
+        }
+
+        // 撃破でも氷の殻の破片だけを飛ばす。解放（砕く回数が足りない）は、次のEmitReleaseShattersが殻だけを飛ばす
+        float scale = enemy->GetVisualScale();
+        Vector3 position = enemy->GetPosition();
+        if (enemy->Shatter()) {
+            shatterEffect_->Spawn(position, scale * shellScale_);
+        }
     }
 }
 
@@ -415,7 +468,14 @@ void EnemyManager::Draw() {
 
             // 凍結中は氷の殻を重ねる
             if (enemy->IsFrozen()) {
-                float shellSize = scale * shellScale_;
+                // 解放の直前は、殻を縮めて溶けるように見せる（残り時間が短いほど小さく、イーズアウト）
+                float melt = 1.0f;
+                float remaining = enemy->GetFrozenTimeRemaining();
+                if (meltTime_ > 0.0f && remaining < meltTime_) {
+                    float t = (std::max)(remaining / meltTime_, 0.0f);
+                    melt = t * (2.0f - t);
+                }
+                float shellSize = (std::max)(scale * shellScale_ * melt, 0.001f);
                 drawTransform_.SetWorldMatrix(Math::MakeWorldMatrixFromEulerRotation(position, { 0.0f, 0.0f, 0.0f }, { shellSize, shellSize, shellSize }));
                 renderQueue_->SubmitRaytracingModel(shellModel_, drawTransform_, &shellRefBuffers_);
             }

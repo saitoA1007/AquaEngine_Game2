@@ -1,0 +1,27 @@
+{
+    "ShatterEffect": {
+        "Benchmark": {
+            "benchmarkCount": 50,
+            "benchmarkSeconds": 10.0,
+            "benchmarkSpread": 12.0
+        },
+        "Color": {
+            "shellColor": [
+                0.6000000238418579,
+                0.8500000238418579,
+                1.0,
+                1.0
+            ]
+        },
+        "Motion": {
+            "fadeStartRatio": 0.5,
+            "lifetime": 1.0,
+            "maxAngularSpeed": 8.0,
+            "maxLaunchSpeed": 7.0,
+            "minLaunchSpeed": 3.0,
+            "parallelThreshold": 8,
+            "shardSizeRatio": 0.15000000596046448
+        },
+        "SceneName": "Game"
+    }
+}

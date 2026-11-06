@@ -17,14 +17,24 @@ void Player::RegisterDebugParameters() {
     debugParam_ = std::make_unique<DebugParameter>("Player");
     debugParam_->Register("radius", radius_);
     debugParam_->Register("color", color_);
-    debugParam_->Register("iceAreaRadius", iceAreaRadius_);
     debugParam_->Register("iceAreaColor", iceAreaColor_);
     debugParam_->Register("initialHp", initialHp_);
     debugParam_->Register("invincibleTime", invincibleTime_);
+
+    // 氷霧とチャージ。サブグループ名はここで管理する
+    const std::string kMistGroup = "IceMist";
+    debugParam_->Register("baseIceAreaRadius", baseIceAreaRadius_, 0, kMistGroup);
+    debugParam_->Register("maxIceAreaRadius", maxIceAreaRadius_, 1, kMistGroup);
+    debugParam_->Register("tapThreshold", tapThreshold_, 2, kMistGroup);
+    debugParam_->Register("maxChargeTime", maxChargeTime_, 3, kMistGroup);
+    debugParam_->Register("mistCooldownTime", mistCooldownTime_, 4, kMistGroup);
+    debugParam_->Register("tapPower", tapPower_, 5, kMistGroup);
+    debugParam_->Register("maxChargePower", maxChargePower_, 6, kMistGroup);
     debugParam_->Apply();
 
-    // 保存済みの初期HPを反映してから開始する
+    // 保存済みの初期HPと氷エリアの元の半径を反映してから開始する
     hp_ = initialHp_;
+    currentIceAreaRadius_ = baseIceAreaRadius_;
 }
 
 void Player::Initialize() {
@@ -64,7 +74,7 @@ void Player::Update() {
     // 無敵時間を進める
     invincibleTimer_ = (std::max)(invincibleTimer_ - FpsCounter::GetGameDeltaTime(), 0.0f);
 
-    // 加減速なしで、入力方向へ即座に移動する
+    // 加減速なしで、入力方向へ即座に移動する。氷霧のクールタイム中も移動は止めない
     Vector3 direction = GetMoveDirection();
     position_ += direction * (stats_->moveSpeed * FpsCounter::GetGameDeltaTime());
 
@@ -74,9 +84,70 @@ void Player::Update() {
     // 球が地面に接するよう、半径に合わせて高さを決める
     position_.y = radius_;
 
+    // 移動後の位置を中心に、チャージと氷霧を扱う
+    UpdateIceMist(FpsCounter::GetGameDeltaTime());
+
     modelComponent_.worldTransform_.transform_.scale = { radius_, radius_, radius_ };
     modelComponent_.worldTransform_.transform_.translate = position_;
     modelComponent_.Update();
+}
+
+void Player::UpdateIceMist(float deltaTime) {
+    // クールタイム中は氷霧の入力（チャージ）を受け付けない
+    if (cooldownTimer_ > 0.0f) {
+        cooldownTimer_ = (std::max)(cooldownTimer_ - deltaTime, 0.0f);
+        UpdateIceAreaRadius();
+        return;
+    }
+
+    // 押している間はチャージする。上限に達したらその状態を保つ
+    if (inputCommand_->IsCommandActive("IceMistCharge")) {
+        isCharging_ = true;
+        chargeTimer_ = (std::min)(chargeTimer_ + deltaTime, maxChargeTime_);
+    }
+
+    // 離した瞬間に氷霧を出す。チャージ中でなければ（クールタイム中に押した等）何もしない
+    if (isCharging_ && inputCommand_->IsCommandActive("IceMistRelease")) {
+        FireIceMist();
+    }
+
+    UpdateIceAreaRadius();
+}
+
+void Player::UpdateIceAreaRadius() {
+    // チャージ中は経過時間に応じて元の半径からフルチャージの半径へ広がる。離したら元に戻る
+    if (!isCharging_) {
+        currentIceAreaRadius_ = baseIceAreaRadius_;
+        return;
+    }
+    float ratio = (std::min)(chargeTimer_ / (std::max)(maxChargeTime_, 0.01f), 1.0f);
+    currentIceAreaRadius_ = baseIceAreaRadius_ + (maxIceAreaRadius_ - baseIceAreaRadius_) * ratio;
+}
+
+void Player::FireIceMist() {
+    IceMistInfo info;
+    info.id = ++mistCounter_;
+    info.center = position_;
+
+    if (chargeTimer_ < tapThreshold_) {
+        // 単押し。チャージした範囲にはならず、威力は弱い
+        info.radius = baseIceAreaRadius_;
+        info.power = tapPower_;
+    } else {
+        // 長押し。チャージ中の氷エリアの半径がそのまま氷霧の範囲になり、威力は割合で上がる
+        float ratio = (std::min)(chargeTimer_ / (std::max)(maxChargeTime_, 0.01f), 1.0f);
+        info.radius = currentIceAreaRadius_;
+        info.power = tapPower_ + (maxChargePower_ - tapPower_) * ratio;
+    }
+
+    // チャージの状態を戻し、共通のクールタイムを始めてから通知する
+    isCharging_ = false;
+    chargeTimer_ = 0.0f;
+    cooldownTimer_ = mistCooldownTime_;
+
+    if (iceMistCallback_) {
+        iceMistCallback_(info);
+    }
 }
 
 void Player::TakeDamage(int32_t damage) {
@@ -103,6 +174,6 @@ void Player::ApplyPushback(const Vector3& offset) {
 
 void Player::Draw() {
     // 氷エリアはプレイヤーを中心に常に描く
-    iceAreaView_.Draw(renderQueue_, position_, iceAreaRadius_, iceAreaColor_);
+    iceAreaView_.Draw(renderQueue_, position_, currentIceAreaRadius_, iceAreaColor_);
     modelComponent_.DrawRaytracing(renderQueue_);
 }

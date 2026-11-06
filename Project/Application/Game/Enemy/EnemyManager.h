@@ -14,6 +14,8 @@
 #include "Application/Game/Enemy/EnemyGrid.h"
 #include "Application/Game/Enemy/EnemyGaugeView.h"
 #include "Application/Game/Enemy/EnemyIO.h"
+#include "Application/Game/Player/IceMistInfo.h"
+#include "Application/Game/Effect/ShatterEffectManager.h"
 #ifdef USE_IMGUI
 #include "Application/Game/Enemy/EnemyListEditor.h"
 #endif
@@ -33,7 +35,8 @@ public:
     /// <param name="fieldRadius">グリッドの範囲を決めるフィールド半径</param>
     /// <param name="camera">氷ゲージの表示位置を求めるカメラ。シーンが所有し、このオブジェクトより長く生存する。</param>
     /// <param name="whiteTextureHandle">氷ゲージの矩形に使う白いテクスチャのハンドル</param>
-    EnemyManager(GameEngine::ModelManager* modelManager, float fieldRadius, const GameEngine::Camera* camera, uint32_t whiteTextureHandle);
+    /// <param name="shatterEffect">砕けた位置を伝える先。シーンが所有し、このオブジェクトより長く生存する。</param>
+    EnemyManager(GameEngine::ModelManager* modelManager, float fieldRadius, const GameEngine::Camera* camera, uint32_t whiteTextureHandle, ShatterEffectManager* shatterEffect);
     ~EnemyManager() override = default;
 
     /// <summary>
@@ -58,6 +61,13 @@ public:
     /// <param name="input">プレイヤーの情報。保持しない。</param>
     /// <returns>プレイヤーが受けるダメージと押し戻し量</returns>
     EnemyOutput UpdateEnemies(const EnemyInput& input);
+
+    /// <summary>
+    /// 氷霧を範囲内の敵へ当てる。凍っていない敵は氷ゲージを進め、凍っている敵は砕く。
+    /// 同じ氷霧で凍った敵は砕かない。撃破した敵は破片を飛ばす。前フレームのグリッドを使うため、UpdateEnemiesより前でも呼べる。
+    /// </summary>
+    /// <param name="info">氷霧の情報。保持しない。</param>
+    void ApplyIceMist(const IceMistInfo& info);
 
 private:
     /// <summary>
@@ -94,6 +104,11 @@ private:
     /// 各個体の氷ゲージと行動を更新する。
     /// </summary>
     void UpdateEnemyBehaviors(const EnemyInput& input, float deltaTime);
+
+    /// <summary>
+    /// 解放された敵の位置から、氷の殻だけの破片を飛ばす。
+    /// </summary>
+    void EmitReleaseShatters();
 
     /// <summary>
     /// 動いている敵と凍った敵の重なりを解消し、壁を回り込ませる。
@@ -138,7 +153,8 @@ private:
     float freezeRate_ = 1.0f;        // 氷エリア内で氷ゲージが進む速さ（ゲージ/秒）
     float decayRate_ = 0.5f;         // 氷エリア外で氷ゲージが減る速さ（ゲージ/秒）
     float frozenDuration_ = 10.0f;   // 凍ってから解放までの時間（秒）
-    float shellScale_ = 1.4f;        // 氷の殻の大きさ（見た目の大きさに対する倍率）
+    float meltTime_ = 0.6f;          // 解放の直前に、殻が縮んで溶ける時間（秒）。0で溶ける表現なし
+    float shellScale_ = 1.4f;       // 氷の殻の大きさ（見た目の大きさに対する倍率）
     Vector4 shellColor_ = { 0.6f, 0.85f, 1.0f, 1.0f }; // 氷の殻の色
     bool enableEnemyWall_ = false;       // 動く敵が凍った敵を押し出されて避けるか（密度が高いため既定では無効。後で重なりの対応を決める）
     bool enableWallPushPlayer_ = false;  // 凍った敵がプレイヤーを押し戻すか（同上）
@@ -162,6 +178,7 @@ private:
     float maxEnemyRadius_ = 0.0f;    // 全種類の当たり半径の最大値
     Vector3 lastPlayerPosition_ = { 0.0f, 0.0f, 0.0f }; // 直近のプレイヤー位置（ゲージの表示数を絞る基準。表示のためだけにコピーを持つ）
     EnemyGrid grid_;
+    ShatterEffectManager* shatterEffect_ = nullptr; // 破砕の破片（所有しない）
     std::unique_ptr<EnemyGaugeView> gaugeView_; // 氷ゲージの仮表示（平面モデルが要るためコンストラクタで作る）
 
     // 描画

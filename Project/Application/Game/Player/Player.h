@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include <memory>
 #include "IGameObject.h"
 #include "ModelComponent.h"
@@ -9,9 +10,11 @@
 #include "Application/Game/Player/PlayerStats.h"
 #include "Application/Game/Field/Field.h"
 #include "Application/Game/Player/IceAreaView.h"
+#include "Application/Game/Player/IceMistInfo.h"
 
 /// <summary>
-/// プレイヤー。B1では移動とフィールド内への制限だけを行う。
+/// プレイヤー。移動、フィールド内への制限、Aボタンのチャージと氷霧の発生を行う。
+/// 氷霧はコールバックで通知するだけで、敵の中身は知らない。
 /// </summary>
 class Player : public GameEngine::IGameObject {
 public:
@@ -46,9 +49,15 @@ public:
     float GetRadius() const { return radius_; }
 
     /// <summary>
-    /// 氷エリアの半径を取得する。氷エリアはプレイヤーを中心に常に存在する。
+    /// 現在の氷エリアの半径を取得する。氷エリアはプレイヤーを中心に常に存在し、チャージ中は広がる。
     /// </summary>
-    float GetIceAreaRadius() const { return iceAreaRadius_; }
+    float GetIceAreaRadius() const { return currentIceAreaRadius_; }
+
+    /// <summary>
+    /// 氷霧を発生させたときに呼ぶ関数を設定する。
+    /// </summary>
+    /// <param name="callback">氷霧の情報を受け取る関数。呼び出し先がプレイヤーより長く生存する必要がある。</param>
+    void SetIceMistCallback(const std::function<void(const IceMistInfo&)>& callback) { iceMistCallback_ = callback; }
 
     /// <summary>
     /// 現在のHPを取得する。
@@ -83,11 +92,32 @@ private:
     /// </summary>
     Vector3 GetMoveDirection() const;
 
+    /// <summary>
+    /// クールタイムを進め、Aの長押しでチャージし、離したら氷霧を発生させる。
+    /// </summary>
+    void UpdateIceMist(float deltaTime);
+
+    /// <summary>
+    /// チャージ中は氷エリアを広げ、チャージしていないときは元の大きさに戻す。
+    /// </summary>
+    void UpdateIceAreaRadius();
+
+    /// <summary>
+    /// 氷霧を発生させ、コールバックで通知する。単押しは狭く弱い。長押しはチャージ量で範囲と威力が上がる。
+    /// </summary>
+    void FireIceMist();
+
 private:
     // 調整値
     float radius_ = 0.5f; // 自機の半径（見た目と境界の余白）
     Vector4 color_ = { 0.4f, 0.8f, 1.0f, 1.0f }; // 水色系統（仮）
-    float iceAreaRadius_ = 8.0f;   // 氷エリアの半径（仮）
+    float baseIceAreaRadius_ = 4.0f;  // 氷エリアの元の半径（チャージしていないとき。単押しの氷霧の半径）（仮）
+    float maxIceAreaRadius_ = 8.0f;   // フルチャージ時の氷エリアの半径（仮）
+    float tapThreshold_ = 0.2f;       // 単押しとみなす押している時間の上限（秒）（仮）
+    float maxChargeTime_ = 1.5f;      // フルチャージまでの時間（秒）。フルチャージは保持できる（仮）
+    float mistCooldownTime_ = 0.1f;   // 氷霧を出した後の共通のクールタイム（秒）。単押し・長押しとも同じ。この間は次の氷霧を出せない。移動は止まらない（仮）
+    float tapPower_ = 0.8f;           // 単押しの威力（敵の氷ゲージへ足す量）（仮）
+    float maxChargePower_ = 3.0f;     // フルチャージの威力（仮）
     Vector3 iceAreaColor_ = { 0.08f, 0.25f, 0.40f }; // 氷エリアの仮描画の色（不透明）
     int32_t initialHp_ = 3;        // 初期HP
     float invincibleTime_ = 1.0f;  // 被弾後の無敵時間（秒）（仮）
@@ -99,11 +129,17 @@ private:
     Vector3 position_ = { 0.0f, 0.5f, 0.0f }; // XZは平面上の位置、Yは球が地面に接する高さ
     int32_t hp_ = 0;                          // 現在のHP
     float invincibleTimer_ = 0.0f;            // 無敵時間の残り（秒）
+    float currentIceAreaRadius_ = 0.0f;       // 現在の氷エリアの半径（チャージで広がる）
+    bool isCharging_ = false;                 // Aを押してチャージ中か
+    float chargeTimer_ = 0.0f;                // チャージの経過時間（秒）
+    float cooldownTimer_ = 0.0f;              // クールタイムの残り（秒）
+    uint32_t mistCounter_ = 0;                // 発生させた氷霧の数（IDの採番に使う）
 
     // 参照（所有しない）
     GameEngine::InputCommand* inputCommand_ = nullptr;
     const Field* field_ = nullptr;
     const PlayerStats* stats_ = nullptr;
+    std::function<void(const IceMistInfo&)> iceMistCallback_; // 氷霧の通知先（GameSceneが設定する）
 
     // 描画
     GameEngine::ModelComponent modelComponent_;

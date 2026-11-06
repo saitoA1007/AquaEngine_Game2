@@ -60,6 +60,43 @@ public:
         position_.z = position.z;
     }
 
+    /// <summary>
+    /// 氷霧による氷ダメージを与える。凍っていれば何もしない。
+    /// 閾値に達して凍ったときは、その氷霧のIDを覚える（同じ氷霧では砕かないための判定に使う）。
+    /// </summary>
+    /// <param name="amount">氷ゲージへ足す量</param>
+    /// <param name="mistId">氷霧のID</param>
+    /// <param name="frozenDuration">凍ってから解放までの時間（秒）</param>
+    void ApplyIceDamage(float amount, uint32_t mistId, float frozenDuration);
+
+    /// <summary>
+    /// 氷霧で砕けるかを返す。凍っていて、最後に凍った氷霧と別の氷霧のときだけtrue。
+    /// </summary>
+    /// <param name="mistId">当たった氷霧のID</param>
+    bool CanShatter(uint32_t mistId) const { return state_ == EnemyState::kFrozen && lastMistId_ != mistId; }
+
+    /// <summary>
+    /// 氷を砕く。砕かれた回数が必要数に達したら撃破として使用を終え、未満なら氷だけ砕いて解放する。
+    /// 解放した場合は解放のイベントが残り、EnemyManagerが氷の破片を飛ばす。
+    /// </summary>
+    /// <returns>撃破したらtrue</returns>
+    bool Shatter();
+
+    /// <summary>
+    /// 凍結の残り時間を取得する（秒。凍っていなければ0）。解放前の溶ける表現に使う。
+    /// </summary>
+    float GetFrozenTimeRemaining() const { return state_ == EnemyState::kFrozen ? frozenTimer_ : 0.0f; }
+
+    /// <summary>
+    /// 氷霧に砕かれて解放されたイベントを取り出す。取り出すと消える。自然解放では立たない。
+    /// </summary>
+    /// <returns>前回の取り出し以降に解放されていたらtrue</returns>
+    bool ConsumeReleasedEvent() {
+        bool released = justReleased_;
+        justReleased_ = false;
+        return released;
+    }
+
     const Vector3& GetPosition() const { return position_; }
     float GetRadius() const { return definition_->radius; }
     float GetVisualScale() const { return definition_->visualScale; }
@@ -118,7 +155,8 @@ private:
     /// <summary>
     /// 氷ゲージの閾値に達して凍る。
     /// </summary>
-    void Freeze(const EnemyContext& context);
+    /// <param name="frozenDuration">凍ってから解放までの時間（秒）</param>
+    void Freeze(float frozenDuration);
 
     /// <summary>
     /// 凍結の残り時間が尽きて解放される。氷ゲージは0に戻す。
@@ -140,4 +178,7 @@ private:
     float iceGauge_ = 0.0f;                // 氷ゲージ（0から閾値まで）
     float frozenTimer_ = 0.0f;             // 凍結の残り時間（秒）
     int32_t wallSense_ = 0;                // 壁を回り込む向き
+    uint32_t lastMistId_ = 0;              // 最後に凍った氷霧のID（0は氷霧以外で凍った、または凍っていない）
+    int32_t brokenCount_ = 0;              // 砕かれた回数
+    bool justReleased_ = false;            // 解放されたイベントが未処理か
 };

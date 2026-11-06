@@ -193,6 +193,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Game\Field\Field.cpp" />
     <ClCompile Include="Application\Game\Player\Player.cpp" />
     <ClCompile Include="Application\Game\Player\IceAreaView.cpp" />
+    <ClCompile Include="Application\Game\Effect\ShatterEffectManager.cpp" />
+    <ClCompile Include="Application\Game\Effect\IceMistEffect.cpp" />
     <ClCompile Include="Application\Game\Enemy\ChaseEnemy.cpp" />
     <ClCompile Include="Application\Game\Enemy\Enemy.cpp" />
     <ClCompile Include="Application\Game\Enemy\EnemyDefinition.cpp" />
@@ -615,6 +617,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Game\Player\Player.h" />
     <ClInclude Include="Application\Game\Player\PlayerStats.h" />
     <ClInclude Include="Application\Game\Player\IceAreaView.h" />
+    <ClInclude Include="Application\Game\Player\IceMistInfo.h" />
+    <ClInclude Include="Application\Game\Effect\ShatterEffectManager.h" />
+    <ClInclude Include="Application\Game\Effect\IceMistEffect.h" />
     <ClInclude Include="Application\Game\Enemy\ChaseEnemy.h" />
     <ClInclude Include="Application\Game\Enemy\Enemy.h" />
     <ClInclude Include="Application\Game\Enemy\EnemyDefinition.h" />
