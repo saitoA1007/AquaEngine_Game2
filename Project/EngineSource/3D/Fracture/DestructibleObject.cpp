@@ -78,7 +78,7 @@ DestructibleObject::DestructibleObject(std::string name, Model* model, uint32_t 
 
 	debugParameter_->Apply();
 
-	iceMaterial_.GetMaterialData()->dissolveThreshold = 0.0f;
+	iceMaterial_.GetMaterialData()->dissolveThreshold = 0.2f;
 }
 
 void DestructibleObject::Initialize() {

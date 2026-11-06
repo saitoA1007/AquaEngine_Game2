@@ -272,6 +272,49 @@ namespace GameEngine {
         ConstantBuffer<UICompositeData> buffer_;
     };
 
+    // 距離フォグ
+    class Fog : public IPostEffect {
+        struct alignas(16) FogData {
+            uint32_t textureHandle;
+            uint32_t depthTextureHandle;
+            float nearZ;
+            float farZ;
+
+            Vector4 color; // フォグの色
+
+            float density; // 濃さ
+            float startDistance; // フォグが掛かり始める距離
+            float maxOpacity; // フォグの最大の濃さ
+            float skyOpacity; // 空に掛けるフォグの濃さ
+        };
+
+    public:
+        Fog();
+
+        void Draw(ID3D12GraphicsCommandList* commandList, SrvManager* srvManager) override;
+
+        void SetPassIndex(const uint32_t& index) override {
+            buffer_.GetData()->textureHandle = index;
+        }
+
+        // 参照する深度テクスチャを設定(全てのフォグで共通)
+        static void SetDepthTextureIndex(uint32_t index) { depthTextureIndex_ = index; }
+
+        // パラメータを操作
+        void DrawParamUI() override;
+
+        // パラメータの保存
+        void SaveParams(nlohmann::json& j) override;
+        // パラメータの読み込み
+        void LoadParams(const nlohmann::json& j) override;
+
+    private:
+        ConstantBuffer<FogData> buffer_;
+
+        // 深度テクスチャのインデックス
+        static inline uint32_t depthTextureIndex_ = 0;
+    };
+
     // アウトライン
     class OutLine : public IPostEffect {
         struct OutLineData {

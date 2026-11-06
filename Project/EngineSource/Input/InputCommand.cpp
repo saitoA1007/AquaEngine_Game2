@@ -3,6 +3,63 @@
 
 using namespace GameEngine;
 
+namespace {
+
+	// キーボード入力の判定
+	bool Check(Input* input, const KeyBinding& binding) {
+		switch (binding.press) {
+		case PressType::kPush:    return input->PushKey(binding.key);
+		case PressType::kTrigger: return input->TriggerKey(binding.key);
+		case PressType::kRelease: return input->ReleaseKey(binding.key);
+		}
+		return false;
+	}
+
+	// マウス入力の判定
+	bool Check(Input* input, const MouseBinding& binding) {
+		switch (binding.press) {
+		case PressType::kPush:    return input->PushMouse(binding.button);
+		case PressType::kTrigger: return input->TriggerMouse(binding.button);
+		case PressType::kRelease: return input->ReleaseMouse(binding.button);
+		}
+		return false;
+	}
+
+	// パッドのボタン入力の判定
+	bool Check(Input* input, const PadButtonBinding& binding) {
+		switch (binding.press) {
+		case PressType::kPush:    return input->PushPad(binding.button);
+		case PressType::kTrigger: return input->TriggerPad(binding.button);
+		case PressType::kRelease: return input->ReleasePad(binding.button);
+		}
+		return false;
+	}
+
+	// パッドのスティック入力の判定
+	bool Check(Input* input, const PadStickBinding& binding) {
+		Vector2 stick = (binding.side == PadSide::kLeft) ? input->GetLeftStick() : input->GetRightStick();
+		float dot = stick.x * binding.direction.x + stick.y * binding.direction.y;
+		return dot > binding.threshold;
+	}
+
+	// パッドのトリガー入力の判定
+	bool Check(Input* input, const PadTriggerBinding& binding) {
+		// XInputのトリガー範囲は0-255なので、threshold(0.0-1.0)を変換する
+		float triggerThreshold = binding.threshold * 255.0f;
+		bool isLeft = (binding.side == PadSide::kLeft);
+
+		switch (binding.press) {
+		case PressType::kPush:
+			return isLeft ? input->GetPushPadLeftTrigger(triggerThreshold) : input->GetPushPadRightTrigger(triggerThreshold);
+		case PressType::kTrigger:
+			return isLeft ? input->GetTriggerPadLeftTrigger(triggerThreshold) : input->GetTriggerPadRightTrigger(triggerThreshold);
+		case PressType::kRelease:
+			return isLeft ? input->GetReleasePadLeftTrigger(triggerThreshold) : input->GetReleasePadRightTrigger(triggerThreshold);
+		}
+		return false;
+	}
+}
+
 InputCommand::InputCommand(Input* input) {
 	input_ = input;
 }
@@ -11,27 +68,26 @@ void InputCommand::Update() {
 	// すべてのコマンドをチェック
 	for (auto& pair : inputCommands_) {
 		const std::string& commandName = pair.first;
-		const std::vector<InputCondition>& conditions = pair.second;
+		const std::vector<InputBinding>& bindings = pair.second;
 
 		// 押されているかを判定するフラグ
-		bool inputConditions = false;
+		bool isActive = false;
 
-		// 設定された入力条件を全てチェック
-		for (size_t i = 0; i < conditions.size(); ++i) {
-			if (CheckCondition(conditions[i])) {
-				// 押されていない場合、falseに設定
-				inputConditions = true;
+		// 設定された入力のいずれかが成立していればアクティブ
+		for (const InputBinding& binding : bindings) {
+			if (CheckCondition(binding)) {
+				isActive = true;
 				break;
 			}
 		}
 		// 現在の状態を更新
-		inputCommandStates_[commandName] = inputConditions;
+		inputCommandStates_[commandName] = isActive;
 	}
 }
 
-void InputCommand::RegisterCommand(const std::string& commandName, const std::vector<InputCondition>& conditions) {
+void InputCommand::RegisterCommand(const std::string& commandName, const std::vector<InputBinding>& bindings) {
 	// コマンドを登録
-	inputCommands_[commandName] = conditions;
+	inputCommands_[commandName] = bindings;
 	// コマンドの入力状態を登録
 	inputCommandStates_[commandName] = false;
 }
@@ -62,101 +118,9 @@ void InputCommand::ClearAllCommands() {
 	inputCommandStates_.clear();
 }
 
-bool InputCommand::CheckCondition(const InputCondition& condition) {
-	
-	switch (condition.inputState)
-	{
-	case GameEngine::InputState::KeyPush:
-		return input_->PushKey(static_cast<BYTE>(condition.code));
-		break;
-
-	case GameEngine::InputState::KeyTrigger:
-		return input_->TriggerKey(static_cast<BYTE>(condition.code));
-		break;
-
-	case GameEngine::InputState::KeyRelease:
-		return input_->ReleaseKey(static_cast<BYTE>(condition.code));
-		break;
-
-	case GameEngine::InputState::MousePush:
-		return input_->PushMouse(condition.code);
-		break;
-
-	case GameEngine::InputState::MouseTrigger:
-		return input_->TriggerMouse(condition.code);
-		break;
-
-	case GameEngine::InputState::MouseRelease:
-		return input_->ReleaseMouse(condition.code);
-		break;
-
-	case GameEngine::InputState::PadPush:
-		return input_->PushPad(static_cast<WORD>(condition.code));
-		break;
-
-	case GameEngine::InputState::PadTrigger:
-		return input_->TriggerPad(static_cast<WORD>(condition.code));
-		break;
-
-	case GameEngine::InputState::PadRelease:
-		return input_->ReleasePad(static_cast<WORD>(condition.code));
-		break;
-
-	case GameEngine::InputState::PadLeftStick: {
-		Vector2 stick = input_->GetLeftStick();
-		float dot = stick.x * condition.direction.x + stick.y * condition.direction.y;
-		return dot > condition.threshold;
-		break;
-	}
-
-	case GameEngine::InputState::PadRightStick: {
-		Vector2 stick = input_->GetRightStick();
-		float dot = stick.x * condition.direction.x + stick.y * condition.direction.y;
-		return dot > condition.threshold;
-		break;
-	}
-
-	case GameEngine::InputState::PadPushLeftTrigger: {
-		// XInputのトリガー範囲は0-255なので、threshold(0.0-1.0)を変換する
-		float triggerThreshold = condition.threshold * 255.0f;
-		return input_->GetPushPadLeftTrigger(triggerThreshold);
-		break;
-	}
-
-	case GameEngine::InputState::PadTriggerLeftTrigger: {
-		float triggerThreshold = condition.threshold * 255.0f;
-		return input_->GetTriggerPadLeftTrigger(triggerThreshold);
-		break;
-	}
-
-	case GameEngine::InputState::PadReleaseLeftTrigger: {
-		float triggerThreshold = condition.threshold * 255.0f;
-		return input_->GetReleasePadLeftTrigger(triggerThreshold);
-		break;
-	}
-
-	case GameEngine::InputState::PadPushRightTrigger: {
-		float triggerThreshold = condition.threshold * 255.0f;
-		return input_->GetPushPadRightTrigger(triggerThreshold);
-		break;
-	}
-
-	case GameEngine::InputState::PadTriggerRightTrigger: {
-		float triggerThreshold = condition.threshold * 255.0f;
-		return input_->GetTriggerPadRightTrigger(triggerThreshold);
-		break;
-	}
-
-	case GameEngine::InputState::PadReleaseRightTrigger: {
-		float triggerThreshold = condition.threshold * 255.0f;
-		return input_->GetReleasePadRightTrigger(triggerThreshold);
-		break;
-	}
-
-	default:
-		return false;
-		break;
-	}
+bool InputCommand::CheckCondition(const InputBinding& binding) const {
+	// 登録された入力の種類に応じた判定関数を呼び出す
+	return std::visit([this](const auto& b) { return Check(input_, b); }, binding);
 }
 
 const Vector2& InputCommand::GetMousePosition() const {

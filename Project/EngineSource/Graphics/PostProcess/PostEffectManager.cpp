@@ -24,6 +24,10 @@ void PostEffectManager::Initialize(ID3D12GraphicsCommandList* commandList, SrvMa
     registry_.RegisterType<Bloom>("Bloom", psoManager);
     registry_.RegisterType<Dissolve>("Dissolve", psoManager);
     registry_.RegisterType<UIComposite>("UIComposite", psoManager);
+    registry_.RegisterType<Fog>("Fog", psoManager);
+
+    // フォグはレイトレの深度値から距離を求める
+    Fog::SetDepthTextureIndex(renderPassController_->GetSrvIndex("RaytracingPassDepth"));
 
     // デフォルトのノードが繋がっている状態
     BuildDefaultGraph();
@@ -147,6 +151,7 @@ void PostEffectManager::BuildDefaultGraph() {
     auto* ui = graph_.AddUINode();
     auto* output = graph_.AddOutputNode();
 
+    auto* fog = CreateEffectNode("Fog");
     auto* highLum = CreateEffectNode("HighLumMask");
     SetPersistent(highLum->id, true);  // 輝度マスクは保存パスに描く
     auto* gaussV = CreateEffectNode("GaussVertical");
@@ -156,12 +161,13 @@ void PostEffectManager::BuildDefaultGraph() {
     auto* uiComposite = CreateEffectNode("UIComposite");
     auto* dissolve = CreateEffectNode("Dissolve");
 
-    // Scene → HighLum → GaussV → GaussH → Bloom(Blur) → Grading → UIComposite(+UI) → Dissolve → Output
-    graph_.AddLink(scene->output.id, highLum->inputs[0].id);
+    // Scene → Fog → HighLum → GaussV → GaussH → Bloom(Blur) → Grading → UIComposite(+UI) → Dissolve → Output
+    graph_.AddLink(scene->output.id, fog->inputs[0].id);
+    graph_.AddLink(fog->output.id, highLum->inputs[0].id);
     graph_.AddLink(highLum->output.id, gaussV->inputs[0].id);
     graph_.AddLink(gaussV->output.id, gaussH->inputs[0].id);
     graph_.AddLink(gaussH->output.id, bloom->inputs[0].id);   // Blur
-    graph_.AddLink(scene->output.id, bloom->inputs[1].id);   // 元の画像
+    graph_.AddLink(fog->output.id, bloom->inputs[1].id);   // 元の画像
     graph_.AddLink(bloom->output.id, grading->inputs[0].id);
     graph_.AddLink(grading->output.id, uiComposite->inputs[0].id);
     graph_.AddLink(ui->output.id, uiComposite->inputs[1].id);  // UI

@@ -3,47 +3,64 @@
 #include <unordered_map>
 #include <functional>
 #include <vector>
+#include <variant>
 
 #include"InPut.h"
 
 namespace GameEngine {
 
-	// 入力する状態
-	enum class InputState {
-		// キー
-		KeyPush,    // 押しっぱなし
-		KeyTrigger, // 押した瞬間
-		KeyRelease, // 離した瞬間
-
-		// マウス
-		MousePush,
-		MouseTrigger,
-		MouseRelease,
-
-		// パッド
-		PadPush,
-		PadTrigger,
-		PadRelease,
-
-		PadLeftStick,  // パッドの左スティック
-		PadRightStick, // パッドの右スティック
-
-		PadPushLeftTrigger,     // L2 押しっぱなし
-		PadTriggerLeftTrigger,  // L2 押した瞬間
-		PadReleaseLeftTrigger,  // L2 離した瞬間
-
-		PadPushRightTrigger,    // R2 押しっぱなし
-		PadTriggerRightTrigger, // R2 押した瞬間
-		PadReleaseRightTrigger, // R2 離した瞬間
+	// ボタン系で共通の押し方
+	enum class PressType {
+		kPush,    // 押しっぱなし
+		kTrigger, // 押した瞬間
+		kRelease, // 離した瞬間
 	};
 
-	// コマンドを入力する状態
-	struct InputCondition {
-		InputState inputState; // どのデバイスでどのように入力するか
-		int32_t code; // 押すボタンの種類
-		Vector2 direction = { 0.0f,0.0f }; // 方向
-		float threshold = 0.2f; // スティックのしきい値
+	// 左右の指定
+	enum class PadSide {
+		kLeft,
+		kRight,
 	};
+
+	// キーボード入力
+	struct KeyBinding {
+		BYTE key; // キー番号(DIK_)
+		PressType press = PressType::kPush;
+	};
+
+	// マウス入力
+	struct MouseBinding {
+		int32_t button; // 0:左 1:右 2:中
+		PressType press = PressType::kPush;
+	};
+
+	// パッドのボタン入力
+	struct PadButtonBinding {
+		WORD button; // XINPUT_GAMEPAD_
+		PressType press = PressType::kPush;
+	};
+
+	// パッドのスティック入力
+	struct PadStickBinding {
+		PadSide side;            // 左右どちらのスティックか
+		Vector2 direction;       // 判定する方向
+		float threshold = 0.2f;  // しきい値
+	};
+
+	// パッドのトリガー入力（L2 / R2）
+	struct PadTriggerBinding {
+		PadSide side;                       // L2,R2
+		PressType press = PressType::kPush;
+		float threshold = 0.2f;             // しきい値(0.0~1.0)
+	};
+
+	// いずれか1つのデバイス入力
+	using InputBinding = std::variant<
+		KeyBinding,
+		MouseBinding,
+		PadButtonBinding,
+		PadStickBinding,
+		PadTriggerBinding>;
 
 	class InputCommand {
 	public:
@@ -66,8 +83,8 @@ namespace GameEngine {
 		/// コマンドを登録する
 		/// </summary>
 		/// <param name="commandName">コマンドの名前</param>
-		/// <param name="conditions">コマンドの振る舞い</param>
-		void RegisterCommand(const std::string& commandName, const std::vector<InputCondition>& conditions);
+		/// <param name="bindings">コマンドに割り当てる入力（いずれかが成立すればアクティブ）</param>
+		void RegisterCommand(const std::string& commandName, const std::vector<InputBinding>& bindings);
 
 		/// <summary>
 		/// コマンドを削除
@@ -131,7 +148,7 @@ namespace GameEngine {
 		Input* input_ = nullptr;
 
 		// 登録されたコマンドと条件
-		std::unordered_map<std::string, std::vector<InputCondition>> inputCommands_;
+		std::unordered_map<std::string, std::vector<InputBinding>> inputCommands_;
 		// 現在の状態
 		std::unordered_map<std::string, bool> inputCommandStates_;
 
@@ -140,8 +157,8 @@ namespace GameEngine {
 		/// <summary>
 		/// コマンドの入力条件チェック
 		/// </summary>
-		/// <param name="condition"></param>
+		/// <param name="binding"></param>
 		/// <returns></returns>
-		bool CheckCondition(const InputCondition& condition);
+		bool CheckCondition(const InputBinding& binding) const;
 	};
 }

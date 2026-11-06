@@ -49,9 +49,6 @@ namespace GameEngine {
 		// レイトレーシング用の描画モデル管理
 		TLAS tlas_;
 
-		// bufferが存在しているsrvのスタート位置
-		uint32_t bufferStartSrvIndex_ = 0;
-
 		// レイトレーシングでの最大描画数
 		uint32_t maxRayInstanceNum_ = 200;
 
