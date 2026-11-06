@@ -90,7 +90,7 @@ void ShatterEffectManager::SetUpShardSet(ShardSet& set, Model* model) {
     Vector3 extent = (maxPoint - minPoint) * 0.5f;
     set.halfExtent = (std::max)({ extent.x, extent.y, extent.z, 0.0001f });
 
-    // 破片は上限まで。多いモデルでは等間隔に選ぶ（15個のモデルならすべて使う）
+    // 破片は上限まで。多いモデルでは等間隔に選ぶ（上限以下の数のモデルならすべて使う）
     size_t count = (std::min)(chunks.size(), kMaxChunks);
     for (size_t i = 0; i < count; ++i) {
         const FractureChunkEntry& chunk = chunks[i * chunks.size() / count];

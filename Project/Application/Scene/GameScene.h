@@ -62,7 +62,7 @@ private: // アセット
 	GameEngine::Model* cylinderModel_ = nullptr; // フィールドの地面と縁
 	GameEngine::Model* sphereModel_ = nullptr;   // プレイヤーの仮の見た目
 	GameEngine::Model* planeModel_ = nullptr;    // 氷霧のパーティクルの板
-	GameEngine::Model* shellShardModel_ = nullptr;  // 氷の殻の破片（15分割）
+	GameEngine::Model* shellShardModel_ = nullptr;  // 氷の殻の破片（8分割）
 
 	// 背景のテクスチャハンドル
 	uint32_t skyboxTextureHandle_ = 0;
