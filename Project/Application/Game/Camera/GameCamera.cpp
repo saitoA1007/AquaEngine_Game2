@@ -35,7 +35,7 @@ void GameCamera::Update(const Vector3& targetPosition) {
     }
 
     // 指数補間。フレームレートに依存せず、毎秒 followRate の割合で差が縮む
-    float t = 1.0f - std::exp(-followRate_ * FpsCounter::gameDeltaTime);
+    float t = 1.0f - std::exp(-followRate_ * FpsCounter::GetGameDeltaTime());
     position_ += (target - position_) * t;
 
     // 固定角度。X回転の正は下向き

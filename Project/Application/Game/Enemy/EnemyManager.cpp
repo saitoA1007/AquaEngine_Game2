@@ -186,7 +186,7 @@ Enemy* EnemyManager::AcquireEnemy(EnemyPool& pool) {
 }
 
 EnemyOutput EnemyManager::UpdateEnemies(const EnemyInput& input) {
-    float deltaTime = FpsCounter::gameDeltaTime;
+    float deltaTime = FpsCounter::GetGameDeltaTime();
     lastPlayerPosition_ = input.playerPosition;
 
     // 出現させてから使用中の個体を集め、その位置でグリッドを作る
