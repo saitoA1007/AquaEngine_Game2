@@ -62,11 +62,11 @@ void Player::Update() {
     modelComponent_.materialData_->color = color_;
 
     // 無敵時間を進める
-    invincibleTimer_ = (std::max)(invincibleTimer_ - FpsCounter::gameDeltaTime, 0.0f);
+    invincibleTimer_ = (std::max)(invincibleTimer_ - FpsCounter::GetDeltaTime(), 0.0f);
 
     // 加減速なしで、入力方向へ即座に移動する
     Vector3 direction = GetMoveDirection();
-    position_ += direction * (stats_->moveSpeed * FpsCounter::gameDeltaTime);
+    position_ += direction * (stats_->moveSpeed * FpsCounter::GetDeltaTime());
 
     // フィールドの外へ出ないよう押し戻す
     position_ = field_->ClampToField(position_, radius_);
