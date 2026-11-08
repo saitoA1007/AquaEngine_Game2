@@ -288,7 +288,7 @@ void IceShardManager::UpdateFlyingShard(Shard& shard, float deltaTime) {
 
     // 到着。着弾を処理して、次の標的へ向かう。全員に当たったら砕けて消える
     shard.position = shard.hopEnd;
-    enemyManager_->ApplyShardHit(shard.target, shardIcePower_);
+    enemyManager_->ApplyShardHit(shard.target, shardIcePower_, volleys_[static_cast<size_t>(shard.volleyIndex)].chainId);
 
     // 飛んでいる間に倒された敵への到着は、命中に数えない
     if (isTargetAlive && hitCallback_) {
@@ -322,6 +322,7 @@ void IceShardManager::Launch(const IceMistInfo& info) {
 
     int32_t volleyIndex = AcquireVolley();
     Volley& volley = volleys_[static_cast<size_t>(volleyIndex)];
+    volley.chainId = info.id;
     BuildChainOrder(info, volley.order);
     if (volley.order.empty()) {
         return;

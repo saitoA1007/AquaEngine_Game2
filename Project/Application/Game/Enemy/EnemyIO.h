@@ -36,4 +36,6 @@ struct EnemyTarget {
 struct EnemyDefeatInfo {
     Vector3 position = { 0.0f, 0.0f, 0.0f }; // 撃破した位置（XZを使う）
     int32_t iceShardCount = 0;               // 落とす氷塊の数
+    int32_t exp = 0;                         // 与える経験値（敵一覧のexp）
+    uint32_t chainId = 0;                    // 連鎖数の数え上げに使うID（氷霧で倒したときは氷霧のID、氷塊は発射元の氷霧のID）
 };

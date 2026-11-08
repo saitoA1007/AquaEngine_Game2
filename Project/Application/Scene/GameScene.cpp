@@ -4,9 +4,12 @@
 using namespace GameEngine;
 
 #include "PostProcess/PostEffectData.h"
+#include "FPSCounter.h"
 #include <cassert>
 
 GameScene::~GameScene() {
+	// 止めたまま次のシーンへ進まないよう、ゲームの時間を通常へ戻す
+	FpsCounter::SetTimeScale(1.0f);
 }
 
 GameScene::GameScene() {
@@ -25,8 +28,16 @@ void GameScene::Initialize() {
 	// エンジンのリセットは、オブジェクトを消さずにInitializeをもう一度呼ぶ。前回のオブジェクトが残って二重にならないよう、先に全て削除する
 	gameObjectManager_->ClearAll();
 
+	// ゲームオーバーの状態を戻す
+	isGameOver_ = false;
+
 	// 振動を作り直す。前回の振動は破棄時に止まる
 	padVibration_ = std::make_unique<PadVibration>(inputCommand_);
+
+	// 強化を初期値へ戻す。回数を0にし、強化前の移動速度から値を求め直す
+	playerStats_ = PlayerStats();
+	playerUpgrade_ = std::make_unique<PlayerUpgrade>();
+	playerUpgrade_->ApplyToStats(playerStats_, baseMoveSpeed_);
 
 	// 背景・カメラ・ライトを設定する
 	SetUpEnvironment();
@@ -34,6 +45,8 @@ void GameScene::Initialize() {
 	// ゲームオブジェクトを生成する
 	CreateGameObjects(cylinderModel_, sphereModel_);
 
+	// 前回のリセット時に選択中で止まっていても、タイムスケールを1へ戻す
+	UpdateTimeScale();
 }
 
 void GameScene::Update() {
@@ -41,6 +54,10 @@ void GameScene::Update() {
 
 	// ライトの調整値を反映する
 	UpdateLight();
+
+	// 強化の調整値を反映し、取った回数からプレイヤーの強化値を求め直す
+	playerUpgrade_->UpdateParameters();
+	playerUpgrade_->ApplyToStats(playerStats_, baseMoveSpeed_);
 
 	// 検証用：同時破砕の計測を始める
 	if (inputCommand_->IsCommandActive("ShatterBenchmark")) {
@@ -53,12 +70,25 @@ void GameScene::Update() {
 	// 敵の更新後の位置で、氷塊の回収と連鎖を進める
 	StepIceShards();
 
-	// 長押しの振動を伝え、そのフレームの振動を出す（氷霧と命中は発生時に要求済み）
-	padVibration_->SetCharging(player_->IsCharging());
-	padVibration_->Update();
+	// HPが0ならゲームオーバーに入る。ゲームオーバー中は再開の入力を見る
+	CheckGameOver();
+	UpdateGameOver();
+
+	// 撃破で溜まったレベルアップがあれば選択画面を開き、止めるかどうかをタイムスケールへ反映する
+	UpdateLevelUp();
+	UpdateTimeScale();
+
+	// 長押しの振動を伝え、そのフレームの振動を出す（氷霧と命中は発生時に要求済み）。止めている間は振動を止めたままにする
+	if (!IsGameStopped()) {
+		padVibration_->SetCharging(player_->IsCharging());
+		padVibration_->Update();
+	}
 
 	// 押し戻し後のプレイヤー位置を追従する
 	gameCamera_->Update(player_->GetPosition());
+
+	// 表示用の値を最後にまとめて渡す（オブジェクトの更新はシーンの更新より先に走るため、描画の直前に最新になる）
+	UpdateHud();
 }
 
 void GameScene::Draw() {
@@ -77,6 +107,9 @@ void GameScene::LoadAssets() {
 
 	// 氷ゲージの矩形に使う白いテクスチャを取得する
 	whiteTextureHandle_ = textureManager_->GetHandleByName("white2x2.png");
+
+	// HPアイコンの仮素材（丸の画像）を取得する。正式な画像ができたら差し替える
+	circleTextureHandle_ = textureManager_->GetHandleByName("circle.png");
 
 	// 取得できなかったモデルがないか確認する
 	assert(cylinderModel_ != nullptr);
@@ -97,7 +130,8 @@ void GameScene::RegisterDebugParameters() {
 	debugParam_->Register("lightDirection", lightDirection_, 1, kLightGroup);
 
 	// プレイヤーの強化値
-	debugParam_->Register("moveSpeed", playerStats_.moveSpeed, 0, kPlayerStatsGroup);
+	// 強化の上昇分を保存しないよう、強化前の値だけを登録する（キー名は保存済みの値を引き継ぐため変えない）
+	debugParam_->Register("moveSpeed", baseMoveSpeed_, 0, kPlayerStatsGroup);
 
 	debugParam_->Apply();
 }
@@ -131,10 +165,111 @@ void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
 
 	// 氷塊（敵より後に作る）。撃破した敵の位置に氷塊を落とす
 	iceShardManager_ = gameObjectManager_->AddObject<IceShardManager>(sphereModel, enemyManager_);
-	enemyManager_->SetDefeatCallback([this](const EnemyDefeatInfo& info) { iceShardManager_->Drop(info.position, info.iceShardCount); });
+	// 経験値とフェーズ（敵一覧を読んだ後に作る）。フェーズの出現ルールの変更を敵へ渡す
+	phaseDirector_ = gameObjectManager_->AddObject<PhaseDirector>(enemyManager_->GetDefinitions());
+	phaseDirector_->SetRuleChangedCallback([this]() { ApplySpawnRule(); });
+	ApplySpawnRule();
+
+	// 撃破の通知で、氷塊を落とし、経験値を足し、連鎖数を数える
+	enemyManager_->SetDefeatCallback([this](const EnemyDefeatInfo& info) {
+		iceShardManager_->Drop(info.position, info.iceShardCount);
+		phaseDirector_->AddExp(info.exp);
+		comboPopupView_->AddHit(info.chainId, info.position);
+		});
 
 	// 氷塊が敵に命中するたびに振動させる
 	iceShardManager_->SetHitCallback([this]() { padVibration_->PlayHit(); });
+
+	// 常時表示のUIと連鎖数（強化の選択画面より手前に重ならないよう先に作る）
+	gameHud_ = gameObjectManager_->AddObject<GameHud>(fontManager_, circleTextureHandle_);
+	comboPopupView_ = gameObjectManager_->AddObject<ComboPopupView>(gameCamera_->GetCamera(), fontManager_);
+
+	// 強化の選択画面（描画が手前に重なるよう最後に作る）
+	upgradeSelectUI_ = gameObjectManager_->AddObject<UpgradeSelectUI>(inputCommand_, fontManager_, whiteTextureHandle_, playerUpgrade_.get());
+	upgradeSelectUI_->SetSelectedCallback([this](UpgradeType type) { OnUpgradeSelected(type); });
+
+	// ゲームオーバーの表示（一番手前に重ねる）
+	gameOverView_ = gameObjectManager_->AddObject<GameOverView>(inputCommand_, fontManager_, whiteTextureHandle_);
+}
+
+void GameScene::UpdateLevelUp() {
+	// 未処理がなければ何もしない。選択中は、選ばれるまで次を開かない
+	if (phaseDirector_->GetPendingLevelUps() <= 0 || upgradeSelectUI_->IsOpen() || isGameOver_) {
+		return;
+	}
+	OpenUpgradeSelect();
+}
+
+void GameScene::OpenUpgradeSelect() {
+	// 選択中はチャージを取り消して氷霧を出さず、振動も止める
+	upgradeSelectUI_->Open();
+	player_->SetInputEnabled(false);
+	padVibration_->Stop();
+}
+
+void GameScene::OnUpgradeSelected(UpgradeType type) {
+	// 強化を取り、レベルとフェーズを1つ進めて、新しい出現ルールを敵へ渡す
+	playerUpgrade_->Select(type);
+	phaseDirector_->ConfirmLevelUp();
+	ApplySpawnRule();
+
+	// 未処理が残っていれば続けて開く。なければ入力を戻す（選択画面は決定の時点で閉じている）
+	if (phaseDirector_->GetPendingLevelUps() > 0) {
+		upgradeSelectUI_->Open();
+		return;
+	}
+	player_->SetInputEnabled(true);
+}
+
+void GameScene::ApplySpawnRule() {
+	// フェーズ表の現在の行を、敵が受け取るルールへ写す
+	const PhaseRow& row = phaseDirector_->GetCurrentRow();
+	EnemySpawnRule rule;
+	rule.interval = row.spawnInterval;
+	rule.perInterval = row.spawnPerInterval;
+	rule.maxEnemies = row.maxEnemies;
+	rule.weights = row.weights;
+	enemyManager_->SetSpawnRule(rule);
+}
+
+bool GameScene::IsGameStopped() const {
+	// 強化の選択中、またはゲームオーバー中は、ゲームの世界を止める。ここに条件を足していく
+	return upgradeSelectUI_->IsOpen() || isGameOver_;
+}
+
+void GameScene::UpdateTimeScale() {
+	// 止めている間はゲームの世界を止める。UIの動きは止まらない時間で進む
+	FpsCounter::SetTimeScale(IsGameStopped() ? 0.0f : 1.0f);
+}
+
+void GameScene::CheckGameOver() {
+	if (isGameOver_ || player_->GetHp() > 0) {
+		return;
+	}
+
+	// 止まっている間にAを離して氷霧が出ないよう入力を切り、振動も止めてから、表示を開く
+	isGameOver_ = true;
+	player_->SetInputEnabled(false);
+	padVibration_->Stop();
+	gameOverView_->Open();
+}
+
+void GameScene::UpdateGameOver() {
+	if (!isGameOver_ || !gameOverView_->IsRetryRequested()) {
+		return;
+	}
+
+	// シーンを終えると、フェードを挟んでGameシーンが最初から作り直される
+	isFinished_ = true;
+}
+
+void GameScene::UpdateHud() {
+	// 表示用の値をまとめる
+	HudInput input;
+	input.hp = player_->GetHp();
+	input.maxHp = player_->GetMaxHp();
+	input.phase = phaseDirector_->GetPhase();
+	gameHud_->SetInput(input);
 }
 
 void GameScene::OnIceMist(const IceMistInfo& info) {
@@ -172,8 +307,11 @@ void GameScene::StepEnemies() {
 	// 敵を更新し、結果を受け取る
 	EnemyOutput output = enemyManager_->UpdateEnemies(input);
 
-	// 結果をプレイヤーへ反映する
-	player_->TakeDamage(output.damage);
+	// 結果をプレイヤーへ反映する。実際にHPが減ったときだけ、被弾の演出と振動を出す
+	if (player_->TakeDamage(output.damage)) {
+		gameHud_->PlayDamage();
+		padVibration_->PlayDamage();
+	}
 	player_->ApplyPushback(output.pushback);
 }
 
@@ -194,6 +332,12 @@ void GameScene::InputRegisterCommand() {
 	// Aボタン（仮の割り当て：Spaceとパッドの A）。押している間のチャージと、離した瞬間の発生に分ける
 	inputCommand_->RegisterCommand("IceMistCharge", { KeyBinding{ DIK_SPACE, PressType::kPush }, PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kPush } });
 	inputCommand_->RegisterCommand("IceMistRelease", { KeyBinding{ DIK_SPACE, PressType::kRelease }, PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kRelease } });
+
+	// ゲームオーバーからの再開（Spaceとパッドの A）。押した瞬間だけ有効にする
+	inputCommand_->RegisterCommand("Retry", { KeyBinding{ DIK_SPACE, PressType::kTrigger }, PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kTrigger } });
+
+	// 強化の決定（Spaceとパッドの A）。押した瞬間だけ有効にする
+	inputCommand_->RegisterCommand("UpgradeConfirm", { KeyBinding{ DIK_SPACE, PressType::kTrigger }, PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kTrigger } });
 
 	// 同時破砕の計測の開始（検証用）
 	inputCommand_->RegisterCommand("ShatterBenchmark", { KeyBinding{ DIK_F9, PressType::kTrigger } });

@@ -14,6 +14,12 @@
 #include "Application/Game/Effect/IceMistEffect.h"
 #include "Application/Game/IceShard/IceShardManager.h"
 #include "Application/Game/Player/PadVibration.h"
+#include "Application/Game/Phase/PhaseDirector.h"
+#include "Application/Game/Upgrade/PlayerUpgrade.h"
+#include "Application/Game/Upgrade/UpgradeSelectUI.h"
+#include "Application/Game/UI/GameHud.h"
+#include "Application/Game/UI/GameOverView.h"
+#include "Application/Game/UI/ComboPopupView.h"
 
 class GameScene : public GameEngine::IScene {
 public:
@@ -45,7 +51,7 @@ public:
 	/// 次のシーン遷移する場面の名前を取得
 	/// </summary>
 	/// <returns></returns>
-	std::string NextSceneName() override { return "Title"; }
+	std::string NextSceneName() override { return "Game"; } // 仮。リザルトとタイトル（C5）ができたら変える。再開はGameシーンを最初からやり直す
 
 	/// <summary>
 	/// 遷移する演出
@@ -72,16 +78,30 @@ private: // アセット
 	// 氷ゲージの矩形に使う白いテクスチャのハンドル
 	uint32_t whiteTextureHandle_ = 0;
 
+	// HPアイコンの仮素材（丸の画像）のハンドル
+	uint32_t circleTextureHandle_ = 0;
+
 private: // ゲームの状態
 
-	// プレイヤーの強化値（Playerが参照する）
+	// プレイヤーの強化値（Playerが参照する）。強化前の移動速度とPlayerUpgradeの回数から毎フレーム求め直す
 	PlayerStats playerStats_;
+
+	// 強化の項目、何回取ったか。シーンが所有し、Initializeのたびに作り直す（回数を0へ戻す）
+	std::unique_ptr<PlayerUpgrade> playerUpgrade_;
 
 	// GameObjectManagerが所有するオブジェクトへの非所有ポインタ。シーン終了まで有効
 	Player* player_ = nullptr;
 	Field* field_ = nullptr;
 	EnemyManager* enemyManager_ = nullptr;
 	IceShardManager* iceShardManager_ = nullptr;
+	PhaseDirector* phaseDirector_ = nullptr;
+	UpgradeSelectUI* upgradeSelectUI_ = nullptr;
+	GameHud* gameHud_ = nullptr;
+	ComboPopupView* comboPopupView_ = nullptr;
+	GameOverView* gameOverView_ = nullptr;
+
+	// HPが0になってゲームオーバーの表示中か。Initializeで戻す
+	bool isGameOver_ = false;
 
 	// コントローラーの振動。シーンが所有し、Initializeのたびに作り直す（破棄時に振動を止める）
 	std::unique_ptr<PadVibration> padVibration_;
@@ -98,6 +118,9 @@ private: // 調整値
 	// ライト
 	float lightIntensity_ = 0.9f;
 	Vector3 lightDirection_ = { -0.3f, -1.0f, 0.4f };
+
+	// 強化前の移動速度（保存する調整値。強化の上昇分は足さない）
+	float baseMoveSpeed_ = 8.0f;
 
 	// 調整値の機能
 	std::unique_ptr<GameEngine::DebugParameter> debugParam_;
@@ -153,6 +176,54 @@ private:
 	/// </summary>
 	/// <param name="info">氷霧の情報</param>
 	void NotifyIceShards(const IceMistInfo& info);
+
+	/// <summary>
+	/// 未処理のレベルアップがあり、選択画面が閉じていれば、選択画面を開いてゲームを止める。
+	/// </summary>
+	void UpdateLevelUp();
+
+	/// <summary>
+	/// 選択画面を開く。プレイヤーの入力と振動を止める。タイムスケールはUpdateTimeScaleが0にする。
+	/// </summary>
+	void OpenUpgradeSelect();
+
+	/// <summary>
+	/// 強化が選ばれたときの処理。強化を反映し、レベルとフェーズを進め、出現ルールを渡す。
+	/// 未処理が残っていれば続けて選択画面を開き、なければ入力を戻す。
+	/// </summary>
+	/// <param name="type">選ばれた強化の項目</param>
+	void OnUpgradeSelected(UpgradeType type);
+
+	/// <summary>
+	/// 現在のフェーズの出現ルールをEnemyManagerへ渡す。
+	/// </summary>
+	void ApplySpawnRule();
+
+	/// <summary>
+	/// ゲームの世界を止めているかを返す。強化の選択中、またはゲームオーバー中。
+	/// </summary>
+	bool IsGameStopped() const;
+
+	/// <summary>
+	/// ゲームのタイムスケールを決める。FpsCounter::SetTimeScaleを呼ぶのはこの関数だけにする。
+	/// 止めているとき（IsGameStopped）は0、それ以外は1。
+	/// </summary>
+	void UpdateTimeScale();
+
+	/// <summary>
+	/// プレイヤーのHPが0ならゲームオーバーに入る。入力と振動を止め、ゲームオーバーの表示を開く。
+	/// </summary>
+	void CheckGameOver();
+
+	/// <summary>
+	/// ゲームオーバー中に、再開の入力があればシーンを終了する（Gameシーンが最初からやり直される）。
+	/// </summary>
+	void UpdateGameOver();
+
+	/// <summary>
+	/// 表示用の値をまとめてGameHudへ渡す。GameScene::Updateの最後に呼ぶ。
+	/// </summary>
+	void UpdateHud();
 
 	/// <summary>
 	/// ライトの調整値を反映する。

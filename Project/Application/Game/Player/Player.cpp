@@ -20,6 +20,7 @@ void Player::RegisterDebugParameters() {
     debugParam_->Register("iceAreaColor", iceAreaColor_);
     debugParam_->Register("initialHp", initialHp_);
     debugParam_->Register("invincibleTime", invincibleTime_);
+    debugParam_->Register("blinkInterval", blinkInterval_);
 
     // 氷霧とチャージ。サブグループ名はここで管理する
     const std::string kMistGroup = "IceMist";
@@ -34,7 +35,25 @@ void Player::RegisterDebugParameters() {
 
     // 保存済みの初期HPと氷エリアの元の半径を反映してから開始する
     hp_ = initialHp_;
-    currentIceAreaRadius_ = baseIceAreaRadius_;
+    currentIceAreaRadius_ = baseIceAreaRadius_ * stats_->rangeScale;
+}
+
+void Player::SetInputEnabled(bool isEnabled) {
+    if (isInputEnabled_ == isEnabled) {
+        return;
+    }
+    isInputEnabled_ = isEnabled;
+
+    // 無効にするときはチャージを取り消す。氷霧は出さず、氷エリアも元の大きさへ戻す
+    if (!isEnabled) {
+        isCharging_ = false;
+        chargeTimer_ = 0.0f;
+        UpdateIceAreaRadius();
+        return;
+    }
+
+    // 戻すときは、決定に使ったAを一度離すまでチャージを始めない（押したままの離しで氷霧が出るのを防ぐ）
+    waitReleaseBeforeCharge_ = true;
 }
 
 void Player::Initialize() {
@@ -94,6 +113,21 @@ void Player::Update() {
 }
 
 void Player::UpdateIceMist(float deltaTime) {
+    // 入力が無効の間は、チャージも氷霧も受け付けない
+    if (!isInputEnabled_) {
+        UpdateIceAreaRadius();
+        return;
+    }
+
+    // 入力を戻した直後は、Aを一度離すまで受け付けない
+    if (waitReleaseBeforeCharge_) {
+        if (inputCommand_->IsCommandActive("IceMistCharge")) {
+            UpdateIceAreaRadius();
+            return;
+        }
+        waitReleaseBeforeCharge_ = false;
+    }
+
     // クールタイム中は氷霧の入力（チャージ）を受け付けない
     if (cooldownTimer_ > 0.0f) {
         cooldownTimer_ = (std::max)(cooldownTimer_ - deltaTime, 0.0f);
@@ -117,12 +151,15 @@ void Player::UpdateIceMist(float deltaTime) {
 
 void Player::UpdateIceAreaRadius() {
     // チャージ中は経過時間に応じて元の半径からフルチャージの半径へ広がる。離したら元に戻る
+    // 強化の範囲の倍率は、通常半径とフルチャージ半径の両方に掛ける
+    float baseRadius = baseIceAreaRadius_ * stats_->rangeScale;
+    float maxRadius = maxIceAreaRadius_ * stats_->rangeScale;
     if (!isCharging_) {
-        currentIceAreaRadius_ = baseIceAreaRadius_;
+        currentIceAreaRadius_ = baseRadius;
         return;
     }
     float ratio = (std::min)(chargeTimer_ / (std::max)(maxChargeTime_, 0.01f), 1.0f);
-    currentIceAreaRadius_ = baseIceAreaRadius_ + (maxIceAreaRadius_ - baseIceAreaRadius_) * ratio;
+    currentIceAreaRadius_ = baseRadius + (maxRadius - baseRadius) * ratio;
 }
 
 void Player::FireIceMist() {
@@ -133,13 +170,13 @@ void Player::FireIceMist() {
 
     if (chargeTimer_ < tapThreshold_) {
         // 単押し。チャージした範囲にはならず、威力は弱い
-        info.radius = baseIceAreaRadius_;
-        info.power = tapPower_;
+        info.radius = baseIceAreaRadius_ * stats_->rangeScale;
+        info.power = tapPower_ * stats_->powerScale;
     } else {
         // 長押し。チャージ中の氷エリアの半径がそのまま氷霧の範囲になり、威力は割合で上がる
         float ratio = (std::min)(chargeTimer_ / (std::max)(maxChargeTime_, 0.01f), 1.0f);
         info.radius = currentIceAreaRadius_;
-        info.power = tapPower_ + (maxChargePower_ - tapPower_) * ratio;
+        info.power = (tapPower_ + (maxChargePower_ - tapPower_) * ratio) * stats_->powerScale;
     }
 
     // チャージの状態を戻し、共通のクールタイムを始めてから通知する
@@ -152,14 +189,15 @@ void Player::FireIceMist() {
     }
 }
 
-void Player::TakeDamage(int32_t damage) {
+bool Player::TakeDamage(int32_t damage) {
     // 無敵時間中、またはダメージがないときは何もしない
     if (IsInvincible() || damage <= 0) {
-        return;
+        return false;
     }
 
     hp_ = (std::max)(hp_ - damage, 0);
     invincibleTimer_ = invincibleTime_;
+    return true;
 }
 
 void Player::ApplyPushback(const Vector3& offset) {
@@ -177,5 +215,14 @@ void Player::ApplyPushback(const Vector3& offset) {
 void Player::Draw() {
     // 氷エリアはプレイヤーを中心に常に描く
     iceAreaView_.Draw(renderQueue_, position_, currentIceAreaRadius_, iceAreaColor_);
+
+    // 無敵時間中は、点滅の間隔ごとに自機の描画を飛ばす（経過時間の奇数番目の間隔だけ描かない）
+    if (IsInvincible()) {
+        float elapsed = invincibleTime_ - invincibleTimer_;
+        int32_t blinkIndex = static_cast<int32_t>(elapsed / (std::max)(blinkInterval_, 0.01f));
+        if (blinkIndex % 2 == 1) {
+            return;
+        }
+    }
     modelComponent_.DrawRaytracing(renderQueue_);
 }

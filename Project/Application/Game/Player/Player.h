@@ -59,6 +59,13 @@ public:
     bool IsCharging() const { return isCharging_; }
 
     /// <summary>
+    /// 入力の有効・無効を切り替える。falseにするとチャージを取り消し、氷霧を出さない。
+    /// 入力を戻すまでチャージも氷霧も受け付けず、戻した後もAを一度離すまでチャージを始めない。移動は止めない（止めるのはタイムスケール）。
+    /// </summary>
+    /// <param name="isEnabled">入力を受け付けるか</param>
+    void SetInputEnabled(bool isEnabled);
+
+    /// <summary>
     /// 氷霧を発生させたときに呼ぶ関数を設定する。
     /// </summary>
     /// <param name="callback">氷霧の情報を受け取る関数。呼び出し先がプレイヤーより長く生存する必要がある。</param>
@@ -78,7 +85,13 @@ public:
     /// ダメージを受ける。無敵時間中は何もしない。受けたら無敵時間を始める。
     /// </summary>
     /// <param name="damage">減らすHP</param>
-    void TakeDamage(int32_t damage);
+    /// <returns>実際にHPが減ったらtrue。無敵時間中やダメージ0ならfalse</returns>
+    bool TakeDamage(int32_t damage);
+
+    /// <summary>
+    /// 初期HP（最大HP）を取得する。
+    /// </summary>
+    int32_t GetMaxHp() const { return initialHp_; }
 
     /// <summary>
     /// 外から押し戻される。フィールド内に収め、見た目の位置も更新する。
@@ -126,6 +139,7 @@ private:
     Vector3 iceAreaColor_ = { 0.08f, 0.25f, 0.40f }; // 氷エリアの仮描画の色（不透明）
     int32_t initialHp_ = 3;        // 初期HP
     float invincibleTime_ = 1.0f;  // 被弾後の無敵時間（秒）（仮）
+    float blinkInterval_ = 0.1f;   // 無敵時間中の点滅の間隔（秒）。この間隔ごとに描画する・しないを切り替える
 
     // 定数
     static constexpr float kStickThreshold = 0.2f; // スティックを入力として扱う最小の倒し量（入力コマンドの閾値に合わせる）
@@ -136,6 +150,8 @@ private:
     float invincibleTimer_ = 0.0f;            // 無敵時間の残り（秒）
     float currentIceAreaRadius_ = 0.0f;       // 現在の氷エリアの半径（チャージで広がる）
     bool isCharging_ = false;                 // Aを押してチャージ中か
+    bool isInputEnabled_ = true;              // チャージと氷霧の入力を受け付けるか
+    bool waitReleaseBeforeCharge_ = false;    // 入力を戻した後、Aを離すまでチャージを始めないか
     float chargeTimer_ = 0.0f;                // チャージの経過時間（秒）
     float cooldownTimer_ = 0.0f;              // クールタイムの残り（秒）
     Vector3 moveDirection_ = { 0.0f, 0.0f, 0.0f }; // 今フレームの移動方向（氷霧の通知に添える）

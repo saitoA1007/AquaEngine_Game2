@@ -21,6 +21,8 @@ void PadVibration::RegisterDebugParameters() {
     debugParam_->Register("hitStrength", hitStrength_, 3);
     debugParam_->Register("releaseTime", releaseTime_, 4);
     debugParam_->Register("hitTime", hitTime_, 5);
+    debugParam_->Register("damageStrength", damageStrength_, 6);
+    debugParam_->Register("damageTime", damageTime_, 7);
     debugParam_->Apply();
 }
 
@@ -31,6 +33,7 @@ void PadVibration::Update() {
     float deltaTime = FpsCounter::GetGameDeltaTime();
     releaseTimer_ = (std::max)(releaseTimer_ - deltaTime, 0.0f);
     hitTimer_ = (std::max)(hitTimer_ - deltaTime, 0.0f);
+    damageTimer_ = (std::max)(damageTimer_ - deltaTime, 0.0f);
 
     // 無効のときは何も出さない
     if (!isEnabled_) {
@@ -49,6 +52,9 @@ void PadVibration::Update() {
     if (hitTimer_ > 0.0f) {
         strength = (std::max)(strength, hitStrength_);
     }
+    if (damageTimer_ > 0.0f) {
+        strength = (std::max)(strength, damageStrength_);
+    }
     Apply(strength);
 }
 
@@ -56,6 +62,7 @@ void PadVibration::Stop() {
     isCharging_ = false;
     releaseTimer_ = 0.0f;
     hitTimer_ = 0.0f;
+    damageTimer_ = 0.0f;
     Apply(0.0f);
 }
 

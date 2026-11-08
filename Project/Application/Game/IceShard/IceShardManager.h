@@ -110,6 +110,7 @@ private:
         std::vector<EnemyTarget> order; // 連鎖の順番
         float hopTime = 0.1f;           // 1区間にかける時間（秒）
         int32_t shardCount = 0;         // まだ飛んでいる氷塊の数（0なら空き）
+        uint32_t chainId = 0;           // 発射元の氷霧のID（連鎖数の数え上げに使う）
     };
 
 private:

@@ -17,7 +17,7 @@
             "id": "chase",
             "kind": "Chase",
             "modelName": "sphere.obj",
-            "moveSpeed": 0.5,
+            "moveSpeed": 1.0,
             "poolSize": 1200,
             "radius": 0.4000000059604645,
             "visualScale": 0.4000000059604645
@@ -39,7 +39,7 @@
             "id": "fast",
             "kind": "Chase",
             "modelName": "sphere.obj",
-            "moveSpeed": 2.0,
+            "moveSpeed": 3.0,
             "poolSize": 600,
             "radius": 0.4000000059604645,
             "visualScale": 0.4000000059604645

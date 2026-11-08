@@ -38,6 +38,11 @@ public:
     void PlayHit() { hitTimer_ = hitTime_; }
 
     /// <summary>
+    /// 被弾したときの振動を始める。
+    /// </summary>
+    void PlayDamage() { damageTimer_ = damageTime_; }
+
+    /// <summary>
     /// 振動の長さを進め、そのフレームの出力を最大値で決めてコントローラーへ送る。値が変わったときだけ送る。
     /// </summary>
     void Update();
@@ -67,11 +72,14 @@ private:
     float hitStrength_ = 0.35f;       // 氷塊が敵に命中したときの強さ
     float releaseTime_ = 0.15f;       // 氷霧の振動の長さ（秒）
     float hitTime_ = 0.08f;           // 命中の振動の長さ（秒）
+    float damageStrength_ = 1.0f;     // 被弾したときの強さ
+    float damageTime_ = 0.35f;        // 被弾の振動の長さ（秒）
 
     // 状態
     bool isCharging_ = false;         // 長押しでチャージ中か
     float releaseTimer_ = 0.0f;       // 氷霧の振動の残り時間（秒）
     float hitTimer_ = 0.0f;           // 命中の振動の残り時間（秒）
+    float damageTimer_ = 0.0f;        // 被弾の振動の残り時間（秒）
     float lastStrength_ = 0.0f;       // 最後に送った強さ
 
     // 参照（所有しない）

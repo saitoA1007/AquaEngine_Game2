@@ -38,6 +38,10 @@ EnemyManager::EnemyManager(ModelManager* modelManager, float fieldRadius, const 
     CreatePools(modelManager);
     CreateShell(modelManager);
 
+    // 重みは全種類0から始める。SetSpawnRuleでルールが渡されるまで出現しない
+    spawnWeights_.assign(pools_.size(), 0.0f);
+    spawnCandidates_.reserve(pools_.size());
+
     // 氷ゲージは、敵の最大数までのバーを描けるようにする。平面モデルが見つからなければ例外にする
     Model* planeModel = modelManager->GetNameByModel(kGaugeModelName);
     if (planeModel == nullptr) {
@@ -67,8 +71,7 @@ void EnemyManager::RegisterDebugParameters() {
     debugParam_ = std::make_unique<DebugParameter>("Enemy");
 
     // スポーン
-    debugParam_->Register("spawnInterval", spawnInterval_, 0, kSpawnGroup);
-    debugParam_->Register("spawnPerInterval", spawnPerInterval_, 1, kSpawnGroup);
+    // 間隔と1回の数はフェーズ表で決める。ここにあるのは全体共通の値だけ
     debugParam_->Register("spawnDistance", spawnDistance_, 2, kSpawnGroup);
 
     // 氷
@@ -218,22 +221,78 @@ void EnemyManager::SpawnEnemies(const EnemyInput& input, float deltaTime) {
     float interval = (std::max)(spawnInterval_, 0.05f);
     // 読み込み直後などで経過時間が極端に長くても、溜まった分を一度に出さない（1フレームに1回まで）
     spawnTimer_ = (std::min)(spawnTimer_ + deltaTime, interval);
-    while (spawnTimer_ >= interval) {
-        spawnTimer_ -= interval;
-        for (int32_t i = 0; i < spawnPerInterval_; ++i) {
-            SpawnOne(input);
+    if (spawnTimer_ < interval) {
+        return;
+    }
+    spawnTimer_ -= interval;
+
+    // 使用中の総数が最大数に達していたら出さない。出すたびに数を増やして上限を守る
+    int32_t activeCount = CountActiveEnemies();
+    for (int32_t i = 0; i < spawnPerInterval_; ++i) {
+        if (activeCount >= maxEnemies_) {
+            break;
         }
+        if (!SpawnOne(input)) {
+            break;
+        }
+        ++activeCount;
     }
 }
 
-void EnemyManager::SpawnOne(const EnemyInput& input) {
-    // 空きのある種類を、ランダムな種類から順に探す
-    size_t poolCount = pools_.size();
-    size_t start = RandomGenerator::Get<size_t>(0, poolCount - 1);
-    for (size_t i = 0; i < poolCount; ++i) {
-        size_t poolIndex = (start + i) % poolCount;
+int32_t EnemyManager::CountActiveEnemies() const {
+    int32_t count = 0;
+    for (const EnemyPool& pool : pools_) {
+        for (const std::unique_ptr<Enemy>& enemy : pool.enemies) {
+            if (enemy->IsActive()) {
+                ++count;
+            }
+        }
+    }
+    return count;
+}
+
+void EnemyManager::SetSpawnRule(const EnemySpawnRule& rule) {
+    spawnInterval_ = rule.interval;
+    spawnPerInterval_ = rule.perInterval;
+    maxEnemies_ = rule.maxEnemies;
+
+    // 敵のIDを種類の番号へ変換する。ルールに書いていない種類は重み0
+    for (size_t i = 0; i < definitions_.size(); ++i) {
+        std::map<std::string, float>::const_iterator it = rule.weights.find(definitions_[i].id);
+        spawnWeights_[i] = (it != rule.weights.end()) ? (std::max)(it->second, 0.0f) : 0.0f;
+    }
+}
+
+bool EnemyManager::SpawnOne(const EnemyInput& input) {
+    // 抽選の候補は、重みが正の種類だけ。空きのない種類は抽選の途中で外す
+    spawnCandidates_ = spawnWeights_;
+    while (true) {
+        float totalWeight = 0.0f;
+        for (float weight : spawnCandidates_) {
+            totalWeight += weight;
+        }
+        if (totalWeight <= 0.0f) {
+            return false;
+        }
+
+        // 重みに比例して種類を選ぶ
+        float pick = RandomGenerator::Get<float>(0.0f, totalWeight);
+        size_t poolIndex = 0;
+        for (size_t i = 0; i < spawnCandidates_.size(); ++i) {
+            if (spawnCandidates_[i] <= 0.0f) {
+                continue;
+            }
+            poolIndex = i;
+            pick -= spawnCandidates_[i];
+            if (pick <= 0.0f) {
+                break;
+            }
+        }
+
+        // プールに空きがなければ、その種類を外して選び直す
         Enemy* enemy = AcquireEnemy(pools_[poolIndex]);
         if (enemy == nullptr) {
+            spawnCandidates_[poolIndex] = 0.0f;
             continue;
         }
 
@@ -249,7 +308,7 @@ void EnemyManager::SpawnOne(const EnemyInput& input) {
         }
 
         enemy->Spawn(&definitions_[poolIndex], { x, 0.0f, z }, ++spawnCounter_);
-        return;
+        return true;
     }
 }
 
@@ -319,15 +378,16 @@ void EnemyManager::ApplyIceMist(const IceMistInfo& info) {
             continue;
         }
 
-        ShatterEnemy(enemy);
+        ShatterEnemy(enemy, info.id);
     }
 }
 
-void EnemyManager::ShatterEnemy(Enemy* enemy) {
+void EnemyManager::ShatterEnemy(Enemy* enemy, uint32_t chainId) {
     // 撃破でも氷の殻の破片だけを飛ばす。解放（砕く回数が足りない）は、次のEmitReleaseShattersが殻だけを飛ばす
     float scale = enemy->GetVisualScale();
     Vector3 position = enemy->GetPosition();
     int32_t iceShardCount = enemy->GetDefinition()->iceShardCount;
+    int32_t exp = enemy->GetDefinition()->exp;
     if (!enemy->Shatter()) {
         return;
     }
@@ -341,6 +401,8 @@ void EnemyManager::ShatterEnemy(Enemy* enemy) {
     EnemyDefeatInfo defeat;
     defeat.position = position;
     defeat.iceShardCount = iceShardCount;
+    defeat.exp = exp;
+    defeat.chainId = chainId;
     defeatCallback_(defeat);
 }
 
@@ -375,7 +437,7 @@ bool EnemyManager::GetTargetPosition(const EnemyTarget& target, Vector3& positio
     return true;
 }
 
-void EnemyManager::ApplyShardHit(const EnemyTarget& target, float icePower) {
+void EnemyManager::ApplyShardHit(const EnemyTarget& target, float icePower, uint32_t chainId) {
     Vector3 position;
     if (!GetTargetPosition(target, position)) {
         return;
@@ -386,7 +448,7 @@ void EnemyManager::ApplyShardHit(const EnemyTarget& target, float icePower) {
         target.enemy->ApplyIceDamage(icePower, 0, frozenDuration_);
         return;
     }
-    ShatterEnemy(target.enemy);
+    ShatterEnemy(target.enemy, chainId);
 }
 
 void EnemyManager::ResolveWalls(const EnemyInput& input, float deltaTime) {

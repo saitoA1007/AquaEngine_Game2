@@ -1,0 +1,14 @@
+{
+    "phases": [
+        { "type": "Normal", "expToNext": 10, "spawnInterval": 1.0, "spawnPerInterval": 3, "maxEnemies": 60, "weights": { "chase": 3.0, "fast": 1.0 } },
+        { "type": "Normal", "expToNext": 20, "spawnInterval": 1.0, "spawnPerInterval": 3, "maxEnemies": 80, "weights": { "chase": 3.0, "fast": 1.5 } },
+        { "type": "Normal", "expToNext": 30, "spawnInterval": 1.0, "spawnPerInterval": 4, "maxEnemies": 100, "weights": { "chase": 3.0, "fast": 2.0 } },
+        { "type": "Normal", "expToNext": 40, "spawnInterval": 1.0, "spawnPerInterval": 4, "maxEnemies": 120, "weights": { "chase": 3.0, "fast": 3.0 } },
+        { "type": "Bonus", "expToNext": 30, "spawnInterval": 0.5, "spawnPerInterval": 8, "maxEnemies": 300, "weights": { "chase": 1.0, "fast": 1.0 } },
+        { "type": "Normal", "expToNext": 50, "spawnInterval": 1.0, "spawnPerInterval": 5, "maxEnemies": 160, "weights": { "chase": 2.0, "fast": 3.0 } },
+        { "type": "Normal", "expToNext": 60, "spawnInterval": 1.0, "spawnPerInterval": 5, "maxEnemies": 180, "weights": { "chase": 2.0, "fast": 4.0 } },
+        { "type": "Normal", "expToNext": 70, "spawnInterval": 1.0, "spawnPerInterval": 6, "maxEnemies": 200, "weights": { "chase": 2.0, "fast": 5.0 } },
+        { "type": "Bonus", "expToNext": 40, "spawnInterval": 0.5, "spawnPerInterval": 10, "maxEnemies": 400, "weights": { "chase": 1.0, "fast": 1.0 } },
+        { "type": "Boss", "expToNext": 0, "spawnInterval": 1.0, "spawnPerInterval": 6, "maxEnemies": 200, "weights": { "chase": 2.0, "fast": 4.0 } }
+    ]
+}

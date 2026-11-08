@@ -1,6 +1,8 @@
 #pragma once
 #include <functional>
+#include <map>
 #include <memory>
+#include <string>
 #include <vector>
 #include "IGameObject.h"
 #include "DebugParameter.h"
@@ -20,6 +22,16 @@
 #ifdef USE_IMGUI
 #include "Application/Game/Enemy/EnemyListEditor.h"
 #endif
+
+/// <summary>
+/// スポーンのルール。フェーズごとにGameSceneが渡す。EnemyManagerはフェーズを知らない。
+/// </summary>
+struct EnemySpawnRule {
+    float interval = 1.0f;                 // スポーンの間隔（秒）
+    int32_t perInterval = 0;               // 1回のスポーンで出そうとする数
+    int32_t maxEnemies = 0;                // 同時に存在できる敵の最大数（全種類の合計）
+    std::map<std::string, float> weights;  // 敵のIDごとの出現の重み（書いていない種類は0）
+};
 
 /// <summary>
 /// 全敵の更新・描画・凍結・スポーンを担当する唯一の敵用IGameObject。
@@ -77,6 +89,18 @@ public:
     void SetDefeatCallback(const std::function<void(const EnemyDefeatInfo&)>& callback) { defeatCallback_ = callback; }
 
     /// <summary>
+    /// スポーンのルールを設定する。重みは敵のIDで受け取り、ここで種類の番号に変換する。
+    /// 出ている敵は消さない。タイマーは引き継ぐ。
+    /// </summary>
+    /// <param name="rule">新しいルール。保持しない。</param>
+    void SetSpawnRule(const EnemySpawnRule& rule);
+
+    /// <summary>
+    /// 敵一覧を読み取り専用で取得する。フェーズ表の検証と編集画面が敵のIDを使う。
+    /// </summary>
+    const std::vector<EnemyDefinition>& GetDefinitions() const { return definitions_; }
+
+    /// <summary>
     /// 円の範囲と重なる使用中の敵を集める。前フレームのグリッドを使い、位置は現在のものを判定する。
     /// </summary>
     /// <param name="center">円の中心（XZを使う）</param>
@@ -98,14 +122,16 @@ public:
     /// </summary>
     /// <param name="target">当たった標的</param>
     /// <param name="icePower">凍っていない敵の氷ゲージへ足す量</param>
-    void ApplyShardHit(const EnemyTarget& target, float icePower);
+    /// <param name="chainId">発射元の氷霧のID。撃破の通知に添える</param>
+    void ApplyShardHit(const EnemyTarget& target, float icePower, uint32_t chainId);
 
 private:
     /// <summary>
     /// 凍った敵を砕く。撃破なら破片を飛ばして撃破を通知し、解放なら次のEmitReleaseShattersが殻だけを飛ばす。
     /// </summary>
     /// <param name="enemy">砕く敵（凍っていること）</param>
-    void ShatterEnemy(Enemy* enemy);
+    /// <param name="chainId">撃破の通知に添える連鎖のID（氷霧のID）</param>
+    void ShatterEnemy(Enemy* enemy, uint32_t chainId);
 
     /// <summary>
     /// 調整値をDebugParameterへ登録する。
@@ -128,9 +154,15 @@ private:
     void SpawnEnemies(const EnemyInput& input, float deltaTime);
 
     /// <summary>
-    /// 空きのある種類をランダムに選び、1体出す。全種類が上限なら出さない。
+    /// 重みで種類を抽選して1体出す。重みが0の種類とプールに空きがない種類は外し、候補がなければ出さない。
     /// </summary>
-    void SpawnOne(const EnemyInput& input);
+    /// <returns>出せたらtrue</returns>
+    bool SpawnOne(const EnemyInput& input);
+
+    /// <summary>
+    /// 使用中の敵の総数を数える。
+    /// </summary>
+    int32_t CountActiveEnemies() const;
 
     /// <summary>
     /// 使用中の敵を集める。
@@ -184,8 +216,6 @@ private:
 
 private:
     // 調整値
-    float spawnInterval_ = 0.5f;     // スポーンの間隔（秒）
-    int32_t spawnPerInterval_ = 3;   // 1回のスポーンで出す数
     float spawnDistance_ = 28.0f;    // プレイヤーからのスポーン距離
     float freezeRate_ = 1.0f;        // 氷エリア内で氷ゲージが進む速さ（ゲージ/秒）
     float decayRate_ = 0.5f;         // 氷エリア外で氷ゲージが減る速さ（ゲージ/秒）
@@ -212,6 +242,11 @@ private:
     std::vector<Enemy*> active_;     // 使用中の個体（毎フレーム集め直す）
     std::vector<Enemy*> neighbors_;  // 範囲検索の結果（使い回す）
     float spawnTimer_ = 0.0f;
+    float spawnInterval_ = 1.0f;         // 現在のルールのスポーン間隔（秒）
+    int32_t spawnPerInterval_ = 0;       // 現在のルールの1回の数（ルールが来るまで出さない）
+    int32_t maxEnemies_ = 0;             // 現在のルールの同時存在数の上限
+    std::vector<float> spawnWeights_;    // 現在のルールの重み（pools_と同じ並び）
+    std::vector<float> spawnCandidates_; // 抽選中の重み（使い回す）
     float maxEnemyRadius_ = 0.0f;    // 全種類の当たり半径の最大値
     Vector3 lastPlayerPosition_ = { 0.0f, 0.0f, 0.0f }; // 直近のプレイヤー位置（ゲージの表示数を絞る基準。表示のためだけにコピーを持つ）
     EnemyGrid grid_;
