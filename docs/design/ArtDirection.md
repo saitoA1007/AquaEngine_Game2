@@ -33,7 +33,7 @@
 - 六角形の枠の中に、正八面体の「冷気の核」をまっすぐ立たせて回す。
 - 被弾すると、核が敵の氷と同じように砕ける。欠片は白く光らせず、残りの色から失った色へだんだん暗くなる。
 - 欠片は枠の中だけで物理的に動き、底に積もって残る。これが失った状態の見た目になる。
-- モデル: `Project/Resources/Models/HpHud/`の`hpFrame.gltf`(枠)、`hpCore.gltf`(核)、`hpCoreShard.gltf`(核を8個の欠片に分けたもの。ノード名は`HpCore_cell`)。表示の実装は別の設計で決める。
+- モデル: `Project/Resources/Models/HpHud/`の`hpFrame.gltf`(枠)、`hpCore.gltf`(核)、`hpCoreShard.gltf`(核を8個に分けた破片モデル。ノード名は`HpCore_cell`〜)。表示の設計は[HUD_HpIcon3D.md](HUD_HpIcon3D.md)。
 
 ## 2. 検討中
 

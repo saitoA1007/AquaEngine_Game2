@@ -5,7 +5,7 @@
 #include <string>
 using namespace GameEngine;
 
-GameHud::GameHud(FontManager* fontManager, uint32_t circleTextureHandle) {
+GameHud::GameHud(FontManager* fontManager, const Camera* camera, const HpHudModels& hpModels, uint32_t whiteTextureHandle) {
     // フォントが見つからなければ例外にする
     const Font* font = fontManager->GetFont(kFontName);
     if (font == nullptr) {
@@ -13,7 +13,7 @@ GameHud::GameHud(FontManager* fontManager, uint32_t circleTextureHandle) {
     }
 
     RegisterDebugParameters();
-    hpIconView_ = std::make_unique<HpIconView>(circleTextureHandle);
+    hpHudView_ = std::make_unique<HpHudView>(camera, hpModels, whiteTextureHandle);
     CreateViews(font);
 }
 
@@ -33,12 +33,12 @@ void GameHud::CreateViews(const Font* font) {
 
 void GameHud::SetInput(const HudInput& input) {
     input_ = input;
-    hpIconView_->SetHp(input_.hp, input_.maxHp);
+    hpHudView_->SetHp(input_.hp, input_.maxHp);
 }
 
 void GameHud::Update() {
     debugParam_->ApplyIfDirty();
-    hpIconView_->Update(FpsCounter::GetDeltaTime());
+    hpHudView_->Update(FpsCounter::GetDeltaTime());
 }
 
 void GameHud::RefreshTexts() {
@@ -66,6 +66,6 @@ void GameHud::Draw() {
     // 表示する値はシーンの更新の最後に届くため、描画の直前に反映して1フレームの遅れをなくす
     UpdateViews();
 
-    hpIconView_->Draw(renderQueue_);
+    hpHudView_->Draw(renderQueue_);
     renderQueue_->SubmitText(phaseText_.get());
 }

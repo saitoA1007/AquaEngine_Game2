@@ -108,14 +108,19 @@ void GameScene::LoadAssets() {
 	// 氷ゲージの矩形に使う白いテクスチャを取得する
 	whiteTextureHandle_ = textureManager_->GetHandleByName("white2x2.png");
 
-	// HPアイコンの仮素材（丸の画像）を取得する。正式な画像ができたら差し替える
-	circleTextureHandle_ = textureManager_->GetHandleByName("circle.png");
+	// HPアイコン（3D）のモデルを取得する。破片モデルは核を8個に分けたもの（_cellの破壊グループが1つ）
+	hpHudModels_.frame = modelManager_->GetNameByModel("hpFrame.gltf");
+	hpHudModels_.core = modelManager_->GetNameByModel("hpCore.gltf");
+	hpHudModels_.shard = modelManager_->GetNameByModel("hpCoreShard.gltf");
 
 	// 取得できなかったモデルがないか確認する
 	assert(cylinderModel_ != nullptr);
 	assert(sphereModel_ != nullptr);
 	assert(planeModel_ != nullptr);
 	assert(shellShardModel_ != nullptr);
+	assert(hpHudModels_.frame != nullptr);
+	assert(hpHudModels_.core != nullptr);
+	assert(hpHudModels_.shard != nullptr);
 }
 
 void GameScene::RegisterDebugParameters() {
@@ -181,7 +186,7 @@ void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
 	iceShardManager_->SetHitCallback([this]() { padVibration_->PlayHit(); });
 
 	// 常時表示のUIと連鎖数（強化の選択画面より手前に重ならないよう先に作る）
-	gameHud_ = gameObjectManager_->AddObject<GameHud>(fontManager_, circleTextureHandle_);
+	gameHud_ = gameObjectManager_->AddObject<GameHud>(fontManager_, gameCamera_->GetCamera(), hpHudModels_, whiteTextureHandle_);
 	comboPopupView_ = gameObjectManager_->AddObject<ComboPopupView>(gameCamera_->GetCamera(), fontManager_);
 
 	// 強化の選択画面（描画が手前に重なるよう最後に作る）

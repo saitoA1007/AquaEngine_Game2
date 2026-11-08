@@ -78,8 +78,8 @@ private: // アセット
 	// 氷ゲージの矩形に使う白いテクスチャのハンドル
 	uint32_t whiteTextureHandle_ = 0;
 
-	// HPアイコンの仮素材（丸の画像）のハンドル
-	uint32_t circleTextureHandle_ = 0;
+	// HPアイコン（3D）のモデル。枠・核・欠片
+	HpHudModels hpHudModels_;
 
 private: // ゲームの状態
 

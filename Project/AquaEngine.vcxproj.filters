@@ -294,7 +294,10 @@
     <ClCompile Include="Application\Game\UI\GameHud.cpp">
       <Filter>Application\Game\UI</Filter>
     </ClCompile>
-    <ClCompile Include="Application\Game\UI\HpIconView.cpp">
+    <ClCompile Include="Application\Game\UI\HpHudView.cpp">
+      <Filter>Application\Game\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Game\UI\HpShardPile.cpp">
       <Filter>Application\Game\UI</Filter>
     </ClCompile>
     <ClCompile Include="Application\Game\UI\GameOverView.cpp">
@@ -908,7 +911,10 @@
     <ClInclude Include="Application\Game\UI\GameHud.h">
       <Filter>Application\Game\UI</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Game\UI\HpIconView.h">
+    <ClInclude Include="Application\Game\UI\HpHudView.h">
+      <Filter>Application\Game\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\UI\HpShardPile.h">
       <Filter>Application\Game\UI</Filter>
     </ClInclude>
     <ClInclude Include="Application\Game\UI\GameOverView.h">

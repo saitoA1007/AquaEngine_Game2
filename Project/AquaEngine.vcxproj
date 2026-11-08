@@ -210,7 +210,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Game\Upgrade\PlayerUpgrade.cpp" />
     <ClCompile Include="Application\Game\Upgrade\UpgradeSelectUI.cpp" />
     <ClCompile Include="Application\Game\UI\GameHud.cpp" />
-    <ClCompile Include="Application\Game\UI\HpIconView.cpp" />
+    <ClCompile Include="Application\Game\UI\HpHudView.cpp" />
+    <ClCompile Include="Application\Game\UI\HpShardPile.cpp" />
     <ClCompile Include="Application\Game\UI\GameOverView.cpp" />
     <ClCompile Include="Application\Game\UI\ComboPopupView.cpp" />
     <ClCompile Include="Application\Scene\Transition\Fade.cpp" />
@@ -647,7 +648,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Game\Upgrade\UpgradeSelectUI.h" />
     <ClInclude Include="Application\Game\UI\HudInput.h" />
     <ClInclude Include="Application\Game\UI\GameHud.h" />
-    <ClInclude Include="Application\Game\UI\HpIconView.h" />
+    <ClInclude Include="Application\Game\UI\HpHudView.h" />
+    <ClInclude Include="Application\Game\UI\HpShardPile.h" />
     <ClInclude Include="Application\Game\UI\GameOverView.h" />
     <ClInclude Include="Application\Game\UI\ComboPopupView.h" />
     <ClInclude Include="Application\Game\Enemy\EnemyManager.h" />

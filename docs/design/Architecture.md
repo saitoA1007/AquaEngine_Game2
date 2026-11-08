@@ -22,9 +22,10 @@
 | `PhaseTable` / `PhaseTableIO` / `PhaseTableEditor` | フェーズ表の構造体、JSONの読み書きと検証、ImGuiの編集画面(`USE_IMGUI`のみ) |
 | `PlayerUpgrade` | 強化の3項目の名前と説明、1回あたりの上昇量(`DebugParameter`)、取った回数、`PlayerStats`への反映。`GameScene`が所有する |
 | `UpgradeSelectUI` | 強化選択の画面。`IGameObject`。止まらない時間で動き、決定をコールバックで返す |
-| `GameHud` | 常時表示のUI(HPアイコン、フェーズ)。`IGameObject`。ゲームのクラスを知らず、`GameScene`から`HudInput`を受け取って表示する。`HpIconView`を所有する。止まらない時間で動く |
+| `GameHud` | 常時表示のUI(HPアイコン、フェーズ)。`IGameObject`。ゲームのクラスを知らず、`GameScene`から`HudInput`を受け取って表示する。`HpHudView`を所有する。止まらない時間で動く |
 | `HudInput` | `GameHud`へ渡す表示用の値(HP、最大HP、フェーズ)の構造体 |
-| `HpIconView` | HPアイコンの並びと被弾の演出(失ったアイコンが弾けて暗くなる)。`GameHud`が所有する |
+| `HpHudView` / `HpHudModels` | 3DのHPアイコン(六角形の枠と回る核)と被弾の演出(核が砕けて欠片が枠に積もる)。画面に固定するため`Camera`を読む。枠と核は`SubmitInstancing`、欠片は破片モデルとアイコンごとの`FractureInstance`で描く。`GameHud`が所有する([HUD_HpIcon3D.md](HUD_HpIcon3D.md)) |
+| `HpShardPile` | アイコン1つ分の欠片の2Dの物理。`HpHudView`が所有する |
 | `GameOverView` | 「GAME OVER」と「Aで再開」の表示、再開の入力(`Retry`)。`IGameObject`。止まらない時間で動く |
 | `ComboPopupView` | 連鎖数の表示(「HIT 12!」)。氷塊で倒したときだけ数える。発射元の氷霧のIDごとに1つ、同時に最大8つ。`IGameObject`。ゲームの時間で動く |
 | `EnemyShotManager` | 敵の弾とビーム。敵とは独立して動く |

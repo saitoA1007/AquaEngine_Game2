@@ -1,0 +1,54 @@
+{
+    "HpHudView": {
+        "Color": {
+            "coreColor": [
+                0.4000000059604645,
+                0.800000011920929,
+                1.0,
+                1.0
+            ],
+            "frameColor": [
+                0.30000001192092896,
+                0.6000000238418579,
+                0.75,
+                1.0
+            ],
+            "lostCoreColor": [
+                0.2230139821767807,
+                0.4244024455547333,
+                0.5250965356826782,
+                1.0
+            ],
+            "lostFrameColor": [
+                0.1542910933494568,
+                0.2830906808376312,
+                0.3474903702735901,
+                1.0
+            ],
+            "shatterTime": 0.6000000238418579
+        },
+        "Layout": {
+            "distance": 2.0,
+            "iconSize": 32.0,
+            "origin": [
+                40.0,
+                40.0
+            ],
+            "spacing": 48.0,
+            "spinSpeed": 1.5
+        },
+        "SceneName": "Game",
+        "Shard": {
+            "angularDamping": 4.0,
+            "burstSpeed": 10.0,
+            "burstUp": 4.0,
+            "depthSettle": 6.0,
+            "friction": 0.20000000298023224,
+            "gravity": 18.0,
+            "maxAngularSpeed": 35.0,
+            "radiusScale": 0.6000000238418579,
+            "restitution": 0.30000001192092896,
+            "sleepSpeed": 0.14000000059604645
+        }
+    }
+}

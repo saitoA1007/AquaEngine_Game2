@@ -49,6 +49,15 @@
 
 表中の`Resources/`は`Project/`からの相対パス。素材はファイル名で管理されるため、フォルダを分けても同名衝突に注意する。各種ローダーのサブフォルダ対応は、種類ごとに確認する。フォント生成や保存操作は書き込みを伴う。
 
+2026-11-08にソースで確認した追加の注意点(HPアイコンの3D化のとき):
+
+- モデルの読み込み対象は`.obj`と`.gltf`だけ(`ModelManager::EnumerateModelFiles`)。`.glb`は読まない。`Resources/Models/`の下を再帰で探す。
+- テクスチャは`Resources/Textures/`の下だけを再帰で探す(`TextureManager`)。glTFの画像の指定は、ファイル名だけが使われる。
+- `ModelLoader`は頂点と法線のXの符号を反転する。Blenderの(x, y, z)は、glTFで(x, z, -y)、エンジンでは(-x, z, -y)になる。
+- `_cell`を含むノード名のメッシュは、破片(`FractureChunkEntry`)として読む。
+- `SubmitInstancing`(`Particle.PS.hlsl`)は光を使わず、インスタンスごとの色をそのまま出す。`SubmitFracture`(`Fracture.PS.hlsl`)は`enableLighting`を見ずに必ず光を計算する([機能不足の記録](FeatureGaps.md))。`IceFracture.PS.hlsl`は`enableLighting`を見るが、縁の光と疑似SSSが残る。
+- ラスタの`SubmitFracture`は、渡した`material`を使わず、モデル自身のマテリアルで描く(`SceneRenderManager`が`DrawFracture`へ渡していない)。同じ破片モデルの描画は、すべて同じ色になる。`FractureChunkState`の回転はオイラー角で、回転の中心は`SetPivot`で決める。
+
 参照: [リソースガイド](https://saitoa1007.github.io/AquaEngine/guide/resources.html)、[音声ガイド](https://saitoa1007.github.io/AquaEngine/guide/audio.html)、[調整値ガイド](https://saitoa1007.github.io/AquaEngine/guide/debug_parameter.html)、[ResourceSubsystem.cpp](../../Project/EngineSource/Core/System/ResourceSubsystem.cpp)、[DebugParameter.cpp](../../Project/EngineSource/Editor/DebugParameter.cpp)。
 
 ## Effectとエディタ操作

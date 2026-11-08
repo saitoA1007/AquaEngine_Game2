@@ -7,21 +7,24 @@
 #include "Vector2.h"
 #include "Vector4.h"
 #include "Application/Game/UI/HudInput.h"
-#include "Application/Game/UI/HpIconView.h"
+#include "Camera.h"
+#include "Application/Game/UI/HpHudView.h"
 
 /// <summary>
-/// 常時表示のUI。左上にHPアイコン、右上にフェーズの文字を出す。
+/// 常時表示のUI。左上にHPアイコン（3D）、右上にフェーズの文字を出す。
 /// ゲームのクラスを知らず、GameSceneから受け取ったHudInputだけで表示する。
-/// 演出は止まらない時間で進める。見た目は仮（丸の画像を塗る）。
+/// 演出は止まらない時間で進める。
 /// </summary>
 class GameHud : public GameEngine::IGameObject {
 public:
     /// <summary>
-    /// 文字を準備する。フォントが見つからなければ例外を投げる。
+    /// 文字とHPアイコンを準備する。フォントやモデルが見つからなければ例外を投げる。
     /// </summary>
     /// <param name="fontManager">フォント取得用。コンストラクタの間だけ使い、保持しない。</param>
-    /// <param name="circleTextureHandle">HPアイコンの画像のハンドル（仮素材）</param>
-    GameHud(GameEngine::FontManager* fontManager, uint32_t circleTextureHandle);
+    /// <param name="camera">HPアイコンを画面に固定するためのカメラ。シーンが所有し、このオブジェクトより長く生存する。</param>
+    /// <param name="hpModels">HPアイコンのモデル</param>
+    /// <param name="whiteTextureHandle">単色の描画に使う白いテクスチャのハンドル</param>
+    GameHud(GameEngine::FontManager* fontManager, const GameEngine::Camera* camera, const HpHudModels& hpModels, uint32_t whiteTextureHandle);
     ~GameHud() override = default;
 
     /// <summary>
@@ -41,9 +44,9 @@ public:
     void SetInput(const HudInput& input);
 
     /// <summary>
-    /// 被弾の演出を始める（HPアイコンが弾ける）。
+    /// 被弾の演出を始める（HPアイコンの核が砕ける）。
     /// </summary>
-    void PlayDamage() { hpIconView_->PlayDamage(); }
+    void PlayDamage() { hpHudView_->PlayDamage(); }
 
     /// <summary>
     /// 描くかどうかを設定する。falseの間も、HPアイコンの演出などの状態は保たれ、trueに戻すと元どおり描く。毎フレーム呼ぶ。
@@ -87,7 +90,7 @@ private:
     bool isVisible_ = true;           // 描くか（強化の選択中などはGameSceneが隠す）
 
     // 描画
-    std::unique_ptr<HpIconView> hpIconView_;                  // HPアイコン
+    std::unique_ptr<HpHudView> hpHudView_;                    // HPアイコン（3D）
     std::unique_ptr<GameEngine::Text> phaseText_;             // 「PHASE 4」
 
     // 調整値の機能
