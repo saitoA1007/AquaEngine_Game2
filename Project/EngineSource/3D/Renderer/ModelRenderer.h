@@ -37,7 +37,8 @@ namespace GameEngine {
 		/// <param name="worldMatrix">ワールド行列</param>
 		/// <param name="directionalLightResource">光源</param>
 		/// <param name="material">マテリアル : 何の書かなければデフォルトのマテリアルを適応</param>
-		static void Draw(const Model* model, WorldTransform& worldTransform, const GpuResource* material = nullptr);
+		/// <param name="localMatrix">個体ごとのローカル行列 : nullptrならモデルが持つローカル行列を使う</param>
+		static void Draw(const Model* model, WorldTransform& worldTransform, const GpuResource* material = nullptr, const Matrix4x4* localMatrix = nullptr);
 
 		/// <summary>
 		/// 生成したモデルの描画(ライト適応、複数マテリアル対応)
@@ -83,7 +84,8 @@ namespace GameEngine {
 		/// <param name="worldTransform"></param>
 		/// <param name="VPMatrix"></param>
 		/// <param name="material"></param>
-		static void DrawAnimation(const Model* model, WorldTransform& worldTransform, GpuResource* lightGroupResource,const GpuResource* material = nullptr);
+		/// <param name="skinCluster">個体ごとの骨行列パレット : nullptrならモデルが持つパレットを使う</param>
+		static void DrawAnimation(const Model* model, WorldTransform& worldTransform, GpuResource* lightGroupResource,const GpuResource* material = nullptr, const SkinCluster* skinCluster = nullptr);
 
 		/// <summary>
 		/// モデルに光源を適応させる

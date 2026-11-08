@@ -1,6 +1,10 @@
 #pragma once
 #include "VertexData.h"
 #include "AnimationData.h"
+#include <memory>
+#include "VertexBuffer.h"
+#include "BLAS.h"
+#include "RefBuffer.h"
 
 namespace GameEngine {
 
@@ -9,8 +13,17 @@ namespace GameEngine {
 	class PSOManager;
 	class DebugRenderer;
 
+	/// <summary>
+	/// アニメーションの再生クラス
+	/// 骨の姿勢・行列パレット・スキニング後の頂点・BLASを個体ごとに保持するため、
+	/// 同じModelを複数のAnimatorで再生してもそれぞれ独立した動きになる
+	/// </summary>
 	class Animator {
 	public:
+		Animator() = default;
+		~Animator() = default;
+		Animator(const Animator&) = delete;
+		Animator& operator=(const Animator&) = delete;
 
 		/// <summary>
 		/// 静的初期化
@@ -98,6 +111,41 @@ namespace GameEngine {
 		/// </summary>
 		Vector3 GetNodeWorldPosition(const std::string& nodeName, const Matrix4x4& worldMatrix) const;
 
+		/// <summary>
+		/// 再生対象のモデルを取得
+		/// </summary>
+		const Model* GetModel() const { return model_; }
+
+		/// <summary>
+		/// この個体の骨行列パレットを取得
+		/// </summary>
+		const SkinCluster* GetSkinCluster() const { return skinCluster_.get(); }
+
+		/// <summary>
+		/// この個体のルートノードのローカル行列を取得
+		/// </summary>
+		const Matrix4x4& GetRootLocalMatrix() const { return rootNode_.localMatrix; }
+
+		/// <summary>
+		/// レイトレーシングで描画できる状態か
+		/// </summary>
+		bool IsRaytracingReady() const { return isBlasBuilt_; }
+
+		/// <summary>
+		/// この個体のBLASを取得
+		/// </summary>
+		BLAS* GetBLAS(uint32_t meshIndex) const { return blases_[meshIndex].get(); }
+
+		/// <summary>
+		/// この個体のスキニング後頂点バッファのSRVインデックスを取得
+		/// </summary>
+		uint32_t GetOutputVertexBufferSrvIndex(uint32_t meshIndex) const { return outputVertexBuffers_[meshIndex]->GetSrvIndex(); }
+
+		/// <summary>
+		/// この個体のレイトレ参照用バッファを取得
+		/// </summary>
+		RefBuffer* GetRefBuffer(uint32_t meshIndex) const { return refBuffers_[meshIndex].get(); }
+
 	private:
 		static ID3D12GraphicsCommandList4* commandList_;
 		static ID3D12RootSignature* rootSignature_;
@@ -109,11 +157,20 @@ namespace GameEngine {
 		// 再生するアニメーションのデータ
 		const AnimationData* animationData_ = nullptr;
 
-		// 使用するモデルデータ
-		SkinCluster* skinCluster_ = nullptr;
-		SkeletonData* skeleton_ = nullptr;
-
 		Model* model_ = nullptr;
+
+		// 骨の姿勢
+		SkeletonData skeleton_;
+		// 骨行列パレット
+		std::unique_ptr<SkinCluster> skinCluster_;
+		// ノードの姿勢
+		Node rootNode_;
+
+		// コンピュートシェーダーでスキニングした結果を保持する、個体ごとのリソース
+		std::vector<std::unique_ptr<VertexBuffer<VertexData>>> outputVertexBuffers_;
+		std::vector<std::unique_ptr<BLAS>> blases_;
+		std::vector<std::unique_ptr<RefBuffer>> refBuffers_;
+		bool isBlasBuilt_ = false;
 
 		// 時間
 		float timer_ = 0.0f;
@@ -140,8 +197,8 @@ namespace GameEngine {
 		/// <summary>
 		/// ノードを更新
 		/// </summary>
-		/// <param name="model"></param>
-		void NodeHierarchyUpdate(Model* model);
+		/// <param name="rootNode"></param>
+		void NodeHierarchyUpdate(Node& rootNode);
 
 		/// <summary>
 		/// 再帰処理用のノード更新
@@ -164,6 +221,9 @@ namespace GameEngine {
 
 		// コンピュートシェーダーを更新
 		void UpdateCompute();
+
+		// コンピュートシェーダー用の個体ごとのリソースを作成
+		void CreateComputeResources();
 
 		static const Node* FindNode(const Node& node, const std::string& name);
 	};

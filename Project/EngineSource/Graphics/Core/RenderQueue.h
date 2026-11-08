@@ -134,7 +134,7 @@ namespace GameEngine {
         void SubmitParticleCS(const Model* model, uint32_t numInstances, SrvResource* particle, const float& alpha = 1.0f, const std::string& passName = "DefaultPass");
 
         /// スケルタルアニメーション
-        void SubmitAnimation(const Model* model, WorldTransform& worldTransform, const float& alpha = 1.0f, const GpuResource* material = nullptr, const std::string& passName = "DefaultPass");
+        void SubmitAnimation(const Model* model, WorldTransform& worldTransform, const float& alpha = 1.0f, const GpuResource* material = nullptr, const std::string& passName = "DefaultPass", const Animator* animator = nullptr);
 
         /// スカイボックス
         void SubmitSkybox(const Model* model, WorldTransform& worldTransform, const GpuResource* material = nullptr, const std::string& passName = "DefaultPass");
@@ -149,7 +149,7 @@ namespace GameEngine {
         void SubmitDebugLine(const DebugRenderer* debugRenderer, const std::string& passName = "DefaultPass");
 
         // レイトレーシングでのモデル
-        void SubmitRaytracingModel(Model* model, WorldTransform& worldTransform, std::vector<RefBuffer>* customRefBuffer = {});
+        void SubmitRaytracingModel(Model* model, WorldTransform& worldTransform, std::vector<RefBuffer>* customRefBuffer = {}, Animator* animator = nullptr);
 
         // 破片の描画
         void SubmitFracture(const Model* model, FractureInstance& fractureInstance, const float& alpha = 1.0f, const GpuResource* material = nullptr, const std::string& passName = "DefaultPass");

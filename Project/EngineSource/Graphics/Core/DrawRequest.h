@@ -12,6 +12,7 @@ namespace GameEngine {
     class SrvResource;
     class DebugRenderer;
     class FractureInstance;
+    class Animator;
 
     // 描画レイヤー（実行優先順位。数値が小さいほど先に描画）
     enum class RenderLayer : uint32_t {
@@ -63,6 +64,9 @@ namespace GameEngine {
 
         // 破片のデータ
         FractureInstance* fractureInstance = nullptr;
+
+        // 個体ごとのアニメーション状態
+        const Animator* animator = nullptr;
 
         // マテリアル
         const GpuResource* material = nullptr;

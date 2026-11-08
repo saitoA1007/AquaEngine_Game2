@@ -23,6 +23,22 @@ namespace GameEngine {
 		// ワールドスクリーン座標変換(ワールド->スクリーン変換)
 		Vector3 Project(const Vector3& worldPosition, const Vector2& viewport, const float& viewportWidth, const float& viewportHeight, const Matrix4x4& viewProjection);
 
+		/// <summary>
+		/// ワールド座標がカメラの後ろにあるか判定する
+		/// </summary>
+		/// <param name="pos">ワールド座標</param>
+		/// <param name="viewMatrix">ビュー行列</param>
+		/// <returns>カメラの後ろにあればtrue</returns>
+		bool IsBehindCamera(const Vector3& pos, const Matrix4x4& viewMatrix);
+
+		/// <summary>
+		/// ワールド座標をスクリーン座標に変換する
+		/// </summary>
+		/// <param name="pos">ワールド座標</param>
+		/// <param name="VPMatrix">ビュープロジェクション行列</param>
+		/// <returns>スクリーン座標</returns>
+		Vector2 WorldToScreen(const Vector3& pos, const Matrix4x4& VPMatrix);
+
 		// ラジアン角度から方向ベクトルを求める
 		Vector3 PitchToDirection(float pitch);
 		Vector3 YawToDirection(float yaw);

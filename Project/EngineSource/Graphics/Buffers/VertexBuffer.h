@@ -155,6 +155,70 @@ namespace GameEngine {
 			isSrvState_ = true;
 		}
 
+		/// <summary>
+		/// 初期データを持たない、コンピュートシェーダー書き込み用の頂点バッファを作成
+		/// </summary>
+		/// <param name="totalVertices">頂点数</param>
+		void CreateUAV(uint32_t totalVertices) {
+			// 頂点数を取得
+			totalVertices_ = totalVertices;
+			size_t sizeInBytes = sizeof(T) * totalVertices_;
+
+			// DEFAULTヒープのリソースを作成(SRVとして読める状態で開始)
+			resource_ = CreateBufferResource(
+				device_,
+				sizeInBytes,
+				D3D12_HEAP_TYPE_DEFAULT,
+				D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+				D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS
+			);
+
+			// ビューを設定
+			vertexBufferView_.BufferLocation = resource_->GetGPUVirtualAddress();
+			vertexBufferView_.SizeInBytes = static_cast<UINT>(sizeInBytes);
+			vertexBufferView_.StrideInBytes = sizeof(T);
+
+			/// SRVの作成
+			{
+				srvIndex_ = srvManager_->AllocateSrvIndex(SrvHeapType::Buffer);
+
+				D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+				srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+				srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+				srvDesc.Buffer.FirstElement = 0;
+				srvDesc.Buffer.NumElements = totalVertices_;
+				srvDesc.Buffer.StructureByteStride = sizeof(T);
+				srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+
+				srvCpuHandle_ = srvManager_->GetCPUHandle(srvIndex_);
+				srvGpuHandle_ = static_cast<CD3DX12_GPU_DESCRIPTOR_HANDLE>(srvManager_->GetGPUHandle(srvIndex_));
+				device_->CreateShaderResourceView(resource_.Get(), &srvDesc, srvCpuHandle_);
+			}
+
+			/// UAVの作成
+			{
+				uavIndex_ = srvManager_->AllocateSrvIndex(SrvHeapType::Buffer);
+
+				D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
+				uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+				uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+				uavDesc.Buffer.FirstElement = 0;
+				uavDesc.Buffer.NumElements = totalVertices_;
+				uavDesc.Buffer.StructureByteStride = sizeof(T);
+				uavDesc.Buffer.CounterOffsetInBytes = 0;
+				uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+
+				D3D12_CPU_DESCRIPTOR_HANDLE uavCPU = srvManager_->GetCPUHandle(uavIndex_);
+				uavGpuHandle_ = static_cast<CD3DX12_GPU_DESCRIPTOR_HANDLE>(srvManager_->GetGPUHandle(uavIndex_));
+				device_->CreateUnorderedAccessView(resource_.Get(), nullptr, &uavDesc, uavCPU);
+			}
+
+			isCreated_ = true;
+			enableUAV_ = true;
+			isSrvState_ = true;
+		}
+
 		// ビューを取得
 		const D3D12_VERTEX_BUFFER_VIEW& GetView() const { return vertexBufferView_; }
 
