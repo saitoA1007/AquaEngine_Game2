@@ -9,6 +9,7 @@
 #include "FractureInstance.h"
 #include "FractureStaticMesh.h"
 #include "DrawRequest.h"
+#include "Animator.h"
 #include "MyMath.h"
 using namespace GameEngine;
 
@@ -215,8 +216,9 @@ void RenderQueue::SubmitParticleCS(const Model* model, uint32_t numInstances, Sr
     }
 }
 
-void RenderQueue::SubmitAnimation(const Model* model, WorldTransform& worldTransform, const float& alpha, const GpuResource* material, const std::string& passName) {
+void RenderQueue::SubmitAnimation(const Model* model, WorldTransform& worldTransform, const float& alpha, const GpuResource* material, const std::string& passName, const Animator* animator) {
     Draw3dRequest request;
+    request.animator = animator;
     if (model->IsSkeleton()) {
         request.type = Draw3dType::Animation;
         request.layer = RenderLayer::Animation;
@@ -287,24 +289,38 @@ void RenderQueue::SubmitDebugLine(const DebugRenderer* debugRenderer, const std:
     draw3dQueueList_[passName][request.layer][Get3dPsoName(request.type)].push_back(request);
 }
 
-void RenderQueue::SubmitRaytracingModel(Model* model, WorldTransform& worldTransform, std::vector<RefBuffer>* customRefBuffer) {
+void RenderQueue::SubmitRaytracingModel(Model* model, WorldTransform& worldTransform, std::vector<RefBuffer>* customRefBuffer, Animator* animator) {
     // 登録
     const auto& meshes = model->GetMeshes();
     auto& refBuffers = model->GetRefBuffers();
 
-    // 読み込んだモデルのローカル行列を設定
-    if (model->IsLoad()) {
+    // 個体ごとのアニメーション状態を使うか
+    const bool useAnimator = (animator != nullptr && animator->GetModel() == model);
+    const bool useSkinning = useAnimator && model->IsSkeleton();
+
+    // まだBLASが構築されていないければ描画しない
+    if (useSkinning && !animator->IsRaytracingReady()) {
+        return;
+    }
+
+    // ノードアニメーションの個体はルートノードの行列を適応する
+    Matrix4x4 worldMatrix = worldTransform.GetWorldMatrix();
+    if (useAnimator && !useSkinning) {
+        worldTransform.SetWVPMatrix(animator->GetRootLocalMatrix());
+        worldMatrix = animator->GetRootLocalMatrix() * worldMatrix;
+    } else if (model->IsLoad()) {
+        // 読み込んだモデルのローカル行列を設定
         worldTransform.SetWVPMatrix(model->GetLocalMatrix());
     }
 
     for (uint32_t i = 0; i < meshes.size(); ++i) {
         const auto& mesh = meshes[i];
-        auto& refBuffer = refBuffers[i];
+        auto& refBuffer = useSkinning ? *animator->GetRefBuffer(i) : refBuffers[i];
         uint32_t refIndex = 0;
         TLASInstanceData data;
 
         // blasを登録
-        data.blas = mesh->GetBLAS();
+        data.blas = useSkinning ? animator->GetBLAS(i) : mesh->GetBLAS();
 
         if (customRefBuffer == nullptr || i >= customRefBuffer->size()) {
             // デフォルトのマテリアルを設定
@@ -328,7 +344,9 @@ void RenderQueue::SubmitRaytracingModel(Model* model, WorldTransform& worldTrans
 
             // スケルトンがあれば参照するデータを変える
             uint32_t vertexHandle = 0;
-            if (model->IsSkeleton()) {
+            if (useSkinning) {
+                vertexHandle = animator->GetOutputVertexBufferSrvIndex(i);
+            } else if (model->IsSkeleton()) {
                 const auto& skeleton = model->GetSkeleton();
                 vertexHandle = skeleton->GetOutputVertexBufferSrvIndex(i);
             } else {
@@ -349,7 +367,7 @@ void RenderQueue::SubmitRaytracingModel(Model* model, WorldTransform& worldTrans
         data.instanceID = refIndex;
 
         // 座標を設定
-        Matrix4x4 matrix = Matrix4x4::Transpose(worldTransform.GetWorldMatrix());
+        Matrix4x4 matrix = Matrix4x4::Transpose(worldMatrix);
         std::memcpy(&data.transform, &matrix, sizeof(float) * 12);
 
         // データを登録

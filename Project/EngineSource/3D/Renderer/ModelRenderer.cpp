@@ -17,9 +17,11 @@ void ModelRenderer::SetCamera(ID3D12Resource* cameraResource) {
 	cameraResource_ = cameraResource;
 }
 
-void ModelRenderer::Draw(const Model* model, WorldTransform& worldTransform, const GpuResource* material) {
+void ModelRenderer::Draw(const Model* model, WorldTransform& worldTransform, const GpuResource* material, const Matrix4x4* localMatrix) {
 	// カメラ座標に変換
-	if (model->IsLoad()) {
+	if (localMatrix != nullptr) {
+		worldTransform.SetWVPMatrix(*localMatrix);
+	} else if (model->IsLoad()) {
 		worldTransform.SetWVPMatrix(model->GetLocalMatrix());
 	}
 
@@ -247,11 +249,16 @@ void ModelRenderer::DrawRuntimeCutFragments(FractureInstance& fractureInstance, 
 		fractureInstance.GetArgumentBuffer().GetResource(), 0, nullptr, 0);
 }
 
-void ModelRenderer::DrawAnimation(const Model* model, WorldTransform& worldTransform, GpuResource* lightGroupResource, const GpuResource* material) {
-	
+void ModelRenderer::DrawAnimation(const Model* model, WorldTransform& worldTransform, GpuResource* lightGroupResource, const GpuResource* material, const SkinCluster* skinCluster) {
+
 	// メッシュを取得
 	const std::vector<std::unique_ptr<Mesh>>& meshes = model->GetMeshes();
 	const auto* skeleton = model->GetSkeleton();
+
+	// 個体ごとのパレットが無ければモデルが持つパレットを使う
+	if (skinCluster == nullptr) {
+		skinCluster = skeleton->GetSkinClusterData();
+	}
 
 	for (uint32_t i = 0; i < meshes.size(); ++i) {
 
@@ -275,7 +282,7 @@ void ModelRenderer::DrawAnimation(const Model* model, WorldTransform& worldTrans
 		commandList_->SetGraphicsRootConstantBufferView(1, worldTransform.GetGpuVirtualAddress());
 		commandList_->SetGraphicsRootDescriptorTable(2, srvManager_->GetSRVHeap()->GetGPUDescriptorHandleForHeapStart());
 
-		commandList_->SetGraphicsRootDescriptorTable(3, skeleton->GetSkinClusterData()->wellBuffer.GetSrvGpuHandle());
+		commandList_->SetGraphicsRootDescriptorTable(3, skinCluster->wellBuffer.GetSrvGpuHandle());
 		commandList_->SetGraphicsRootConstantBufferView(4, cameraResource_->GetGPUVirtualAddress());
 
 		commandList_->SetGraphicsRootConstantBufferView(5, lightGroupResource->GetGpuVirtualAddress());

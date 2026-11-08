@@ -50,7 +50,7 @@ void ModelComponent::Draw(RenderQueue* renderQueue, const Draw3dType& drawType, 
 		break;
 
 	case GameEngine::Draw3dType::Animation:
-		renderQueue->SubmitAnimation(model_, worldTransform_, materialData_->color.w, &defaultMaterials_[0].GetMaterialBuffer(), passName);
+		renderQueue->SubmitAnimation(model_, worldTransform_, materialData_->color.w, &defaultMaterials_[0].GetMaterialBuffer(), passName, animator_);
 		break;
 
 	case GameEngine::Draw3dType::ShadowMap:
@@ -68,5 +68,5 @@ void ModelComponent::Draw(RenderQueue* renderQueue, const Draw3dType& drawType, 
 
 void ModelComponent::DrawRaytracing(RenderQueue* renderQueue) {
 	// レイトレによる描画
-	renderQueue->SubmitRaytracingModel(model_, worldTransform_, &refBuffers_);
+	renderQueue->SubmitRaytracingModel(model_, worldTransform_, &refBuffers_, animator_);
 }

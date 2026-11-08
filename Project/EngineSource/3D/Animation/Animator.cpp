@@ -45,21 +45,19 @@ void Animator::Update(const float& time) {
 
 	if (model_->IsSkeleton()) {
 		// アニメーションの更新をおこない、骨ごとのLocal情報を更新する
-		ApplyAnimation(*skeleton_, *animationData_, time);
+		ApplyAnimation(skeleton_, *animationData_, time);
 
 		// 現在の骨ごとのLocal情報を基にSkeletonSpaceの情報を更新する
-		SkeletonUpdate(*skeleton_);
+		SkeletonUpdate(skeleton_);
 
 		// SkeletonSpaceの情報を基に、SkinClusterのMatrixPaletteを更新する
-		SkinClusterUpdate(*skinCluster_, *skeleton_);
+		SkinClusterUpdate(*skinCluster_, skeleton_);
 	} else {
-		Node& rootNode = model_->GetNodes();
-
 		// 全ノードにアニメーション値をサンプリング
-		ApplyNodeAnimation(rootNode, *animationData_, time);
+		ApplyNodeAnimation(rootNode_, *animationData_, time);
 
 		// ノードを更新
-		NodeHierarchyUpdate(model_);
+		NodeHierarchyUpdate(rootNode_);
 	}
 }
 
@@ -148,9 +146,7 @@ void Animator::ApplyNodeAnimation(Node& node, const AnimationData& animation, fl
 	}
 }
 
-void Animator::NodeHierarchyUpdate(Model* model) {
-	auto& rootNode = model->GetNodes();
-
+void Animator::NodeHierarchyUpdate(Node& rootNode) {
 	// 親行列
 	rootNode.localMatrix = Matrix4x4::MakeAffineMatrix(rootNode.transform.scale, rootNode.transform.rotate, rootNode.transform.translate);
 
@@ -207,17 +203,70 @@ void Animator::SkinClusterUpdate(SkinCluster& skinCluster, const SkeletonData& s
 
 void Animator::SetModelData(Model* model) {
 	model_ = model;
+
+	// 前のモデルで作成した個体ごとのリソースを破棄
+	outputVertexBuffers_.clear();
+	blases_.clear();
+	refBuffers_.clear();
+	isBlasBuilt_ = false;
+
+	// ノードの姿勢を個体ごとに持つ
+	rootNode_ = model->GetNodes();
+
 	if (model->IsSkeleton()) {
 		auto* skeleton = model->GetSkeleton();
-		skinCluster_ = skeleton->GetSkinCluster();
-		skeleton_ = skeleton->GetSkeletonData();
+
+		// 骨の姿勢を個体ごとに持つ
+		skeleton_ = *skeleton->GetSkeletonData();
+
+		// 骨行列パレットを個体ごとに作成する
+		const size_t jointNum = skeleton_.joints.size();
+		skinCluster_ = std::make_unique<SkinCluster>();
+		skinCluster_->inverseBindPoseMatrices = skeleton->GetSkinCluster()->inverseBindPoseMatrices;
+		skinCluster_->wellBuffer.Create(static_cast<uint32_t>(jointNum));
+		skinCluster_->mappedPalette = { skinCluster_->wellBuffer.GetData(), jointNum };
+
+		// 初期姿勢でパレットを埋めておく
+		SkeletonUpdate(skeleton_);
+		SkinClusterUpdate(*skinCluster_, skeleton_);
 	} else {
-		skinCluster_ = nullptr;
-		skeleton_ = nullptr;
+		skinCluster_.reset();
+		skeleton_ = SkeletonData{};
+	}
+}
+
+void Animator::CreateComputeResources() {
+	const auto* skeleton = model_->GetSkeleton();
+	const auto& meshes = model_->GetMeshes();
+	const uint32_t meshCount = static_cast<uint32_t>(meshes.size());
+
+	outputVertexBuffers_.resize(meshCount);
+	blases_.resize(meshCount);
+	refBuffers_.resize(meshCount);
+
+	for (uint32_t i = 0; i < meshCount; ++i) {
+		// スキニング結果の出力先
+		outputVertexBuffers_[i] = std::make_unique<VertexBuffer<VertexData>>();
+		outputVertexBuffers_[i]->CreateUAV(skeleton->GetVerticesNum(i));
+
+		// レイトレで参照するデータを、この個体の出力頂点に向ける
+		refBuffers_[i] = std::make_unique<RefBuffer>();
+		refBuffers_[i]->Create();
+		refBuffers_[i]->SetModelData(outputVertexBuffers_[i]->GetSrvIndex(), meshes[i]->GetIndexBufferSrvIndex());
+		if (Material* material =model_->GetMaterial(meshes[i]->GetMaterialName())) {
+			refBuffers_[i]->SetBufferMaterial(static_cast<uint32_t>(BufferType::kDefalutMaterial), material->GetMaterialSrvIndex());
+		}
 	}
 }
 
 void Animator::UpdateCompute() {
+	// スケルトンを持たないモデルは頂点を変形しない
+	if (!model_->IsSkeleton()) { return; }
+
+	// 初回のみ個体ごとのリソースを作成
+	if (outputVertexBuffers_.empty()) {
+		CreateComputeResources();
+	}
 
 	commandList_->SetComputeRootSignature(rootSignature_);
 	commandList_->SetPipelineState(pipelineState_);
@@ -226,28 +275,39 @@ void Animator::UpdateCompute() {
 	const auto& meshes = model_->GetMeshes();
 
 	for (uint32_t i = 0; i < meshes.size(); ++i) {
-		auto* outputBuffer = skeleton->GetOutputVertexBuffer(i);
+		auto* outputBuffer = outputVertexBuffers_[i].get();
 		outputBuffer->TransitionUAV(commandList_);
 
-		commandList_->SetComputeRootDescriptorTable(0, skinCluster_->wellBuffer.GetSrvGpuHandle()); // 共通パレット
+		commandList_->SetComputeRootDescriptorTable(0, skinCluster_->wellBuffer.GetSrvGpuHandle()); // 個体ごとのパレット
 		commandList_->SetComputeRootDescriptorTable(1, meshes[i]->GetVertexBuffer().GetSrvGpuHandle());
-		commandList_->SetComputeRootDescriptorTable(2, skeleton->GetInfluenceBuffer(i)->GetSrvGpuHandle()); // メッシュ固有
+		commandList_->SetComputeRootDescriptorTable(2, skeleton->GetInfluenceBuffer(i)->GetSrvGpuHandle()); // メッシュ固有(共有)
 		commandList_->SetComputeRootDescriptorTable(3, outputBuffer->GetUAVGpuHandle());
 		commandList_->SetComputeRootConstantBufferView(4, skeleton->GetConstantBuffer(i)->GetGpuVirtualAddress());
 
 		commandList_->Dispatch(UINT(skeleton->GetVerticesNum(i) + 1023) / 1024, 1, 1);
 
 		outputBuffer->TransitionSRV(commandList_);
-		meshes[i]->GetBLAS()->Update(commandList_, outputBuffer->GetView());
+
+		// 個体ごとのBLASを構築、更新
+		if (!blases_[i]) {
+			// 初回はスキニング結果からフルビルドする
+			blases_[i] = std::make_unique<BLAS>();
+			blases_[i]->Create(commandList_, outputBuffer->GetView(), meshes[i]->GetIndexBufferView(),
+				outputBuffer->GetTotalVertices(), meshes[i]->GetTotalIndices(), true);
+		} else {
+			blases_[i]->Update(commandList_, outputBuffer->GetView());
+		}
 	}
+
+	isBlasBuilt_ = true;
 }
 
 void Animator::DebugDraw(DebugRenderer* debugRenderer, float sphereRadius, const Vector4& color) {
-	if (!model_->IsSkeleton()) {
+	if (!model_ || !model_->IsSkeleton()) {
 		return;
 	}
 
-	for (const auto& joint : skeleton_->joints) {
+	for (const auto& joint : skeleton_.joints) {
 		// 行列から現在の関節のワールド空間位置を取得
 		Vector3 jointPos = {
 			joint.skeletonSpaceMatrix.m[3][0],
@@ -262,7 +322,7 @@ void Animator::DebugDraw(DebugRenderer* debugRenderer, float sphereRadius, const
 		// 親の関節が存在する場合、親と自分を繋ぐ線を引く
 		if (joint.parent) {
 			// 親のJoint情報を取得
-			const auto& parentJoint = skeleton_->joints[*joint.parent];
+			const auto& parentJoint = skeleton_.joints[*joint.parent];
 
 			// 親の位置を抽出
 			Vector3 parentPos = {
@@ -278,16 +338,16 @@ void Animator::DebugDraw(DebugRenderer* debugRenderer, float sphereRadius, const
 }
 
 Vector3 Animator::GetJointWorldPosition(const std::string& jointName, const Matrix4x4& worldMatrix) const {
-	if (!skeleton_) {
+	if (!model_ || !model_->IsSkeleton()) {
 		return Vector3(0.0f,0.0f,0.0f);
 	}
 
-	auto it = skeleton_->jointMap.find(jointName);
-	if (it == skeleton_->jointMap.end()) {
+	auto it = skeleton_.jointMap.find(jointName);
+	if (it == skeleton_.jointMap.end()) {
 		return Vector3(0.0f, 0.0f, 0.0f);
 	}
 
-	const Joint& joint = skeleton_->joints[it->second];
+	const Joint& joint = skeleton_.joints[it->second];
 	Matrix4x4 world = joint.skeletonSpaceMatrix * worldMatrix;
 
 	return Vector3{ world.m[3][0], world.m[3][1], world.m[3][2] };
@@ -298,7 +358,7 @@ Vector3 Animator::GetNodeWorldPosition(const std::string& nodeName, const Matrix
 		return Vector3(0.0f, 0.0f, 0.0f);
 	}
 
-	const Node* target = FindNode(model_->GetNodes(), nodeName);
+	const Node* target = FindNode(rootNode_, nodeName);
 	if (!target) {
 		return Vector3(0.0f, 0.0f, 0.0f);
 	}
