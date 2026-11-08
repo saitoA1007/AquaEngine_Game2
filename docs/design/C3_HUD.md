@@ -25,14 +25,15 @@
 - 止めている間は、`GameScene`が`PadVibration::Stop()`を呼び、`PadVibration::Update`を呼ばない。
 - `GameOverView`が「GAME OVER」を出す。待ち時間(`retryWaitTime`、既定1秒。止まらない`FpsCounter::GetDeltaTime`で数える)の後に「Aで再開」を出し、入力コマンド`Retry`(Space、パッドのA。押した瞬間)を受け付ける。`GameScene`が`isFinished_ = true`にし、フェードを挟んでGameシーンを最初からやり直す。
 - `GameScene::NextSceneName()`は`"Game"`(仮)。`"Title"`は登録されておらず、シーンが終わると`assert`で止まるため。C5で変える。
+- 強化の選択中は、画面のUI(`GameHud`と`ComboPopupView`)を描かない。`GameScene::UpdateHud`が毎フレーム`SetVisible`で渡す。HPアイコンの演出やHITの数と残り時間は保ち、閉じたら元どおり描く。敵の頭上の氷ゲージや氷エリアなど、ゲーム世界の中の表示は変えない。`GameOverView`と強化画面も変えない。
 - UIの演出は止まらない時間(`GetDeltaTime`)で進める。連鎖数はゲームの時間(`GetGameDeltaTime`)で動くため、止まっている間は一緒に止まる。
 
 ## 4. 連鎖数(`ComboPopupView`)
 
-- 1回の氷霧と、その氷霧から飛んだ氷塊で砕いた数を「12 HIT」と数え上げる。
-- `EnemyDefeatInfo::chainId`: 氷霧で倒したときは`IceMistInfo::id`。氷塊の連鎖は、発射元の氷霧のIDを`IceShardManager`の`Volley`に持たせ、`EnemyManager::ApplyShardHit`の`chainId`引数で渡す。
+- 1回の氷霧から飛んだ氷塊で砕いた数を「HIT 12!」と数え上げる。氷霧で倒した分は数えない(氷塊で倒したときだけ表示する)。
+- `EnemyDefeatInfo::chainId`: 氷霧で倒したときは0(数えない)。氷塊の連鎖は、発射元の氷霧のIDを`IceShardManager`の`Volley`に持たせ、`EnemyManager::ApplyShardHit`の`chainId`引数で渡す。
 - 表示は1つの連鎖につき1つ。新しく砕けた敵の画面位置(`Camera::GetVPMatrix()`で1280×720へ変換)へ移って数が増え、数が大きいほど文字を大きくする。一定時間(`holdTime`)増えなければ消える。同時に出せる表示は8つまで(`maxPopups`、上限8)。文字はSDFの`Text`(源直ゴシック)。
-- 1体だけ砕いたときも「1 HIT」から出す。
+- 氷塊で1体だけ砕いたときも「HIT 1!」から出す。
 - 表示が上限まで使われているときは、新しい連鎖の表示は出さない(数えない)。
 
 ## 5. クラス、依存、更新の流れ

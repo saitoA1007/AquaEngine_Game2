@@ -270,6 +270,11 @@ void GameScene::UpdateHud() {
 	input.maxHp = player_->GetMaxHp();
 	input.phase = phaseDirector_->GetPhase();
 	gameHud_->SetInput(input);
+
+	// 強化の選択中は、画面のUI（HUDと連鎖数）を隠して、選択画面だけが見えるようにする
+	bool isHudVisible = !upgradeSelectUI_->IsOpen();
+	gameHud_->SetVisible(isHudVisible);
+	comboPopupView_->SetVisible(isHudVisible);
 }
 
 void GameScene::OnIceMist(const IceMistInfo& info) {

@@ -45,6 +45,12 @@ public:
     /// </summary>
     void PlayDamage() { hpIconView_->PlayDamage(); }
 
+    /// <summary>
+    /// 描くかどうかを設定する。falseの間も、HPアイコンの演出などの状態は保たれ、trueに戻すと元どおり描く。毎フレーム呼ぶ。
+    /// </summary>
+    /// <param name="isVisible">描くか</param>
+    void SetVisible(bool isVisible) { isVisible_ = isVisible; }
+
 private:
     /// <summary>
     /// 調整値をDebugParameterへ登録する。
@@ -78,6 +84,7 @@ private:
     // 状態
     HudInput input_;                  // 最新の表示する値
     int32_t shownPhase_ = -1;         // 文字へ書いたフェーズ（-1は未設定）
+    bool isVisible_ = true;           // 描くか（強化の選択中などはGameSceneが隠す）
 
     // 描画
     std::unique_ptr<HpIconView> hpIconView_;                  // HPアイコン

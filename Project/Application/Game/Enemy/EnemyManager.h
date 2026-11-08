@@ -130,7 +130,7 @@ private:
     /// 凍った敵を砕く。撃破なら破片を飛ばして撃破を通知し、解放なら次のEmitReleaseShattersが殻だけを飛ばす。
     /// </summary>
     /// <param name="enemy">砕く敵（凍っていること）</param>
-    /// <param name="chainId">撃破の通知に添える連鎖のID（氷霧のID）</param>
+    /// <param name="chainId">撃破の通知に添える連鎖のID（氷霧で倒したときは0、氷塊は発射元の氷霧のID）</param>
     void ShatterEnemy(Enemy* enemy, uint32_t chainId);
 
     /// <summary>

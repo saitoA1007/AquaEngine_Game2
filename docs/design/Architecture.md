@@ -26,7 +26,7 @@
 | `HudInput` | `GameHud`へ渡す表示用の値(HP、最大HP、フェーズ)の構造体 |
 | `HpIconView` | HPアイコンの並びと被弾の演出(失ったアイコンが弾けて暗くなる)。`GameHud`が所有する |
 | `GameOverView` | 「GAME OVER」と「Aで再開」の表示、再開の入力(`Retry`)。`IGameObject`。止まらない時間で動く |
-| `ComboPopupView` | 連鎖数の表示(「12 HIT」)。氷霧のIDごとに1つ、同時に最大8つ。`IGameObject`。ゲームの時間で動く |
+| `ComboPopupView` | 連鎖数の表示(「HIT 12!」)。氷塊で倒したときだけ数える。発射元の氷霧のIDごとに1つ、同時に最大8つ。`IGameObject`。ゲームの時間で動く |
 | `EnemyShotManager` | 敵の弾とビーム。敵とは独立して動く |
 | `ShatterEffectManager` | 破片の`FractureInstance`の事前確保と使い回し、飛ばす処理と描画 |
 | `PlayerStats` | 移動速度、範囲の倍率、威力の倍率を持つ構造体。`GameScene`が持ち、強化前の移動速度(調整値)と`PlayerUpgrade`の回数から毎フレーム求め直す |
@@ -124,7 +124,7 @@
 ## 6. 経験値と強化
 
 - `EnemyManager`が撃破を`EnemyDefeatInfo`(位置、氷塊の数、経験値、連鎖ID)のコールバックで通知する。`GameScene`のラムダが、氷塊(`IceShardManager::Drop`)、経験値(`PhaseDirector::AddExp`。撃破した瞬間に入る)、連鎖数(`ComboPopupView::AddHit`)の順に渡す。
-- 連鎖IDは、氷霧で倒したときは`IceMistInfo::id`。氷塊は`IceShardManager`の`Volley`が発射元の氷霧のIDを持ち、`EnemyManager::ApplyShardHit`の引数で渡す。
+- 連鎖IDは、氷霧で倒したときは0で、`ComboPopupView`は数えない。氷塊は`IceShardManager`の`Volley`が発射元の氷霧のIDを持ち、`EnemyManager::ApplyShardHit`の引数で渡す。
 - `PhaseDirector`がレベルアップを判定し、未処理の数を持つ。`GameScene`が選択画面(`UpgradeSelectUI`)を開き、選ばれた結果を`PlayerUpgrade`経由で`PlayerStats`へ書き、`PhaseDirector::ConfirmLevelUp`でフェーズを進める。`PhaseDirector`は`PlayerStats`と`UpgradeSelectUI`を知らない。
 - フェーズが変わるたびに、`GameScene`が`EnemyManager::SetSpawnRule`で出現ルールを渡す。`EnemyManager`は`PhaseDirector`を知らない。
 - `Player`は範囲の倍率、威力の倍率、移動速度を`PlayerStats`から読む。
@@ -136,6 +136,7 @@
 - `GameScene::Update`の最後(`UpdateHud`)で、`Player`と`PhaseDirector`の値から`HudInput`を作って`GameHud`へ渡す。オブジェクトの更新はシーンの更新より先に走るが、`GameHud`は描画の直前に値を反映するため遅れない。`GameHud`、`ComboPopupView`は`Player`、`EnemyManager`、`PhaseDirector`を知らない。`ComboPopupView`は座標の変換のために`Camera`を読むだけ。
 - 被弾: `Player::TakeDamage`が実際に減ったかを返し、`GameScene::StepEnemies`が`GameHud::PlayDamage()`と`PadVibration::PlayDamage()`を呼ぶ。無敵時間中の点滅は`Player::Draw`で描画を飛ばす。
 - HPが0: `GameScene::CheckGameOver`が`isGameOver_`をtrueにし、`Player::SetInputEnabled(false)`、`PadVibration::Stop()`、`GameOverView::Open()`を行う。`GameOverView`が再開の入力を返すと、`GameScene`が`isFinished_`をtrueにする。`NextSceneName()`は仮に`"Game"`を返し、フェードのあとGameシーンが作り直される(C5で変える)。
+- 強化の選択中は、`GameScene::UpdateHud`が`GameHud`と`ComboPopupView`へ`SetVisible(false)`を渡し、画面のUIを描かない(状態は保つ)。ゲーム世界の中の表示は変えない。
 - 詳細は[C3_HUD.md](C3_HUD.md)。
 
 ## 7. カメラ

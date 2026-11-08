@@ -21,7 +21,7 @@ ComboPopupView::ComboPopupView(const Camera* camera, FontManager* fontManager) :
 
     // 文字は上限の数だけ作って使い回す
     for (Popup& popup : popups_) {
-        popup.text = std::make_unique<Text>(font, "1 HIT", 12);
+        popup.text = std::make_unique<Text>(font, "HIT 1!", 12);
         popup.text->anchorPoint_ = { 0.5f, 0.5f };
     }
 }
@@ -49,6 +49,11 @@ Vector2 ComboPopupView::WorldToScreen(const Vector3& worldPosition) const {
 }
 
 void ComboPopupView::AddHit(uint32_t chainId, const Vector3& worldPosition) {
+    // 氷霧で倒した撃破（連鎖IDが0）は数えない。氷塊で倒したときだけ数える
+    if (chainId == 0) {
+        return;
+    }
+
     // 画面の端で見切れないよう、文字の中心を画面の内側へ収める
     Vector2 screen = WorldToScreen(worldPosition);
     Vector2 position = {
@@ -66,11 +71,11 @@ void ComboPopupView::AddHit(uint32_t chainId, const Vector3& worldPosition) {
         popup.position = position;
         popup.idleTimer = 0.0f;
         popup.punchTimer = 0.0f;
-        popup.text->SetText(std::to_string(popup.count) + " HIT");
+        popup.text->SetText("HIT " + std::to_string(popup.count) + "!");
         return;
     }
 
-    // なければ空きの表示を使い、「1 HIT」から出す。空きがなければ出さない
+    // なければ空きの表示を使い、「HIT 1!」から出す。空きがなければ出さない
     for (int32_t i = 0; i < limit; ++i) {
         Popup& popup = popups_[static_cast<size_t>(i)];
         if (popup.isActive) {
@@ -82,7 +87,7 @@ void ComboPopupView::AddHit(uint32_t chainId, const Vector3& worldPosition) {
         popup.position = position;
         popup.idleTimer = 0.0f;
         popup.punchTimer = 0.0f;
-        popup.text->SetText("1 HIT");
+        popup.text->SetText("HIT 1!");
         return;
     }
 }
@@ -126,6 +131,11 @@ void ComboPopupView::UpdatePopup(Popup& popup, float deltaTime) {
 }
 
 void ComboPopupView::Draw() {
+    // 非表示の間は描かない（数と残り時間は保つ）
+    if (!isVisible_) {
+        return;
+    }
+
     for (Popup& popup : popups_) {
         if (!popup.isActive) {
             continue;

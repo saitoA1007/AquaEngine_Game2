@@ -378,7 +378,7 @@ void EnemyManager::ApplyIceMist(const IceMistInfo& info) {
             continue;
         }
 
-        ShatterEnemy(enemy, info.id);
+        ShatterEnemy(enemy, 0); // 氷霧で倒した撃破は連鎖数に数えない
     }
 }
 

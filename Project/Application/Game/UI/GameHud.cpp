@@ -58,6 +58,11 @@ void GameHud::UpdateViews() {
 }
 
 void GameHud::Draw() {
+    // 非表示の間は描かない（状態は保つ）
+    if (!isVisible_) {
+        return;
+    }
+
     // 表示する値はシーンの更新の最後に届くため、描画の直前に反映して1フレームの遅れをなくす
     UpdateViews();
 

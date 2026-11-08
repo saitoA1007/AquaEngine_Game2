@@ -221,7 +221,7 @@ private:
 	void UpdateGameOver();
 
 	/// <summary>
-	/// 表示用の値をまとめてGameHudへ渡す。GameScene::Updateの最後に呼ぶ。
+	/// 表示用の値をまとめてGameHudへ渡し、強化の選択中は画面のUI（HUDと連鎖数）を隠す。GameScene::Updateの最後に呼ぶ。
 	/// </summary>
 	void UpdateHud();
 
