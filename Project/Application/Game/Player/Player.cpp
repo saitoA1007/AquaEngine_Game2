@@ -76,7 +76,8 @@ void Player::Update() {
 
     // 加減速なしで、入力方向へ即座に移動する。氷霧のクールタイム中も移動は止めない
     Vector3 direction = GetMoveDirection();
-    position_ += direction * (stats_->moveSpeed * FpsCounter::GetGameDeltaTime());
+    moveDirection_ = direction;
+    position_ +=direction * (stats_->moveSpeed * FpsCounter::GetGameDeltaTime());
 
     // フィールドの外へ出ないよう押し戻す
     position_ = field_->ClampToField(position_, radius_);
@@ -128,6 +129,7 @@ void Player::FireIceMist() {
     IceMistInfo info;
     info.id = ++mistCounter_;
     info.center = position_;
+    info.moveDirection = moveDirection_;
 
     if (chargeTimer_ < tapThreshold_) {
         // 単押し。チャージした範囲にはならず、威力は弱い

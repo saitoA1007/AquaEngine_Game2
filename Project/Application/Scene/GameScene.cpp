@@ -22,6 +22,9 @@ GameScene::GameScene() {
 
 void GameScene::Initialize() {
 
+	// エンジンのリセットは、オブジェクトを消さずにInitializeをもう一度呼ぶ。前回のオブジェクトが残って二重にならないよう、先に全て削除する
+	gameObjectManager_->ClearAll();
+
 	// 背景・カメラ・ライトを設定する
 	SetUpEnvironment();
 
@@ -43,6 +46,9 @@ void GameScene::Update() {
 
 	// シーン更新はオブジェクト更新の後に走るため、更新後のプレイヤー位置を敵が使える
 	StepEnemies();
+
+	// 敵の更新後の位置で、氷塊の回収と連鎖を進める
+	StepIceShards();
 
 	// 押し戻し後のプレイヤー位置を追従する
 	gameCamera_->Update(player_->GetPosition());
@@ -115,18 +121,35 @@ void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
 
 	// 敵（敵一覧とモデルの読み込みに失敗すると例外を投げる）
 	enemyManager_ = gameObjectManager_->AddObject<EnemyManager>(modelManager_, field_->GetRadius(), gameCamera_->GetCamera(), whiteTextureHandle_, shatterEffect_);
+
+	// 氷塊（敵より後に作る）。撃破した敵の位置に氷塊を落とす
+	iceShardManager_ = gameObjectManager_->AddObject<IceShardManager>(sphereModel, enemyManager_);
+	enemyManager_->SetDefeatCallback([this](const EnemyDefeatInfo& info) { iceShardManager_->Drop(info.position, info.iceShardCount); });
 }
 
 void GameScene::OnIceMist(const IceMistInfo& info) {
-	// 処理の順番はここで決める（更新順には頼らない）。敵へ当て、氷塊へ通知し、見た目を出す
+	// 処理の順番はここで決める（更新順には頼らない）。敵へ当て、氷塊へ通知し、見た目を出す。氷霧で撃破した敵の氷塊は地面に落ち、この発射には含まれない
 	enemyManager_->ApplyIceMist(info);
 	NotifyIceShards(info);
 	iceMistEffect_->Play(info.center, info.radius);
+
+	// コントローラーを振動させる
+	inputCommand_->PlayPadVibration()
+
 }
 
 void GameScene::NotifyIceShards(const IceMistInfo& info) {
-	// B4でIceShardManagerを呼ぶ場所。B3では何もしない
-	(void)info;
+	// 氷霧の範囲に合わせて、持っている氷塊を連鎖させて飛ばす
+	iceShardManager_->Launch(info);
+}
+
+void GameScene::StepIceShards() {
+	// 氷塊が見るプレイヤーの情報をまとめる
+	IceShardInput input;
+	input.playerPosition = player_->GetPosition();
+	input.isCharging = player_->IsCharging();
+
+	iceShardManager_->UpdateShards(input);
 }
 
 void GameScene::StepEnemies() {

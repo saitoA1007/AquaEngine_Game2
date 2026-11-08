@@ -36,7 +36,8 @@ public:
     /// </summary>
     /// <param name="definition">この個体の種類。EnemyManagerが所有し、個体より長く生存する。</param>
     /// <param name="position">出現位置（XZ平面。Yは使わない）</param>
-    void Spawn(const EnemyDefinition* definition, const Vector3& position);
+    /// <param name="serial">出現ごとの連番。プール再利用で別の敵になったことを、外から見分けるために使う</param>
+    void Spawn(const EnemyDefinition* definition, const Vector3& position, uint32_t serial);
 
     /// <summary>
     /// 1フレーム分更新する。凍っていれば解放までの時間だけ進め、凍っていなければ氷ゲージと行動を更新する。
@@ -103,6 +104,7 @@ public:
     const EnemyDefinition* GetDefinition() const { return definition_; }
     bool IsActive() const { return isActive_; }
     bool IsFrozen() const { return state_ == EnemyState::kFrozen; }
+    uint32_t GetSerial() const { return serial_; }
 
     /// <summary>
     /// 氷ゲージの割合（0から1。閾値が0以下の種類は1）。表示に使う。
@@ -174,6 +176,7 @@ protected:
 private:
     // 状態
     bool isActive_ = false;                // プールから取り出されているか
+    uint32_t serial_ = 0;                  // 出現ごとの連番（0は未使用）
     EnemyState state_ = EnemyState::kNormal;
     float iceGauge_ = 0.0f;                // 氷ゲージ（0から閾値まで）
     float frozenTimer_ = 0.0f;             // 凍結の残り時間（秒）

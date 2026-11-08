@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include <memory>
 #include <vector>
 #include "IGameObject.h"
@@ -69,7 +70,43 @@ public:
     /// <param name="info">氷霧の情報。保持しない。</param>
     void ApplyIceMist(const IceMistInfo& info);
 
+    /// <summary>
+    /// 敵を撃破したときに呼ぶ関数を設定する。氷霧と氷塊のどちらで倒した場合も呼ばれる。解放（倒れない）では呼ばれない。
+    /// </summary>
+    /// <param name="callback">撃破の情報を受け取る関数。呼び出し先がこのオブジェクトより長く生存する必要がある。</param>
+    void SetDefeatCallback(const std::function<void(const EnemyDefeatInfo&)>& callback) { defeatCallback_ = callback; }
+
+    /// <summary>
+    /// 円の範囲と重なる使用中の敵を集める。前フレームのグリッドを使い、位置は現在のものを判定する。
+    /// </summary>
+    /// <param name="center">円の中心（XZを使う）</param>
+    /// <param name="radius">円の半径</param>
+    /// <param name="out">結果。呼び出しのたびに空にしてから入れる</param>
+    void CollectTargets(const Vector3& center, float radius, std::vector<EnemyTarget>& out);
+
+    /// <summary>
+    /// 標的が今も同じ敵として生きているかを確かめ、その現在位置を返す。
+    /// </summary>
+    /// <param name="target">確かめる標的</param>
+    /// <param name="position">生きているときの現在位置</param>
+    /// <returns>生きていればtrue。倒された、または別の敵として再利用されていればfalse</returns>
+    bool GetTargetPosition(const EnemyTarget& target, Vector3& position) const;
+
+    /// <summary>
+    /// 氷塊が当たった処理。凍っていない敵は氷ゲージを大きく進め、凍っている敵は砕く。
+    /// 氷霧と違い、同じ連鎖で凍った敵も砕ける。標的が無効なら何もしない。
+    /// </summary>
+    /// <param name="target">当たった標的</param>
+    /// <param name="icePower">凍っていない敵の氷ゲージへ足す量</param>
+    void ApplyShardHit(const EnemyTarget& target, float icePower);
+
 private:
+    /// <summary>
+    /// 凍った敵を砕く。撃破なら破片を飛ばして撃破を通知し、解放なら次のEmitReleaseShattersが殻だけを飛ばす。
+    /// </summary>
+    /// <param name="enemy">砕く敵（凍っていること）</param>
+    void ShatterEnemy(Enemy* enemy);
+
     /// <summary>
     /// 調整値をDebugParameterへ登録する。
     /// </summary>
@@ -179,6 +216,8 @@ private:
     Vector3 lastPlayerPosition_ = { 0.0f, 0.0f, 0.0f }; // 直近のプレイヤー位置（ゲージの表示数を絞る基準。表示のためだけにコピーを持つ）
     EnemyGrid grid_;
     ShatterEffectManager* shatterEffect_ = nullptr; // 破砕の破片（所有しない）
+    std::function<void(const EnemyDefeatInfo&)> defeatCallback_; // 撃破の通知先（GameSceneが設定する）
+    uint32_t spawnCounter_ = 0;      // 出現させた敵の数（出現ごとの連番の採番に使う）
     std::unique_ptr<EnemyGaugeView> gaugeView_; // 氷ゲージの仮表示（平面モデルが要るためコンストラクタで作る）
 
     // 描画

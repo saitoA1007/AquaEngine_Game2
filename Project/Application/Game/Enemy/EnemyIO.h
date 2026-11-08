@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "Vector3.h"
+#include "Application/Game/Enemy/Enemy.h"
 
 /// <summary>
 /// 敵が毎フレーム読むプレイヤーの情報。GameSceneが作り、EnemyManagerは保持しない。
@@ -18,4 +19,21 @@ struct EnemyInput {
 struct EnemyOutput {
     int32_t damage = 0;                      // プレイヤーが受けるダメージ（0なら被弾なし）
     Vector3 pushback = { 0.0f, 0.0f, 0.0f }; // プレイヤーを押し戻す量（凍った敵との重なり分）
+};
+
+/// <summary>
+/// 敵への参照。プールの個体は再利用されるため、ポインタと出現ごとの連番を組にして、同じ敵かを確かめられるようにする。
+/// 有効かどうかはEnemyManagerが判定する。
+/// </summary>
+struct EnemyTarget {
+    Enemy* enemy = nullptr; // 敵の個体（EnemyManagerが所有する）
+    uint32_t serial = 0;    // 取得時の出現ごとの連番
+};
+
+/// <summary>
+/// 敵を撃破したときの通知内容。EnemyManagerが作り、コールバックで渡す。
+/// </summary>
+struct EnemyDefeatInfo {
+    Vector3 position = { 0.0f, 0.0f, 0.0f }; // 撃破した位置（XZを使う）
+    int32_t iceShardCount = 0;               // 落とす氷塊の数
 };

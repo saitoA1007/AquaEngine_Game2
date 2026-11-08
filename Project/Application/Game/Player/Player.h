@@ -54,6 +54,11 @@ public:
     float GetIceAreaRadius() const { return currentIceAreaRadius_; }
 
     /// <summary>
+    /// Aを押してチャージ中かを返す。氷塊の回収に使う。
+    /// </summary>
+    bool IsCharging() const { return isCharging_; }
+
+    /// <summary>
     /// 氷霧を発生させたときに呼ぶ関数を設定する。
     /// </summary>
     /// <param name="callback">氷霧の情報を受け取る関数。呼び出し先がプレイヤーより長く生存する必要がある。</param>
@@ -133,6 +138,7 @@ private:
     bool isCharging_ = false;                 // Aを押してチャージ中か
     float chargeTimer_ = 0.0f;                // チャージの経過時間（秒）
     float cooldownTimer_ = 0.0f;              // クールタイムの残り（秒）
+    Vector3 moveDirection_ = { 0.0f, 0.0f, 0.0f }; // 今フレームの移動方向（氷霧の通知に添える）
     uint32_t mistCounter_ = 0;                // 発生させた氷霧の数（IDの採番に使う）
 
     // 参照（所有しない）

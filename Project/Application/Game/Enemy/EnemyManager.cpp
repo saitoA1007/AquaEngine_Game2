@@ -248,7 +248,7 @@ void EnemyManager::SpawnOne(const EnemyInput& input) {
             z *= limit / distance;
         }
 
-        enemy->Spawn(&definitions_[poolIndex], { x, 0.0f, z });
+        enemy->Spawn(&definitions_[poolIndex], { x, 0.0f, z }, ++spawnCounter_);
         return;
     }
 }
@@ -319,13 +319,74 @@ void EnemyManager::ApplyIceMist(const IceMistInfo& info) {
             continue;
         }
 
-        // 撃破でも氷の殻の破片だけを飛ばす。解放（砕く回数が足りない）は、次のEmitReleaseShattersが殻だけを飛ばす
-        float scale = enemy->GetVisualScale();
-        Vector3 position = enemy->GetPosition();
-        if (enemy->Shatter()) {
-            shatterEffect_->Spawn(position, scale * shellScale_);
-        }
+        ShatterEnemy(enemy);
     }
+}
+
+void EnemyManager::ShatterEnemy(Enemy* enemy) {
+    // 撃破でも氷の殻の破片だけを飛ばす。解放（砕く回数が足りない）は、次のEmitReleaseShattersが殻だけを飛ばす
+    float scale = enemy->GetVisualScale();
+    Vector3 position = enemy->GetPosition();
+    int32_t iceShardCount = enemy->GetDefinition()->iceShardCount;
+    if (!enemy->Shatter()) {
+        return;
+    }
+
+    shatterEffect_->Spawn(position, scale * shellScale_);
+
+    // 撃破を通知する。氷塊の落下などに使われる
+    if (!defeatCallback_) {
+        return;
+    }
+    EnemyDefeatInfo defeat;
+    defeat.position = position;
+    defeat.iceShardCount = iceShardCount;
+    defeatCallback_(defeat);
+}
+
+void EnemyManager::CollectTargets(const Vector3& center, float radius, std::vector<EnemyTarget>& out) {
+    out.clear();
+
+    // グリッドは候補を絞るためだけに使い、範囲との重なりは現在の位置で判定する
+    grid_.Query(center, radius + maxEnemyRadius_ + kGridLag, neighbors_);
+    for (Enemy* enemy : neighbors_) {
+        if (!enemy->IsActive()) {
+            continue;
+        }
+
+        float dx = enemy->GetPosition().x - center.x;
+        float dz = enemy->GetPosition().z - center.z;
+        float reach = radius + enemy->GetRadius();
+        if (dx * dx + dz * dz > reach * reach) {
+            continue;
+        }
+
+        out.push_back({ enemy, enemy->GetSerial() });
+    }
+}
+
+bool EnemyManager::GetTargetPosition(const EnemyTarget& target, Vector3& position) const {
+    // 倒された、または再利用されて別の敵になっていれば無効
+    if (target.enemy == nullptr || !target.enemy->IsActive() || target.enemy->GetSerial() != target.serial) {
+        return false;
+    }
+
+    position = target.enemy->GetPosition();
+    return true;
+}
+
+void EnemyManager::ApplyShardHit(const EnemyTarget& target, float icePower) {
+    Vector3 position;
+    if (!GetTargetPosition(target, position)) {
+        return;
+    }
+
+    // 凍っていない敵は凍結を進め、凍っている敵は砕く。氷霧のIDは使わず、同じ連鎖でも凍結から破壊まで進める
+    if (!target.enemy->IsFrozen()) {
+        target.enemy->ApplyIceDamage(icePower, 0, frozenDuration_);
+        return;
+    }
+    ShatterEnemy(target.enemy);
 }
 
 void EnemyManager::ResolveWalls(const EnemyInput& input, float deltaTime) {

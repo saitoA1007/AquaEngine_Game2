@@ -2,8 +2,9 @@
 #include "Enemy.h"
 #include <algorithm>
 
-void Enemy::Spawn(const EnemyDefinition* definition, const Vector3& position) {
+void Enemy::Spawn(const EnemyDefinition* definition, const Vector3& position, uint32_t serial) {
     definition_ = definition;
+    serial_ = serial;
     position_ = { position.x, 0.0f, position.z };
     moveDirection_ = { 0.0f, 0.0f, 0.0f };
 

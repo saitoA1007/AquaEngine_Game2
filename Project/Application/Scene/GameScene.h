@@ -12,6 +12,7 @@
 #include "Application/Game/Enemy/EnemyManager.h"
 #include "Application/Game/Effect/ShatterEffectManager.h"
 #include "Application/Game/Effect/IceMistEffect.h"
+#include "Application/Game/IceShard/IceShardManager.h"
 
 class GameScene : public GameEngine::IScene {
 public:
@@ -79,6 +80,7 @@ private: // ゲームの状態
 	Player* player_ = nullptr;
 	Field* field_ = nullptr;
 	EnemyManager* enemyManager_ = nullptr;
+	IceShardManager* iceShardManager_ = nullptr;
 	ShatterEffectManager* shatterEffect_ = nullptr;
 	IceMistEffect* iceMistEffect_ = nullptr;
 
@@ -132,13 +134,18 @@ private:
 	void StepEnemies();
 
 	/// <summary>
-	/// 氷霧が発生したときの処理順を決める。敵へ当て、氷塊（B4）へ通知し、見た目を出す。
+	/// プレイヤーの情報を氷塊へ渡して更新する。敵の更新後に呼ぶ。
+	/// </summary>
+	void StepIceShards();
+
+	/// <summary>
+	/// 氷霧が発生したときの処理順を決める。敵へ当て、氷塊へ通知し、見た目を出す。
 	/// </summary>
 	/// <param name="info">氷霧の情報</param>
 	void OnIceMist(const IceMistInfo& info);
 
 	/// <summary>
-	/// 氷塊の管理（B4）へ氷霧を通知する呼び出し口。B3では何もしない。
+	/// 氷塊の管理へ氷霧を通知する呼び出し口。持っている氷塊を連鎖させて発射する。
 	/// </summary>
 	/// <param name="info">氷霧の情報</param>
 	void NotifyIceShards(const IceMistInfo& info);

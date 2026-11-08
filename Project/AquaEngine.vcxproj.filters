@@ -21,6 +21,9 @@
     <Filter Include="Application\Game\Player">
       <UniqueIdentifier>{c4e7a0b9-1d52-4e86-8f3a-92b6d0a5e1c3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Application\Game\IceShard">
+      <UniqueIdentifier>{a7c3e5d1-2b94-4f60-8e17-3d5a9c0b6f42}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Application\Demo">
       <UniqueIdentifier>{a693a117-c9b0-441e-9104-ead2a5875503}</UniqueIdentifier>
     </Filter>
@@ -269,6 +272,9 @@
     </ClCompile>
     <ClCompile Include="Application\Game\Effect\ShatterEffectManager.cpp">
       <Filter>Application\Game\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Game\IceShard\IceShardManager.cpp">
+      <Filter>Application\Game\IceShard</Filter>
     </ClCompile>
     <ClCompile Include="Application\Game\Effect\IceMistEffect.cpp">
       <Filter>Application\Game\Effect</Filter>
@@ -850,6 +856,9 @@
     </ClInclude>
     <ClInclude Include="Application\Game\Effect\ShatterEffectManager.h">
       <Filter>Application\Game\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\IceShard\IceShardManager.h">
+      <Filter>Application\Game\IceShard</Filter>
     </ClInclude>
     <ClInclude Include="Application\Game\Effect\IceMistEffect.h">
       <Filter>Application\Game\Effect</Filter>

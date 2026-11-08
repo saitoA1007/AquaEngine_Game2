@@ -10,4 +10,5 @@ struct IceMistInfo {
     Vector3 center = { 0.0f, 0.0f, 0.0f };         // 氷霧の中心（XZを使う）
     float radius = 0.0f;                           // 氷霧の半径
     float power = 0.0f;                            // 威力（敵の氷ゲージへ足す量）
+    Vector3 moveDirection = { 0.0f, 0.0f, 0.0f };  // 発生の瞬間のプレイヤーの移動方向（長さ1以内のXZ。静止中は0）
 };
