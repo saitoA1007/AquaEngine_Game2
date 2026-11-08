@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cmath>
 #include <algorithm>
+#include "WindowsApp.h"
 
 namespace GameEngine {
 	namespace Math {
@@ -54,6 +55,25 @@ namespace GameEngine {
 			// ワールド->スクリーン座標変換(3Dから2Dへ)
 			Vector3 screenPos = Matrix4x4::Transform(worldPosition, viewProjectionViewportMatrix);
 			return  screenPos;
+		}
+
+		bool IsBehindCamera(const Vector3& pos, const Matrix4x4& viewMatrix) {
+			// ビュー空間で奥行きが0以下ならカメラの後ろ
+			Vector3 viewPos = Matrix4x4::Transform(pos, viewMatrix);
+			return viewPos.z <= 0.0f;
+		}
+
+		Vector2 WorldToScreen(const Vector3& pos, const Matrix4x4& VPMatrix) {
+			// ワールド->正規化デバイス座標
+			Vector3 ndc = Matrix4x4::Transform(pos, VPMatrix);
+
+			// 正規化デバイス座標->スクリーン座標
+			const float width = static_cast<float>(WindowsApp::kWindowWidth);
+			const float height = static_cast<float>(WindowsApp::kWindowHeight);
+			return Vector2{
+				(ndc.x + 1.0f) * 0.5f * width,
+				(1.0f - ndc.y) * 0.5f * height
+			};
 		}
 
 		Vector3 PitchToDirection(float pitch) {

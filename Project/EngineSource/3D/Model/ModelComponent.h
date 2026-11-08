@@ -9,6 +9,7 @@ namespace GameEngine {
 
 	// 前方宣言
 	class RenderQueue;
+	class Animator;
 
 	/// <summary>
 	/// モデルのデータから加工をおこなう
@@ -49,6 +50,9 @@ namespace GameEngine {
 			refBuffers_[i].SetInstanceMask(mask);
 		}
 
+		// この個体を動かすアニメーターを設定
+		void SetAnimator(Animator* animator) { animator_ = animator; }
+
 	public:
 
 		// モデルが持つワールド行列
@@ -66,6 +70,9 @@ namespace GameEngine {
 
 		// 参照用
 		std::vector<RefBuffer> refBuffers_;
+
+		// 個体ごとのアニメーション
+		Animator* animator_ = nullptr;
 	};
 }
 

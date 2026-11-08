@@ -5,6 +5,7 @@
 #include "raytracingPipeline.h"
 #include "BufferRefManager.h"
 #include "ModelRenderer.h"
+#include "Animator.h"
 #include "DebugRenderer.h"
 #include "SpriteRenderer.h"
 using namespace GameEngine;
@@ -179,7 +180,9 @@ void SceneRenderManager::Execute3dRequest(const Draw3dRequest& request) {
     case Draw3dType::Default:
     case Draw3dType::DefaultAdd:
         ModelRenderer::DrawLight(renderQueue_->GetLightResource());
-        ModelRenderer::Draw(request.model, *request.worldTransform, request.material);
+        // 個体ごとのノードアニメーションがあればその行列を使う
+        ModelRenderer::Draw(request.model, *request.worldTransform, request.material,
+            request.animator ? &request.animator->GetRootLocalMatrix() : nullptr);
         break;
 
     case Draw3dType::Instancing:
@@ -196,7 +199,8 @@ void SceneRenderManager::Execute3dRequest(const Draw3dRequest& request) {
         break;
 
     case Draw3dType::Animation:
-        ModelRenderer::DrawAnimation(request.model, *request.worldTransform, renderQueue_->GetLightResource(), request.material);
+        ModelRenderer::DrawAnimation(request.model, *request.worldTransform, renderQueue_->GetLightResource(), request.material,
+            request.animator ? request.animator->GetSkinCluster() : nullptr);
         break;
 
     case Draw3dType::Skybox:
