@@ -1,0 +1,48 @@
+{
+    "Enemy": {
+        "Gauge": {
+            "gaugeBackColor": [
+                0.019999999552965164,
+                0.029999999329447746,
+                0.05000000074505806,
+                0.800000011920929
+            ],
+            "gaugeBorder": 0.029999999329447746,
+            "gaugeFillColor": [
+                0.10000000149011612,
+                0.5,
+                1.0,
+                1.0
+            ],
+            "gaugeHeadOffset": 0.4000000059604645,
+            "gaugeHeight": 0.1599999964237213,
+            "gaugeMaxCount": 128,
+            "gaugeVisible": true,
+            "gaugeWidth": 1.2000000476837158
+        },
+        "Ice": {
+            "decayRate": 0.5,
+            "freezeRate": 1.0,
+            "frozenDuration": 10.0,
+            "meltTime": 0.6000000238418579,
+            "shellColor": [
+                0.6000000238418579,
+                0.8500000238418579,
+                1.0,
+                1.0
+            ],
+            "shellScale": 1.399999976158142
+        },
+        "SceneName": "Game",
+        "Spawn": {
+            "spawnDistance": 40.0,
+            "spawnInterval": 1.0,
+            "spawnPerInterval": 3
+        },
+        "Wall": {
+            "enableEnemyWall": false,
+            "enableWallPushPlayer": false,
+            "slideStrength": 1.0
+        }
+    }
+}

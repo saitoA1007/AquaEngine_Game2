@@ -133,9 +133,6 @@ void GameScene::OnIceMist(const IceMistInfo& info) {
 	NotifyIceShards(info);
 	iceMistEffect_->Play(info.center, info.radius);
 
-	// コントローラーを振動させる
-	inputCommand_->PlayPadVibration()
-
 }
 
 void GameScene::NotifyIceShards(const IceMistInfo& info) {

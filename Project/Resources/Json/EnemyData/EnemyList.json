@@ -1,38 +1,48 @@
 {
     "enemies": [
         {
-            "id": "chase",
+            "breakCount": 1,
+            "color": [
+                1.0,
+                0.5,
+                0.10000000149011612,
+                1.0
+            ],
+            "contactDamage": 1,
             "displayName": "Chaser",
+            "exp": 1,
+            "extras": {},
+            "iceShardCount": 1,
+            "iceThreshold": 1.5,
+            "id": "chase",
             "kind": "Chase",
             "modelName": "sphere.obj",
-            "visualScale": 0.4,
-            "radius": 0.4,
-            "moveSpeed": 3.0,
-            "iceThreshold": 1.5,
-            "contactDamage": 1,
-            "exp": 1,
-            "iceShardCount": 1,
-            "breakCount": 1,
+            "moveSpeed": 0.5,
             "poolSize": 1200,
-            "color": [1.0, 0.5, 0.1, 1.0],
-            "extras": {}
+            "radius": 0.4000000059604645,
+            "visualScale": 0.4000000059604645
         },
         {
-            "id": "fast",
+            "breakCount": 1,
+            "color": [
+                1.0,
+                0.30000001192092896,
+                0.05000000074505806,
+                1.0
+            ],
+            "contactDamage": 1,
             "displayName": "Fast Chaser",
+            "exp": 2,
+            "extras": {},
+            "iceShardCount": 1,
+            "iceThreshold": 1.0,
+            "id": "fast",
             "kind": "Chase",
             "modelName": "sphere.obj",
-            "visualScale": 0.4,
-            "radius": 0.4,
-            "moveSpeed": 6.0,
-            "iceThreshold": 1.0,
-            "contactDamage": 1,
-            "exp": 2,
-            "iceShardCount": 1,
-            "breakCount": 1,
+            "moveSpeed": 2.0,
             "poolSize": 600,
-            "color": [1.0, 0.3, 0.05, 1.0],
-            "extras": {}
+            "radius": 0.4000000059604645,
+            "visualScale": 0.4000000059604645
         }
     ]
 }
