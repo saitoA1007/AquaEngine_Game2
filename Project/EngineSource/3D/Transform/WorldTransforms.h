@@ -37,7 +37,7 @@ namespace GameEngine {
 		/// </summary>
 		void UpdateTransformMatrix(const uint32_t& numInstance);
 
-		const CD3DX12_GPU_DESCRIPTOR_HANDLE& GetInstancingSrvGPU() const { return buffer_.GetSrvGpuHandle(); }
+		CD3DX12_GPU_DESCRIPTOR_HANDLE GetInstancingSrvGPU() const { return buffer_.GetSrvGpuHandle(); }
 
 		/// <summary>
 		/// 描画するモデルの数
