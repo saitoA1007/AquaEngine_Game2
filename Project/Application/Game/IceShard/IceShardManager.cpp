@@ -269,7 +269,8 @@ bool IceShardManager::StartNextHop(Shard& shard) {
 void IceShardManager::UpdateFlyingShard(Shard& shard, float deltaTime) {
     // 標的が動いていれば到着点を追う。倒されていたら、最後の位置へそのまま向かう
     Vector3 targetPosition;
-    if (enemyManager_->GetTargetPosition(shard.target, targetPosition)) {
+    bool isTargetAlive = enemyManager_->GetTargetPosition(shard.target, targetPosition);
+    if (isTargetAlive) {
         shard.hopEnd = { targetPosition.x, hitHeight_, targetPosition.z };
     }
 
@@ -288,6 +289,11 @@ void IceShardManager::UpdateFlyingShard(Shard& shard, float deltaTime) {
     // 到着。着弾を処理して、次の標的へ向かう。全員に当たったら砕けて消える
     shard.position = shard.hopEnd;
     enemyManager_->ApplyShardHit(shard.target, shardIcePower_);
+
+    // 飛んでいる間に倒された敵への到着は、命中に数えない
+    if (isTargetAlive && hitCallback_) {
+        hitCallback_();
+    }
     if (!StartNextHop(shard)) {
         FinishShard(shard);
     }

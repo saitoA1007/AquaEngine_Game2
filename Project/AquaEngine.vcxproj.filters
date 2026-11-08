@@ -273,6 +273,9 @@
     <ClCompile Include="Application\Game\Effect\ShatterEffectManager.cpp">
       <Filter>Application\Game\Effect</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Game\Player\PadVibration.cpp">
+      <Filter>Application\Game\Player</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Game\IceShard\IceShardManager.cpp">
       <Filter>Application\Game\IceShard</Filter>
     </ClCompile>
@@ -856,6 +859,9 @@
     </ClInclude>
     <ClInclude Include="Application\Game\Effect\ShatterEffectManager.h">
       <Filter>Application\Game\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Player\PadVibration.h">
+      <Filter>Application\Game\Player</Filter>
     </ClInclude>
     <ClInclude Include="Application\Game\IceShard\IceShardManager.h">
       <Filter>Application\Game\IceShard</Filter>

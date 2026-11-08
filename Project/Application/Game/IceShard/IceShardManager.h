@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <vector>
 #include "IGameObject.h"
@@ -66,6 +67,12 @@ public:
     /// </summary>
     /// <param name="info">氷霧の情報。範囲と移動方向を使う。</param>
     void Launch(const IceMistInfo& info);
+
+    /// <summary>
+    /// 氷塊が生きている敵に命中するたびに呼ぶ関数を設定する。倒された敵を飛ばした分は呼ばれない。
+    /// </summary>
+    /// <param name="callback">命中を受け取る関数。呼び出し先がこのオブジェクトより長く生存する必要がある。</param>
+    void SetHitCallback(const std::function<void()>& callback) { hitCallback_ = callback; }
 
     /// <summary>
     /// 持っている氷塊の数を取得する。発射待ちの氷塊は含まない。
@@ -226,6 +233,7 @@ private:
     // 参照（所有しない）
     EnemyManager* enemyManager_ = nullptr;
     GameEngine::Model* model_ = nullptr;
+    std::function<void()> hitCallback_; // 命中の通知先（GameSceneが設定する）
 
     // 描画
     GameEngine::WorldTransform drawTransform_; // 全個体で使い回す（行列は登録時に取り込まれる）

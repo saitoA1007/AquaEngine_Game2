@@ -1,0 +1,11 @@
+{
+    "PadVibration": {
+        "SceneName": "Game",
+        "chargeStrength": 0.05000000074505806,
+        "hitStrength": 0.3499999940395355,
+        "hitTime": 0.15000000596046448,
+        "isEnabled": true,
+        "releaseStrength": 0.800000011920929,
+        "releaseTime": 0.20000000298023224
+    }
+}

@@ -25,6 +25,9 @@ void GameScene::Initialize() {
 	// エンジンのリセットは、オブジェクトを消さずにInitializeをもう一度呼ぶ。前回のオブジェクトが残って二重にならないよう、先に全て削除する
 	gameObjectManager_->ClearAll();
 
+	// 振動を作り直す。前回の振動は破棄時に止まる
+	padVibration_ = std::make_unique<PadVibration>(inputCommand_);
+
 	// 背景・カメラ・ライトを設定する
 	SetUpEnvironment();
 
@@ -49,6 +52,10 @@ void GameScene::Update() {
 
 	// 敵の更新後の位置で、氷塊の回収と連鎖を進める
 	StepIceShards();
+
+	// 長押しの振動を伝え、そのフレームの振動を出す（氷霧と命中は発生時に要求済み）
+	padVibration_->SetCharging(player_->IsCharging());
+	padVibration_->Update();
 
 	// 押し戻し後のプレイヤー位置を追従する
 	gameCamera_->Update(player_->GetPosition());
@@ -125,6 +132,9 @@ void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
 	// 氷塊（敵より後に作る）。撃破した敵の位置に氷塊を落とす
 	iceShardManager_ = gameObjectManager_->AddObject<IceShardManager>(sphereModel, enemyManager_);
 	enemyManager_->SetDefeatCallback([this](const EnemyDefeatInfo& info) { iceShardManager_->Drop(info.position, info.iceShardCount); });
+
+	// 氷塊が敵に命中するたびに振動させる
+	iceShardManager_->SetHitCallback([this]() { padVibration_->PlayHit(); });
 }
 
 void GameScene::OnIceMist(const IceMistInfo& info) {
@@ -133,6 +143,8 @@ void GameScene::OnIceMist(const IceMistInfo& info) {
 	NotifyIceShards(info);
 	iceMistEffect_->Play(info.center, info.radius);
 
+	// 離して氷霧を発生させた振動。単押しも長押しも同じ
+	padVibration_->PlayRelease();
 }
 
 void GameScene::NotifyIceShards(const IceMistInfo& info) {

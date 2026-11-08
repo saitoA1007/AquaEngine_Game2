@@ -13,6 +13,7 @@
 #include "Application/Game/Effect/ShatterEffectManager.h"
 #include "Application/Game/Effect/IceMistEffect.h"
 #include "Application/Game/IceShard/IceShardManager.h"
+#include "Application/Game/Player/PadVibration.h"
 
 class GameScene : public GameEngine::IScene {
 public:
@@ -81,6 +82,9 @@ private: // ゲームの状態
 	Field* field_ = nullptr;
 	EnemyManager* enemyManager_ = nullptr;
 	IceShardManager* iceShardManager_ = nullptr;
+
+	// コントローラーの振動。シーンが所有し、Initializeのたびに作り直す（破棄時に振動を止める）
+	std::unique_ptr<PadVibration> padVibration_;
 	ShatterEffectManager* shatterEffect_ = nullptr;
 	IceMistEffect* iceMistEffect_ = nullptr;
 
