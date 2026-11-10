@@ -113,6 +113,13 @@ void GameScene::LoadAssets() {
 	hpHudModels_.core = modelManager_->GetNameByModel("hpCore.gltf");
 	hpHudModels_.shard = modelManager_->GetNameByModel("hpCoreShard.gltf");
 
+	// 強化の選択画面の画像を取得する（Resources/Textures/UI/Upgrade）
+	upgradeSelectTextures_.white = whiteTextureHandle_;
+	upgradeSelectTextures_.plate = textureManager_->GetHandleByName("UpgradeCardPlate.png");
+	upgradeSelectTextures_.frame = textureManager_->GetHandleByName("UpgradeCardFrame.png");
+	upgradeSelectTextures_.light = textureManager_->GetHandleByName("UpgradeCardLight.png");
+	upgradeSelectTextures_.divider = textureManager_->GetHandleByName("UpgradeDivider.png");
+
 	// 取得できなかったモデルがないか確認する
 	assert(cylinderModel_ != nullptr);
 	assert(sphereModel_ != nullptr);
@@ -121,6 +128,12 @@ void GameScene::LoadAssets() {
 	assert(hpHudModels_.frame != nullptr);
 	assert(hpHudModels_.core != nullptr);
 	assert(hpHudModels_.shard != nullptr);
+
+	// 画像は取得できないと0が返るため、0でないことを確認する
+	assert(upgradeSelectTextures_.plate != 0);
+	assert(upgradeSelectTextures_.frame != 0);
+	assert(upgradeSelectTextures_.light != 0);
+	assert(upgradeSelectTextures_.divider != 0);
 }
 
 void GameScene::RegisterDebugParameters() {
@@ -190,7 +203,7 @@ void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
 	comboPopupView_ = gameObjectManager_->AddObject<ComboPopupView>(gameCamera_->GetCamera(), fontManager_);
 
 	// 強化の選択画面（描画が手前に重なるよう最後に作る）
-	upgradeSelectUI_ = gameObjectManager_->AddObject<UpgradeSelectUI>(inputCommand_, fontManager_, whiteTextureHandle_, playerUpgrade_.get());
+	upgradeSelectUI_ = gameObjectManager_->AddObject<UpgradeSelectUI>(inputCommand_, fontManager_, upgradeSelectTextures_, playerUpgrade_.get());
 	upgradeSelectUI_->SetSelectedCallback([this](UpgradeType type) { OnUpgradeSelected(type); });
 
 	// ゲームオーバーの表示（一番手前に重ねる）

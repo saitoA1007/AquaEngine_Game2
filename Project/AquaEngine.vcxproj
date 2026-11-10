@@ -208,6 +208,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Game\Phase\PhaseTable.cpp" />
     <ClCompile Include="Application\Game\Phase\PhaseTableEditor.cpp" />
     <ClCompile Include="Application\Game\Upgrade\PlayerUpgrade.cpp" />
+    <ClCompile Include="Application\Game\Upgrade\UpgradeCardView.cpp" />
     <ClCompile Include="Application\Game\Upgrade\UpgradeSelectUI.cpp" />
     <ClCompile Include="Application\Game\UI\GameHud.cpp" />
     <ClCompile Include="Application\Game\UI\HpHudView.cpp" />
@@ -645,6 +646,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Game\Phase\PhaseTable.h" />
     <ClInclude Include="Application\Game\Phase\PhaseTableEditor.h" />
     <ClInclude Include="Application\Game\Upgrade\PlayerUpgrade.h" />
+    <ClInclude Include="Application\Game\Upgrade\UpgradeCardView.h" />
     <ClInclude Include="Application\Game\Upgrade\UpgradeSelectUI.h" />
     <ClInclude Include="Application\Game\UI\HudInput.h" />
     <ClInclude Include="Application\Game\UI\GameHud.h" />

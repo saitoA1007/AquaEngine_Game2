@@ -6,7 +6,7 @@
 #include <string>
 using namespace GameEngine;
 
-UpgradeSelectUI::UpgradeSelectUI(InputCommand* inputCommand, FontManager* fontManager, uint32_t whiteTextureHandle, const PlayerUpgrade* upgrade)
+UpgradeSelectUI::UpgradeSelectUI(InputCommand* inputCommand, FontManager* fontManager, const UpgradeSelectTextures& textures, const PlayerUpgrade* upgrade)
     : inputCommand_(inputCommand), upgrade_(upgrade) {
 
     // フォントが見つからなければ例外にする
@@ -16,59 +16,82 @@ UpgradeSelectUI::UpgradeSelectUI(InputCommand* inputCommand, FontManager* fontMa
     }
 
     RegisterDebugParameters();
-    CreateViews(font, whiteTextureHandle);
+    CreateHeaderViews(font, textures);
+    CreateCards(font, textures);
+    RefreshTexts();
 }
 
 void UpgradeSelectUI::RegisterDebugParameters() {
     debugParam_ = std::make_unique<DebugParameter>("UpgradeSelectUI");
-    debugParam_->Register("confirmLockTime", confirmLockTime_, 0);
+    RegisterMotionParameters();
+    RegisterShardParameters();
+    RegisterColorParameters();
     debugParam_->Apply();
 }
 
-void UpgradeSelectUI::CreateViews(const Font* font, uint32_t whiteTextureHandle) {
+void UpgradeSelectUI::RegisterMotionParameters() {
+    const std::string kMotionGroup = "Motion";
+
+    debugParam_->Register("assembleTime", style_.assembleTime, 0, kMotionGroup);
+    debugParam_->Register("cardStagger", style_.cardStagger, 1, kMotionGroup);
+    debugParam_->Register("scatterDistance", style_.scatterDistance, 2, kMotionGroup);
+    debugParam_->Register("scatterRotation", style_.scatterRotation, 3, kMotionGroup);
+    debugParam_->Register("textFadeTime", style_.textFadeTime, 4, kMotionGroup);
+    debugParam_->Register("textRiseDistance", style_.textRiseDistance, 5, kMotionGroup);
+    debugParam_->Register("selectedScale", style_.selectedScale, 6, kMotionGroup);
+    debugParam_->Register("lightPeriod", style_.lightPeriod, 7, kMotionGroup);
+}
+
+void UpgradeSelectUI::RegisterShardParameters() {
+    const std::string kShardGroup = "Shard";
+
+    debugParam_->Register("shardAngle", style_.shardAngle, 0, kShardGroup);
+    debugParam_->Register("shardColumns", style_.shardColumns, 1, kShardGroup);
+    debugParam_->Register("shardRows", style_.shardRows, 2, kShardGroup);
+    debugParam_->Register("shardJitter", style_.shardJitter, 3, kShardGroup);
+}
+
+void UpgradeSelectUI::RegisterColorParameters() {
+    const std::string kColorGroup = "Color";
+
+    debugParam_->Register("plateColor", style_.plateColor, 0, kColorGroup);
+    debugParam_->Register("plateSelectedColor", style_.plateSelectedColor, 1, kColorGroup);
+    debugParam_->Register("frameColor", style_.frameColor, 2, kColorGroup);
+    debugParam_->Register("frameSelectedColor", style_.frameSelectedColor, 3, kColorGroup);
+    debugParam_->Register("lightColor", style_.lightColor, 4, kColorGroup);
+    debugParam_->Register("dividerColor", style_.dividerColor, 5, kColorGroup);
+    debugParam_->Register("textColor", style_.textColor, 6, kColorGroup);
+    debugParam_->Register("shadowColor", style_.shadowColor, 7, kColorGroup);
+    debugParam_->Register("shadowOffset", style_.shadowOffset, 8, kColorGroup);
+}
+
+void UpgradeSelectUI::CreateHeaderViews(const Font* font, const UpgradeSelectTextures& textures) {
     // 画面全体を覆う暗い板
     dimSprite_ = std::make_unique<Sprite>(Vector2{ 0.0f, 0.0f }, Vector2{ kScreenWidth, kScreenHeight }, Vector2{ 0.0f, 0.0f }, Vector4{ 0.0f, 0.0f, 0.0f, 0.65f });
-    dimSprite_->textureHandle_ = whiteTextureHandle;
+    dimSprite_->textureHandle_ = textures.white;
+
+    // 見出しの下の区切り線（画像は2倍の解像度で、表示は640x32）
+    dividerSprite_ = std::make_unique<Sprite>(Vector2{ kScreenWidth * 0.5f, kDividerY }, Vector2{ 640.0f, 32.0f }, Vector2{ 0.5f, 0.5f }, style_.dividerColor);
+    dividerSprite_->textureHandle_ = textures.divider;
 
     // 見出しと操作の案内
-    titleText_ = std::make_unique<Text>(font, "強化を選んでください", 16);
-    titleText_->position_ = { kScreenWidth * 0.5f, 90.0f };
-    titleText_->scale_ = { 44.0f, 44.0f };
-    titleText_->anchorPoint_ = { 0.5f, 0.5f };
+    titleText_ = std::make_unique<ShadowedText>(font, "強化を選んでください", 16, 44.0f);
+    hintText_ = std::make_unique<ShadowedText>(font, "左右で選ぶ    Aで決定", 24, 28.0f);
+}
 
-    hintText_ = std::make_unique<Text>(font, "左右で選ぶ    Aで決定", 24);
-    hintText_->position_ = { kScreenWidth * 0.5f, 640.0f };
-    hintText_->scale_ = { 28.0f, 28.0f };
-    hintText_->anchorPoint_ = { 0.5f, 0.5f };
-
-    // 横に並べた3枚のカード
+void UpgradeSelectUI::CreateCards(const Font* font, const UpgradeSelectTextures& textures) {
     float totalWidth = kCardWidth * static_cast<float>(kCardCount) + kCardGap * static_cast<float>(kCardCount - 1);
     float firstCenterX = (kScreenWidth - totalWidth) * 0.5f + kCardWidth * 0.5f;
     for (int32_t i = 0; i < kCardCount; ++i) {
         size_t index = static_cast<size_t>(i);
         UpgradeType type = static_cast<UpgradeType>(i);
         float centerX = firstCenterX + (kCardWidth + kCardGap) * static_cast<float>(i);
-
-        cardSprites_[index] = std::make_unique<Sprite>(Vector2{ centerX, kCardCenterY }, Vector2{ kCardWidth, kCardHeight }, Vector2{ 0.5f, 0.5f }, Vector4{ 0.1f, 0.15f, 0.2f, 0.9f });
-        cardSprites_[index]->textureHandle_ = whiteTextureHandle;
-
-        nameTexts_[index] = std::make_unique<Text>(font, PlayerUpgrade::GetName(type), 8);
-        nameTexts_[index]->position_ = { centerX, kCardCenterY - 100.0f };
-        nameTexts_[index]->scale_ = { 48.0f, 48.0f };
-        nameTexts_[index]->anchorPoint_ = { 0.5f, 0.5f };
-
-        descriptionTexts_[index] = std::make_unique<Text>(font, "", 24);
-        descriptionTexts_[index]->position_ = { centerX, kCardCenterY };
-        descriptionTexts_[index]->scale_ = { 26.0f, 26.0f };
-        descriptionTexts_[index]->anchorPoint_ = { 0.5f, 0.5f };
-
-        countTexts_[index] = std::make_unique<Text>(font, "", 16);
-        countTexts_[index]->position_ = { centerX, kCardCenterY + 120.0f };
-        countTexts_[index]->scale_ = { 28.0f, 28.0f };
-        countTexts_[index]->anchorPoint_ = { 0.5f, 0.5f };
+        cards_[index] = std::make_unique<UpgradeCardView>(font, textures, &style_, Vector2{ centerX, kCardCenterY }, PlayerUpgrade::GetName(type));
     }
+}
 
-    RefreshTexts();
+bool UpgradeSelectUI::IsAssembled() const {
+    return openTimer_ >= style_.assembleTime;
 }
 
 void UpgradeSelectUI::Open() {
@@ -80,8 +103,15 @@ void UpgradeSelectUI::Open() {
     needReleaseA_ = true;
     needNeutral_ = true;
 
+    // カードは左から順に、少しずつ遅れて組み上がる。最後のカードが、全体の長さで組み上がる
+    float staggerTotal = style_.cardStagger * static_cast<float>(kCardCount - 1);
+    float duration = style_.assembleTime - staggerTotal;
+    for (int32_t i = 0; i < kCardCount; ++i) {
+        cards_[static_cast<size_t>(i)]->Start(style_.cardStagger * static_cast<float>(i), duration);
+    }
+
     RefreshTexts();
-    UpdateCardViews();
+    UpdateViews(0.0f);
 }
 
 void UpgradeSelectUI::Update() {
@@ -92,12 +122,13 @@ void UpgradeSelectUI::Update() {
 
     // 動きは止まらない時間で進める（ゲームの時間は止まっている）
     float deltaTime = FpsCounter::GetDeltaTime();
+    openTimer_ += deltaTime;
 
     UpdateCursor();
-    UpdateConfirm(deltaTime);
+    UpdateConfirm();
 
     // 決定でこの画面が閉じた（または開き直した）場合も、現在の状態を表示用に整える
-    UpdateCardViews();
+    UpdateViews(deltaTime);
 }
 
 void UpgradeSelectUI::UpdateCursor() {
@@ -109,7 +140,9 @@ void UpgradeSelectUI::UpdateCursor() {
         needNeutral_ = false;
         return;
     }
-    if (needNeutral_ || (isLeft && isRight)) {
+
+    // 組み上がるまではカーソルを動かさない
+    if (!IsAssembled() || needNeutral_ || (isLeft && isRight)) {
         return;
     }
 
@@ -121,14 +154,14 @@ void UpgradeSelectUI::UpdateCursor() {
     needNeutral_ = true;
 }
 
-void UpgradeSelectUI::UpdateConfirm(float deltaTime) {
-    openTimer_ += deltaTime;
-
+void UpgradeSelectUI::UpdateConfirm() {
     // 開いた時点でAを押していた場合は、一度離すまで受け付けない
     if (needReleaseA_ && !inputCommand_->IsCommandActive(kHoldCommand)) {
         needReleaseA_ = false;
     }
-    if (needReleaseA_ || openTimer_ < confirmLockTime_) {
+
+    // 組み上がるまでは決定を受け付けない
+    if (needReleaseA_ || !IsAssembled()) {
         return;
     }
     if (!inputCommand_->IsCommandActive(kConfirmCommand)) {
@@ -144,32 +177,22 @@ void UpgradeSelectUI::UpdateConfirm(float deltaTime) {
 
 void UpgradeSelectUI::RefreshTexts() {
     for (int32_t i = 0; i < kCardCount; ++i) {
-        size_t index = static_cast<size_t>(i);
         UpgradeType type = static_cast<UpgradeType>(i);
-        descriptionTexts_[index]->SetText(upgrade_->GetDescription(type));
-        countTexts_[index]->SetText("取得 " + std::to_string(upgrade_->GetCount(type)) + " 回");
+        cards_[static_cast<size_t>(i)]->SetTexts(upgrade_->GetDescription(type), "取得 " + std::to_string(upgrade_->GetCount(type)) + " 回");
     }
 }
 
-void UpgradeSelectUI::UpdateCardViews() {
+void UpgradeSelectUI::UpdateViews(float deltaTime) {
     for (int32_t i = 0; i < kCardCount; ++i) {
-        size_t index = static_cast<size_t>(i);
-
-        // 選んでいるカードは明るく、少し大きくする
-        bool isSelected = (i == cursor_);
-        cardSprites_[index]->color_ = isSelected ? Vector4{ 0.25f, 0.55f, 0.75f, 0.95f } : Vector4{ 0.1f, 0.15f, 0.2f, 0.9f };
-        float scale = isSelected ? 1.08f : 1.0f;
-        cardSprites_[index]->scale_ = { scale, scale };
-        cardSprites_[index]->Update();
-
-        nameTexts_[index]->Update();
-        descriptionTexts_[index]->Update();
-        countTexts_[index]->Update();
+        cards_[static_cast<size_t>(i)]->Update(deltaTime, i == cursor_);
     }
 
+    // 見出しと案内は、開いた時点からそのまま出す
     dimSprite_->Update();
-    titleText_->Update();
-    hintText_->Update();
+    dividerSprite_->color_ = style_.dividerColor;
+    dividerSprite_->Update();
+    titleText_->Update({ kScreenWidth * 0.5f, kTitleY }, style_, 1.0f);
+    hintText_->Update({ kScreenWidth * 0.5f, kHintY }, style_, 1.0f);
 }
 
 void UpgradeSelectUI::Draw() {
@@ -177,17 +200,15 @@ void UpgradeSelectUI::Draw() {
         return;
     }
 
-    // 暗い板、カード、文字の順に重ねる
+    // 暗い板、区切り線、カードの順に重ねてから、文字を重ねる
     renderQueue_->SubmitSprite(dimSprite_.get());
-    for (std::unique_ptr<Sprite>& card : cardSprites_) {
-        renderQueue_->SubmitSprite(card.get());
+    renderQueue_->SubmitSprite(dividerSprite_.get());
+    for (std::unique_ptr<UpgradeCardView>& card : cards_) {
+        card->DrawSprites(renderQueue_);
     }
-    renderQueue_->SubmitText(titleText_.get());
-    renderQueue_->SubmitText(hintText_.get());
-    for (int32_t i = 0; i < kCardCount; ++i) {
-        size_t index = static_cast<size_t>(i);
-        renderQueue_->SubmitText(nameTexts_[index].get());
-        renderQueue_->SubmitText(descriptionTexts_[index].get());
-        renderQueue_->SubmitText(countTexts_[index].get());
+    titleText_->Draw(renderQueue_);
+    hintText_->Draw(renderQueue_);
+    for (std::unique_ptr<UpgradeCardView>& card : cards_) {
+        card->DrawTexts(renderQueue_);
     }
 }

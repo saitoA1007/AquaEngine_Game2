@@ -288,6 +288,9 @@
     <ClCompile Include="Application\Game\Upgrade\PlayerUpgrade.cpp">
       <Filter>Application\Game\Upgrade</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Game\Upgrade\UpgradeCardView.cpp">
+      <Filter>Application\Game\Upgrade</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Game\Upgrade\UpgradeSelectUI.cpp">
       <Filter>Application\Game\Upgrade</Filter>
     </ClCompile>
@@ -900,6 +903,9 @@
       <Filter>Application\Game\Phase</Filter>
     </ClInclude>
     <ClInclude Include="Application\Game\Upgrade\PlayerUpgrade.h">
+      <Filter>Application\Game\Upgrade</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Upgrade\UpgradeCardView.h">
       <Filter>Application\Game\Upgrade</Filter>
     </ClInclude>
     <ClInclude Include="Application\Game\Upgrade\UpgradeSelectUI.h">

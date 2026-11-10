@@ -81,6 +81,9 @@ private: // アセット
 	// HPアイコン（3D）のモデル。枠・核・欠片
 	HpHudModels hpHudModels_;
 
+	// 強化の選択画面で使う画像のハンドル
+	UpgradeSelectTextures upgradeSelectTextures_;
+
 private: // ゲームの状態
 
 	// プレイヤーの強化値（Playerが参照する）。強化前の移動速度とPlayerUpgradeの回数から毎フレーム求め直す
