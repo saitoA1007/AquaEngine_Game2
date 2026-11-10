@@ -66,7 +66,7 @@ namespace GameEngine {
 		// 指定メッシュを衝撃点周りでランタイムカットし、その結果でこのインスタンスを構築する
 		void ApplyRuntimeCut(const Fragment& source, const Vector3& impactPos, float craterRadius, int numSites,int planeCount);
 
-		const CD3DX12_GPU_DESCRIPTOR_HANDLE& GetInstancingSrvGPU() const { return buffer_.GetSrvGpuHandle(); }
+		CD3DX12_GPU_DESCRIPTOR_HANDLE GetInstancingSrvGPU() const { return buffer_.GetSrvGpuHandle(); }
 
 		/// <summary>
 		/// 描画するモデルの数

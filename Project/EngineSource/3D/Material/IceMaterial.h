@@ -63,7 +63,7 @@ namespace GameEngine {
 		D3D12_GPU_VIRTUAL_ADDRESS GetGpuVirtualAddress() const { return materialBuffer_.GetGpuVirtualAddress(); }
 		StructuredBuffer<IceMaterialData>& GetMaterialBuffer() { return materialBuffer_; }
 
-		const uint32_t& GetMaterialSrvIndex() const { return materialBuffer_.GetSrvIndex(); }
+		uint32_t GetMaterialSrvIndex() const { return materialBuffer_.GetSrvIndex(); }
 
 	public:
 

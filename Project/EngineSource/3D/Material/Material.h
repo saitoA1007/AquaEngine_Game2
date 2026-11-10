@@ -143,7 +143,7 @@ namespace GameEngine {
 		D3D12_GPU_VIRTUAL_ADDRESS GetGpuVirtualAddress() const { return materialBuffer_.GetGpuVirtualAddress(); }
 		StructuredBuffer<MaterialData>& GetMaterialBuffer() { return materialBuffer_; }
 
-		const uint32_t& GetMaterialSrvIndex() const { return materialBuffer_.GetSrvIndex(); }
+		uint32_t GetMaterialSrvIndex() const { return materialBuffer_.GetSrvIndex(); }
 
 		void SetTextureName(const std::string& name) {
 			textureName_ = name;
