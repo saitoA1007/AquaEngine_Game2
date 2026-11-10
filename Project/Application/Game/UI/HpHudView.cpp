@@ -43,8 +43,7 @@ void HpHudView::SetUpShards() {
         shardShapes_.push_back({ chunk.info.centroid, halfSize.Length() });
     }
 
-    // 破片の描画はモデル自身のマテリアルを使う。UIは平らな色で見せたいので、光を切る
-    // （Fracture.PS.hlslがenableLightingを見るようになるまでは、陰影が付いたまま描かれる。docs/ai/FeatureGaps.md）
+    // 破片の描画はモデル自身のマテリアルを使う。UIは平らな色で見せたいので、光を切る（Fracture.PS.hlslはenableLightingが0なら光を計算しない）
     shardMaterial_ = models_.shard->GetMaterial(chunks.front().materialName);
     if (shardMaterial_ == nullptr) {
         throw std::runtime_error("HpHudView: shard model material is missing");
