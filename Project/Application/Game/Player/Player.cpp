@@ -5,8 +5,8 @@
 #include <cmath>
 using namespace GameEngine;
 
-Player::Player(Model* model, Model* discModel, InputCommand* inputCommand, const Field* field, const PlayerStats* stats)
-    : inputCommand_(inputCommand), field_(field), stats_(stats), modelComponent_(model), iceAreaView_(discModel) {
+Player::Player(Model* model, const IceAreaAssets& iceAreaAssets, InputCommand* inputCommand, const Field* field, const PlayerStats* stats)
+    : inputCommand_(inputCommand), field_(field), stats_(stats), modelComponent_(model), iceAreaView_(iceAreaAssets) {
 
     RegisterDebugParameters();
 
@@ -17,7 +17,6 @@ void Player::RegisterDebugParameters() {
     debugParam_ = std::make_unique<DebugParameter>("Player");
     debugParam_->Register("radius", radius_);
     debugParam_->Register("color", color_);
-    debugParam_->Register("iceAreaColor", iceAreaColor_);
     debugParam_->Register("initialHp", initialHp_);
     debugParam_->Register("invincibleTime", invincibleTime_);
     debugParam_->Register("blinkInterval", blinkInterval_);
@@ -89,6 +88,9 @@ Vector3 Player::GetMoveDirection() const {
 void Player::Update() {
     debugParam_->ApplyIfDirty();
     modelComponent_.materialData_->color = color_;
+
+    // 氷エリアの結晶の回転と、発動時の光の時間を進める
+    iceAreaView_.Update(FpsCounter::GetGameDeltaTime());
 
     // 無敵時間を進める
     invincibleTimer_ = (std::max)(invincibleTimer_ - FpsCounter::GetGameDeltaTime(), 0.0f);
@@ -184,6 +186,9 @@ void Player::FireIceMist() {
     chargeTimer_ = 0.0f;
     cooldownTimer_ = mistCooldownTime_;
 
+    // 氷霧の範囲の縁から光の輪を広げる
+    iceAreaView_.PlayBurst(position_, info.radius);
+
     if (iceMistCallback_) {
         iceMistCallback_(info);
     }
@@ -214,7 +219,7 @@ void Player::ApplyPushback(const Vector3& offset) {
 
 void Player::Draw() {
     // 氷エリアはプレイヤーを中心に常に描く
-    iceAreaView_.Draw(renderQueue_, position_, currentIceAreaRadius_, iceAreaColor_);
+    iceAreaView_.Draw(renderQueue_, position_, currentIceAreaRadius_);
 
     // 無敵時間中は、点滅の間隔ごとに自機の描画を飛ばす（経過時間の奇数番目の間隔だけ描かない）
     if (IsInvincible()) {

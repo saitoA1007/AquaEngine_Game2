@@ -1,0 +1,60 @@
+{
+    "IceAreaView": {
+        "Burst": {
+            "burstBrightness": 1.5,
+            "burstSpread": 3.0,
+            "burstTime": 0.4000000059604645,
+            "edgeFlashBoost": 0.800000011920929
+        },
+        "Edge": {
+            "edgeBrightness": 1.0,
+            "edgeColor": [
+                0.0,
+                0.5,
+                1.0,
+                0.800000011920929
+            ],
+            "edgeLineColor": [
+                1.0,
+                1.0,
+                1.0,
+                0.8999999761581421
+            ],
+            "edgeLineWidth": 0.05999999865889549,
+            "edgeSegmentLength": 1.0,
+            "edgeWidth": 0.44999998807907104,
+            "layerLift": 0.019999999552965164
+        },
+        "Flake": {
+            "flakeBrightness": 1.0,
+            "flakeColor": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "flakeInset": 0.75,
+            "flakeSize": 0.8999999761581421,
+            "flakeSmallRatio": 0.6000000238418579,
+            "flakeSpacing": 1.2999999523162842,
+            "flakeSpinSpeed": 0.25
+        },
+        "SceneName": "Game",
+        "Slab": {
+            "highlightOffset": [
+                -0.4000000059604645,
+                0.0,
+                0.4000000059604645
+            ],
+            "highlightSize": 0.0,
+            "highlightStrength": 0.5,
+            "slabColor": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "slabThickness": 0.20000000298023224
+        }
+    }
+}

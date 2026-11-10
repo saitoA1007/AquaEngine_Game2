@@ -80,6 +80,7 @@ private: // アセット
 
 	// HPアイコン（3D）のモデル。枠・核・欠片
 	HpHudModels hpHudModels_;
+	IceAreaAssets iceAreaAssets_;   // 氷エリアの描画に使うモデルとテクスチャ
 
 	// 強化の選択画面で使う画像のハンドル
 	UpgradeSelectTextures upgradeSelectTextures_;

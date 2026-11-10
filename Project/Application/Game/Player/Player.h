@@ -22,11 +22,11 @@ public:
     /// 見た目・入力・フィールド・強化値を参照する。
     /// </summary>
     /// <param name="model">自機の見た目に使うモデル。管理クラスが所有する。</param>
-    /// <param name="discModel">氷エリアの仮描画に使う球モデル。管理クラスが所有する。</param>
+    /// <param name="iceAreaAssets">氷エリアの描画に使うモデルとテクスチャ。モデルは管理クラスが所有する。</param>
     /// <param name="inputCommand">入力機能。シーンが所有する。</param>
     /// <param name="field">移動制限に使うフィールド。GameObjectManagerが所有し、シーン終了まで有効。</param>
     /// <param name="stats">移動速度などの強化値。GameSceneが所有する。</param>
-    Player(GameEngine::Model* model, GameEngine::Model* discModel, GameEngine::InputCommand* inputCommand, const Field* field, const PlayerStats* stats);
+    Player(GameEngine::Model* model, const IceAreaAssets& iceAreaAssets, GameEngine::InputCommand* inputCommand, const Field* field, const PlayerStats* stats);
     ~Player() override = default;
 
     void Initialize() override;
@@ -136,7 +136,6 @@ private:
     float mistCooldownTime_ = 0.1f;   // 氷霧を出した後の共通のクールタイム（秒）。単押し・長押しとも同じ。この間は次の氷霧を出せない。移動は止まらない（仮）
     float tapPower_ = 0.8f;           // 単押しの威力（敵の氷ゲージへ足す量）（仮）
     float maxChargePower_ = 3.0f;     // フルチャージの威力（仮）
-    Vector3 iceAreaColor_ = { 0.08f, 0.25f, 0.40f }; // 氷エリアの仮描画の色（不透明）
     int32_t initialHp_ = 3;        // 初期HP
     float invincibleTime_ = 1.0f;  // 被弾後の無敵時間（秒）（仮）
     float blinkInterval_ = 0.1f;   // 無敵時間中の点滅の間隔（秒）。この間隔ごとに描画する・しないを切り替える
@@ -165,7 +164,7 @@ private:
 
     // 描画
     GameEngine::ModelComponent modelComponent_;
-    IceAreaView iceAreaView_; // 氷エリアの仮描画。差し替え可能
+    IceAreaView iceAreaView_; // 氷エリアの見た目。差し替え可能
 
     // 調整値の機能
     std::unique_ptr<GameEngine::DebugParameter> debugParam_;

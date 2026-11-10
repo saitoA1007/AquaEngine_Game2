@@ -113,6 +113,14 @@ void GameScene::LoadAssets() {
 	hpHudModels_.core = modelManager_->GetNameByModel("hpCore.gltf");
 	hpHudModels_.shard = modelManager_->GetNameByModel("hpCoreShard.gltf");
 
+	// 氷エリアのモデルと画像を取得する（Resources/Models/IceArea、Resources/Textures/IceArea）
+	iceAreaAssets_.slab = modelManager_->GetNameByModel("iceAreaSlab.gltf");
+	iceAreaAssets_.plane = modelManager_->GetNameByModel("planeXZ.obj");
+	iceAreaAssets_.slabTexture = textureManager_->GetHandleByName("iceAreaSlabStylized.png");
+	iceAreaAssets_.slabHighlight = textureManager_->GetHandleByName("iceAreaSlabHighlight.png");
+	iceAreaAssets_.rimLine = textureManager_->GetHandleByName("iceAreaRimLine.png");
+	iceAreaAssets_.snowflake = textureManager_->GetHandleByName("iceAreaSnowflake.png");
+
 	// 強化の選択画面の画像を取得する（Resources/Textures/UI/Upgrade）
 	upgradeSelectTextures_.white = whiteTextureHandle_;
 	upgradeSelectTextures_.plate = textureManager_->GetHandleByName("UpgradeCardPlate.png");
@@ -128,11 +136,17 @@ void GameScene::LoadAssets() {
 	assert(hpHudModels_.frame != nullptr);
 	assert(hpHudModels_.core != nullptr);
 	assert(hpHudModels_.shard != nullptr);
+	assert(iceAreaAssets_.slab != nullptr);
+	assert(iceAreaAssets_.plane != nullptr);
 
 	// 画像は取得できないと0が返るため、0でないことを確認する
 	assert(upgradeSelectTextures_.plate != 0);
 	assert(upgradeSelectTextures_.frame != 0);
 	assert(upgradeSelectTextures_.light != 0);
+	assert(iceAreaAssets_.slabTexture != 0);
+	assert(iceAreaAssets_.slabHighlight != 0);
+	assert(iceAreaAssets_.rimLine != 0);
+	assert(iceAreaAssets_.snowflake != 0);
 	assert(upgradeSelectTextures_.divider != 0);
 }
 
@@ -171,7 +185,7 @@ void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
 	field_ = gameObjectManager_->AddObject<Field>(cylinderModel);
 
 	// プレイヤー
-	player_ = gameObjectManager_->AddObject<Player>(sphereModel, sphereModel, inputCommand_, field_, &playerStats_);
+	player_ = gameObjectManager_->AddObject<Player>(sphereModel, iceAreaAssets_, inputCommand_, field_, &playerStats_);
 
 	// 氷霧の発生を受け取る。氷霧の見た目と破片は敵より先に作る
 	iceMistEffect_ = gameObjectManager_->AddObject<IceMistEffect>(planeModel_, textureManager_);
