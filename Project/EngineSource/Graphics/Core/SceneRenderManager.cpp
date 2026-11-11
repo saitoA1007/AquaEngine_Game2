@@ -220,7 +220,7 @@ void SceneRenderManager::Execute3dRequest(const Draw3dRequest& request) {
         break;
 
     case Draw3dType::Fracture:
-        ModelRenderer::DrawFracture(request.model, *request.fractureInstance, fractureCommandSignature_, renderQueue_->GetLightResource());
+        ModelRenderer::DrawFracture(request.model, *request.fractureInstance, fractureCommandSignature_, renderQueue_->GetLightResource(), request.material);
         break;
 
     case Draw3dType::RuntimeCutFragments:
