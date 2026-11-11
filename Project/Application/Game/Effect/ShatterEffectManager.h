@@ -59,6 +59,7 @@ private:
         GameEngine::IceMaterial material;
         std::vector<uint32_t> chunkIds;          // 使う破片のID（最大kMaxChunks個）
         std::vector<Vector3> centroids;          // 破片の重心（回転の中心）
+        std::vector<float> chunkRadii;           // 破片の大きさ（重心から端までの最大距離。地面との接触に使う）
         Vector3 center = { 0.0f, 0.0f, 0.0f };   // 使う破片全体のバウンディングの中心
         float halfExtent = 1.0f;                 // 全体の中心から端までの最大距離（大きさの正規化に使う）
         std::string groupName;                   // 破壊グループ名
@@ -70,6 +71,8 @@ private:
         GameEngine::FractureInstance shell;
         bool isActive = false;
         float age = 0.0f; // 経過時間（秒）
+        float scale = 1.0f;  // 破片モデルをワールドへ拡大する倍率（速度・重力をモデル座標へ直すために使う）
+        float baseY = 0.0f;  // 破片モデルの原点のワールドの高さ（地面との接触に使う）
     };
 
 private:
@@ -91,7 +94,7 @@ private:
     /// <summary>
     /// インスタンスの状態だけを戻して、各破片の初速と回転を決める。バッファは再確保しない。
     /// </summary>
-    void LaunchShards(GameEngine::FractureInstance& instance, const ShardSet& set, const Vector3& position, float radius);
+    void LaunchShards(Slot& slot, const ShardSet& set, const Vector3& position, float radius);
 
     /// <summary>
     /// 空きスロットを探す。なければ一番古いスロットを返す。
@@ -104,9 +107,17 @@ private:
     void UpdateSlot(Slot& slot, float deltaTime);
 
     /// <summary>
-    /// 破片を動かして、インスタンスの行列を更新する。
+    /// 破片を動かして、インスタンスの行列を更新する。重力で落ち、地面で跳ねてから滑り、縮んで消える。
     /// </summary>
-    void UpdateShards(GameEngine::FractureInstance& instance, float deltaTime, float fadeScale);
+    void UpdateShards(Slot& slot, float deltaTime, float fadeScale);
+
+    /// <summary>
+    /// 1個の破片を地面に当てる。跳ね返って止まり、地面にある間は摩擦で滑りと回転が弱まる。
+    /// </summary>
+    /// <param name="state">破片の状態（モデル座標）</param>
+    /// <param name="centroidY">破片の重心のモデル座標での高さ</param>
+    /// <param name="chunkRadius">破片の大きさ（モデル座標）</param>
+    void CollideWithGround(const Slot& slot, GameEngine::FractureChunkState& state, float centroidY, float chunkRadius, float fadeScale, float deltaTime) const;
 
     /// <summary>
     /// 計測中の処理。常に指定数が砕け続けるよう補充し、フレーム時間を集める。
@@ -126,6 +137,10 @@ private:
     float lifetime_ = 1.5f;             // 破片が消えるまでの時間（秒）
     float fadeStartRatio_ = 0.5f;       // 寿命のどこから縮み始めるか（0から1）
     float shardSizeRatio_ = 0.15f;      // 破片の大きさの倍率（1で敵の大きさに収まる大きさ）
+    float gravity_ = 30.0f;             // 破片に掛かる重力（ワールド単位/秒の2乗）
+    float restitution_ = 0.35f;         // 地面で跳ね返る速さの割合（0で跳ねない）
+    float groundFriction_ = 4.0f;       // 地面にある間の摩擦（大きいほど早く滑りと回転が止まる。1/秒）
+    float restSpeed_ = 0.6f;            // 跳ね返りの速さがこれ以下なら跳ねずに地面に止まる（ワールド単位/秒）
     int32_t parallelThreshold_ = 8;     // 使用中のスロットがこの数以上のとき、更新を並列に行う（0以下で常に直列）
     Vector4 shellColor_ = { 0.6f, 0.85f, 1.0f, 1.0f };  // 殻の破片の色
     int32_t benchmarkCount_ = 50;       // 計測時に同時に砕く数

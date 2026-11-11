@@ -8,6 +8,8 @@
 #include "Model.h"
 #include "RefBuffer.h"
 #include "IceMaterial.h"
+#include "ParticleBehavior.h"
+#include "TextureManager.h"
 #include "WorldTransform.h"
 #include "Vector3.h"
 #include "Vector4.h"
@@ -33,17 +35,19 @@ public:
     /// 氷塊の見た目と、事前確保するプールを準備する。
     /// </summary>
     /// <param name="sphereModel">氷塊の仮の見た目に使う球モデル（"sphere.obj"）。管理クラスが所有し、このオブジェクトより長く生存する。</param>
+    /// <param name="planeModel">連鎖の軌跡と着弾の粒1枚の板に使うモデル（"plane.obj"）。管理クラスが所有し、このオブジェクトより長く生存する。</param>
+    /// <param name="textureManager">粒のテクスチャ取得用。コンストラクタの間だけ使う。</param>
     /// <param name="enemyManager">連鎖の標的と着弾の相手。シーンが所有し、このオブジェクトより長く生存する。</param>
-    IceShardManager(GameEngine::Model* sphereModel, EnemyManager* enemyManager);
+    IceShardManager(GameEngine::Model* sphereModel, GameEngine::Model* planeModel, GameEngine::TextureManager* textureManager, EnemyManager* enemyManager);
     ~IceShardManager() override = default;
 
     /// <summary>
-    /// 調整値の反映だけを行う。氷塊の更新はUpdateShardsで行う。
+    /// 調整値の反映と、軌跡・着弾の粒の更新だけを行う。氷塊の更新はUpdateShardsで行う。
     /// </summary>
     void Update() override;
 
     /// <summary>
-    /// 使用中の氷塊を描画キューへ登録する。
+    /// 使用中の氷塊と、軌跡・着弾の粒を描画キューへ登録する。
     /// </summary>
     void Draw() override;
 
@@ -96,6 +100,10 @@ private:
         Vector3 position = { 0.0f, 0.0f, 0.0f };
         float age = 0.0f;           // 地面に落ちてからの経過時間（秒）
         float orbitAngle = 0.0f;    // 所持中に回る位置の基準角（ラジアン）
+        Vector3 orbitAxisU = { 1.0f, 0.0f, 0.0f };  // 所持中の軌道の平面を張る1本目の単位ベクトル
+        Vector3 orbitAxisV = { 0.0f, 0.0f, 1.0f };  // 所持中の軌道の平面を張る2本目の単位ベクトル（U、Vで1個ずつ違う傾きの軌道になる）
+        float orbitSpeedScale = 1.0f;  // 所持中の回る速さの倍率（負なら逆向き）
+        float orbitRadiusScale = 1.0f; // 所持中の塊の半径に対する、この氷塊の軌道半径の割合
         int32_t volleyIndex = -1;   // 所属する連鎖（volleys_の番号）
         float launchDelay = 0.0f;   // 飛び始めるまでの残り時間（秒）
         size_t nextTarget = 0;      // 連鎖の順番のうち、次に探し始める位置
@@ -123,6 +131,26 @@ private:
     /// 氷塊の見た目（氷マテリアルと参照バッファ）を準備する。
     /// </summary>
     void CreateVisual();
+
+    /// <summary>
+    /// 連鎖の軌跡と着弾のパーティクルを作る。
+    /// </summary>
+    void CreateParticles(GameEngine::Model* planeModel, GameEngine::TextureManager* textureManager);
+
+    /// <summary>
+    /// 所持にする氷塊へ、塊の中での軌道（傾き・速さ・向き・半径）をランダムに割り当てる。
+    /// </summary>
+    void AssignOrbit(Shard& shard);
+
+    /// <summary>
+    /// 飛んでいる氷塊の位置から、軌跡の粒を1個出す。
+    /// </summary>
+    void EmitTrail(const Shard& shard);
+
+    /// <summary>
+    /// 着弾した位置で、氷の粒を弾けさせる。
+    /// </summary>
+    void EmitHit(const Vector3& position);
 
     /// <summary>
     /// 空きの氷塊を返す。なければ一番古い地面の氷塊を再利用する。どちらもなければnullptr。
@@ -166,9 +194,9 @@ private:
     void FinishShard(Shard& shard);
 
     /// <summary>
-    /// 所持中の周回位置を求める。
+    /// 所持中の位置を求める。プレイヤーの頭の上の小さな球の中を、氷塊ごとに違う軌道で回り、塊全体もゆっくり自転する。
     /// </summary>
-    Vector3 GetOrbitPosition(float orbitAngle) const;
+    Vector3 GetOrbitPosition(const Shard& shard) const;
 
     /// <summary>
     /// 範囲内の敵から連鎖の順番を作る。1個目は移動方向の最寄り、以降は直前の敵の最寄り。
@@ -196,9 +224,12 @@ private:
     float dropScatter_ = 0.6f;         // 落とす位置のばらつき（半径）
 
     // 調整値（所持の見た目）
-    float orbitRadius_ = 1.0f;         // 所持中に回る半径
-    float orbitHeight_ = 1.3f;         // 所持中に回る高さ
-    float orbitSpeed_ = 2.5f;          // 所持中に回る速さ（ラジアン/秒）
+    float orbitRadius_ = 0.3f;         // 所持中の塊（頭の上の球）の半径。氷塊の数が増えても変えない
+    float orbitHeight_ = 1.9f;         // 所持中の塊の中心の高さ
+    float orbitSpeed_ = 2.5f;          // 所持中に氷塊が回る基準の速さ（ラジアン/秒。氷塊ごとに倍率が掛かる）
+    float orbitSpeedVariation_ = 0.5f; // 氷塊ごとの速さの倍率のばらつき（1±この値。向きはランダムに逆になる）
+    float orbitSpinSpeed_ = 0.6f;      // 塊全体が縦軸で自転する速さ（ラジアン/秒）
+    float orbitMinRadiusRatio_ = 0.35f; // 氷塊の軌道半径の下限（塊の半径に対する割合。上限は1）
 
     // 調整値（連鎖）
     float aimHalfAngleDegrees_ = 45.0f; // 移動方向にいるとみなす角度の片側の広さ（度）
@@ -212,6 +243,7 @@ private:
 
     // 調整値（見た目）
     float shardScale_ = 0.25f;                                // 氷塊の大きさ（球の半径）
+    float hitEffectHeight_ = 1.1f;                            // 着弾の粒を出す高さ（ワールド。敵の殻の上側）
     Vector4 shardColor_ = { 0.6f, 0.85f, 1.0f, 1.0f };        // 氷塊の色
 
     // 定数
@@ -220,12 +252,17 @@ private:
     static constexpr float kMoveEpsilon = 0.1f;     // 移動方向の長さがこれ以下なら静止とみなす
     static constexpr float kGoldenAngle = 2.39996f; // 所持の位置をずらす角（ラジアン）
     static constexpr float kMinHopTime = 0.01f;     // 1区間の時間の下限（秒）
+    static constexpr uint32_t kMaxTrailParticles = 1024; // 軌跡の粒の同時数の上限
+    static constexpr uint32_t kMaxHitParticles = 256;    // 着弾の粒の同時数の上限
+    inline static const char* kTrailParticleName = "IceShardTrail"; // 軌跡の設定のJSONの名前
+    inline static const char* kHitParticleName = "IceShardHit";     // 着弾の設定のJSONの名前
 
     // 状態
     std::vector<Shard> shards_;
     std::vector<Volley> volleys_;
     int32_t orbitCounter_ = 0;      // 所持にした数（周回の基準角を散らすために使う）
     float orbitPhase_ = 0.0f;       // 所持の周回の回転量（ラジアン）
+    float orbitSpin_ = 0.0f;        // 塊全体の自転の回転量（ラジアン）
     Vector3 playerPosition_ = { 0.0f, 0.0f, 0.0f }; // 直近のプレイヤー位置（所持の周回の中心。表示と発射の起点のためだけにコピーを持つ）
     std::vector<EnemyTarget> candidates_;        // 発射時の範囲内の敵（使い回す）
     std::vector<EnemyTarget> remainingTargets_;  // 順番づけ中の未訪問の敵（使い回す）
@@ -235,6 +272,10 @@ private:
     EnemyManager* enemyManager_ = nullptr;
     GameEngine::Model* model_ = nullptr;
     std::function<void()> hitCallback_; // 命中の通知先（GameSceneが設定する）
+
+    // 描画（粒）
+    std::unique_ptr<GameEngine::ParticleBehavior> trailParticle_; // 連鎖で飛ぶ氷塊の軌跡（全氷塊で共有）
+    std::unique_ptr<GameEngine::ParticleBehavior> hitParticle_;   // 着弾で弾ける氷の粒
 
     // 描画
     GameEngine::WorldTransform drawTransform_; // 全個体で使い回す（行列は登録時に取り込まれる）

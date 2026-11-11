@@ -1,0 +1,42 @@
+{
+    "IceShardTrail": {
+        "SceneName": "Game",
+        "Emitter": {
+            "SpawnMaxCount": 1,
+            "SpawnCoolTime": 0.0,
+            "IsLoop": false,
+            "IsBillBoard": true,
+            "IsActiveBlendAdd": true,
+            "IsEmitByDistance": false,
+            "SpawnDistance": 0.5,
+            "Defalut": {
+                "LifeTime": 0.9,
+                "EmittePos": [0.0, 0.0, 0.0],
+                "Rotate": [0.0, 0.0, 0.0],
+                "Scale": [0.6, 0.6, 0.6],
+                "Color": [0.6, 0.9, 1.0, 0.8]
+            },
+            "TextureEmit": {
+                "Enable": true,
+                "Texture": { "_TextureName": "star_04.png" }
+            },
+            "LifeTimeEmit": {
+                "Enable": true,
+                "MinLifeTime": 0.8,
+                "MaxLifeTime": 1.0
+            }
+        },
+        "Particle": {
+            "SizeOverLifeTime": {
+                "Enable": true,
+                "EndSize": 0.0,
+                "SeparateAxes": false,
+                "SeparateAxesEndSize": [0.0, 0.0, 0.0]
+            },
+            "AlphaOverLifeTime": {
+                "Enable": true,
+                "EndAlpha": 0.0
+            }
+        }
+    }
+}

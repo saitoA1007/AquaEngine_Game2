@@ -1,0 +1,70 @@
+{
+    "IceMistBurst": {
+        "SceneName": "Game",
+        "Emitter": {
+            "SpawnMaxCount": 1,
+            "SpawnCoolTime": 0.0,
+            "IsLoop": false,
+            "IsBillBoard": false,
+            "IsActiveBlendAdd": true,
+            "IsEmitByDistance": false,
+            "SpawnDistance": 0.5,
+            "Defalut": {
+                "LifeTime": 1.0,
+                "EmittePos": [0.0, 0.0, 0.0],
+                "Rotate": [-1.5707963, 0.0, 0.0],
+                "Scale": [1.0, 1.0, 1.0],
+                "Color": [1.0, 1.0, 1.0, 1.0]
+            },
+            "TextureEmit": {
+                "Enable": true,
+                "Texture": { "_TextureName": "smoke.png" }
+            },
+            "DirectionEmit": {
+                "Enable": true,
+                "Direction": [1.0, 0.0, 0.0],
+                "MinSpeed": 42.75,
+                "MaxSpeed": 47.25,
+                "SpreadAngle": 0.0
+            },
+            "ColorEmit": {
+                "Enable": true,
+                "MinColor": [0.65, 0.88, 1.0, 0.18],
+                "MaxColor": [0.85, 0.96, 1.0, 0.28]
+            },
+            "LifeTimeEmit": {
+                "Enable": true,
+                "MinLifeTime": 0.9,
+                "MaxLifeTime": 1.1
+            },
+            "ScaleEmit": {
+                "Enable": true,
+                "SeparateAxes": false,
+                "RangeScale": { "_Min": [0.7, 0.7, 0.7], "_Max": [1.1, 1.1, 1.1] }
+            }
+        },
+        "Particle": {
+            "VelocityOverLifeTime": {
+                "Enable": true,
+                "EndVelocity": [0.0, 0.0, 0.0],
+                "EaseCurve": {
+                    "_EaseCurve": [
+                        { "time": 0.0, "value": 0.0, "inTangent": 0.0, "outTangent": 5.0, "mode": "Broken" },
+                        { "time": 0.4, "value": 1.0, "inTangent": 0.0, "outTangent": 0.0, "mode": "Broken" },
+                        { "time": 1.0, "value": 1.0, "inTangent": 0.0, "outTangent": 0.0, "mode": "Broken" }
+                    ]
+                }
+            },
+            "SizeOverLifeTime": {
+                "Enable": true,
+                "EndSize": 2.2,
+                "SeparateAxes": false,
+                "SeparateAxesEndSize": [0.0, 0.0, 0.0]
+            },
+            "AlphaOverLifeTime": {
+                "Enable": true,
+                "EndAlpha": 0.0
+            }
+        }
+    }
+}

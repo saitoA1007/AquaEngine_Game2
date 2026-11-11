@@ -70,7 +70,7 @@ private: // アセット
 	GameEngine::Model* cylinderModel_ = nullptr; // フィールドの地面と縁
 	GameEngine::Model* sphereModel_ = nullptr;   // プレイヤーの仮の見た目
 	GameEngine::Model* planeModel_ = nullptr;    // 氷霧のパーティクルの板
-	GameEngine::Model* shellShardModel_ = nullptr;  // 氷の殻の破片（8分割）
+	GameEngine::Model* shellShardModel_ = nullptr;  // 氷の殻の破片（球の殻を12個に割ったモデル）
 
 	// 背景のテクスチャハンドル
 	uint32_t skyboxTextureHandle_ = 0;
@@ -115,7 +115,7 @@ private: // ゲームの状態
 private: // 定数
 
 	// 破片モデルの名前（拡張子つき。モデルはファイル名で取得する）
-	inline static const char* kShellShardModelName = "CellFractureCube8.gltf";
+	inline static const char* kShellShardModelName = "IceShellShard12.gltf";
 
 private: // 調整値
 

@@ -51,6 +51,10 @@ void ShatterEffectManager::RegisterDebugParameters() {
     debugParam_->Register("fadeStartRatio", fadeStartRatio_, 4, kMotionGroup);
     debugParam_->Register("shardSizeRatio", shardSizeRatio_, 5, kMotionGroup);
     debugParam_->Register("parallelThreshold", parallelThreshold_, 6, kMotionGroup);
+    debugParam_->Register("gravity", gravity_, 7, kMotionGroup);
+    debugParam_->Register("restitution", restitution_, 8, kMotionGroup);
+    debugParam_->Register("groundFriction", groundFriction_, 9, kMotionGroup);
+    debugParam_->Register("restSpeed", restSpeed_, 10, kMotionGroup);
 
     // 色
     debugParam_->Register("shellColor", shellColor_, 0, kColorGroup);
@@ -96,6 +100,10 @@ void ShatterEffectManager::SetUpShardSet(ShardSet& set, Model* model) {
         const FractureChunkEntry& chunk = chunks[i * chunks.size() / count];
         set.chunkIds.push_back(chunk.info.chunkId);
         set.centroids.push_back(chunk.info.centroid);
+
+        // 破片の大きさは、バウンディングの半分の幅の最大値で近似する（地面に置いたときの高さに使う）
+        Vector3 chunkExtent = (chunk.info.aabb.max - chunk.info.aabb.min) * 0.5f;
+        set.chunkRadii.push_back((std::max)({ chunkExtent.x, chunkExtent.y, chunkExtent.z }));
     }
 
     // 破片の描画は氷用なので、氷マテリアルをモデルのバッファへ設定する
@@ -119,11 +127,17 @@ void ShatterEffectManager::AllocateSlots() {
     }
 }
 
-void ShatterEffectManager::LaunchShards(FractureInstance& instance, const ShardSet& set, const Vector3& position, float radius) {
+void ShatterEffectManager::LaunchShards(Slot& slot, const ShardSet& set, const Vector3& position, float radius) {
+    FractureInstance& instance = slot.shell;
+
     // モデルを大きさradiusの球に収めたうえで、破片のサイズ倍率を掛け、中心を砕けた位置へ合わせる
     float scale = radius * shardSizeRatio_ / set.halfExtent;
     Vector3 translate = { position.x - set.center.x * scale, radius - set.center.y * scale, position.z - set.center.z * scale };
     instance.SetParentWorldMatrix(Math::MakeWorldMatrixFromEulerRotation(translate, { 0.0f, 0.0f, 0.0f }, { scale, scale, scale }));
+
+    // 地面との接触と重力の計算のため、拡大倍率と原点の高さを覚える
+    slot.scale = scale;
+    slot.baseY = translate.y;
 
     constexpr float kTwoPi = 2.0f * std::numbers::pi_v<float>;
     for (FractureChunkState& state : instance.GetTransformDatas()) {
@@ -165,7 +179,7 @@ void ShatterEffectManager::Spawn(const Vector3& position, float shellRadius) {
     slot.isActive = true;
     slot.age = 0.0f;
 
-    LaunchShards(slot.shell, shellSet_, position, shellRadius);
+    LaunchShards(slot, shellSet_, position, shellRadius);
 }
 
 void ShatterEffectManager::Update() {
@@ -219,16 +233,52 @@ void ShatterEffectManager::UpdateSlot(Slot& slot, float deltaTime) {
         fadeScale = (std::max)(1.0f - t * t, 0.001f);
     }
 
-    UpdateShards(slot.shell, deltaTime, fadeScale);
+    UpdateShards(slot, deltaTime, fadeScale);
 }
 
-void ShatterEffectManager::UpdateShards(FractureInstance& instance, float deltaTime, float fadeScale) {
-    for (FractureChunkState& state : instance.GetTransformDatas()) {
+void ShatterEffectManager::UpdateShards(Slot& slot, float deltaTime, float fadeScale) {
+    FractureInstance& instance = slot.shell;
+
+    // 重力はワールドの値なので、破片のモデル座標へ直す
+    float modelGravity = gravity_ / slot.scale;
+
+    std::vector<FractureChunkState>& states = instance.GetTransformDatas();
+    for (size_t c = 0; c < states.size(); ++c) {
+        FractureChunkState& state = states[c];
+
+        state.velocity.y -= modelGravity * deltaTime;
         state.transform.translate += state.velocity * deltaTime;
         state.transform.rotate += state.angularVelocity * deltaTime;
         state.transform.scale = { fadeScale, fadeScale, fadeScale };
+
+        // 地面との接触（重心の高さは、モデル座標での重心＋移動量）
+        float centroidY = shellSet_.centroids[c].y + state.transform.translate.y;
+        CollideWithGround(slot, state, centroidY, shellSet_.chunkRadii[c], fadeScale, deltaTime);
     }
     instance.Update();
+}
+
+void ShatterEffectManager::CollideWithGround(const Slot& slot, FractureChunkState& state, float centroidY, float chunkRadius, float fadeScale, float deltaTime) const {
+    // 重心がこの高さより下に行ったら地面に埋まっている（縮んだ分だけ低く置ける）。地面はワールドのy=0
+    float minCentroidY = -slot.baseY / slot.scale + chunkRadius * fadeScale;
+    if (centroidY >= minCentroidY) {
+        return;
+    }
+
+    // 埋まった分を地面の上へ戻す
+    state.transform.translate.y += minCentroidY - centroidY;
+
+    // 落下中なら跳ね返る。弱いときは跳ねずに止まる
+    if (state.velocity.y < 0.0f) {
+        float bounceSpeed = -state.velocity.y * restitution_;
+        state.velocity.y = (bounceSpeed * slot.scale > restSpeed_) ? bounceSpeed : 0.0f;
+    }
+
+    // 地面にある間は摩擦で、滑りと回転が弱まる
+    float friction = (std::max)(1.0f - groundFriction_ * deltaTime, 0.0f);
+    state.velocity.x *= friction;
+    state.velocity.z *= friction;
+    state.angularVelocity *= friction;
 }
 
 void ShatterEffectManager::Draw() {

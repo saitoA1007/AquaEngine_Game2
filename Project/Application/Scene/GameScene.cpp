@@ -188,7 +188,7 @@ void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
 	player_ = gameObjectManager_->AddObject<Player>(sphereModel, iceAreaAssets_, inputCommand_, field_, &playerStats_);
 
 	// 氷霧の発生を受け取る。氷霧の見た目と破片は敵より先に作る
-	iceMistEffect_ = gameObjectManager_->AddObject<IceMistEffect>(planeModel_, textureManager_);
+	iceMistEffect_ = gameObjectManager_->AddObject<IceMistEffect>(planeModel_, textureManager_, whiteTextureHandle_);
 	shatterEffect_ = gameObjectManager_->AddObject<ShatterEffectManager>(shellShardModel_);
 	player_->SetIceMistCallback([this](const IceMistInfo& info) { OnIceMist(info); });
 
@@ -196,7 +196,7 @@ void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
 	enemyManager_ = gameObjectManager_->AddObject<EnemyManager>(modelManager_, field_->GetRadius(), gameCamera_->GetCamera(), whiteTextureHandle_, shatterEffect_);
 
 	// 氷塊（敵より後に作る）。撃破した敵の位置に氷塊を落とす
-	iceShardManager_ = gameObjectManager_->AddObject<IceShardManager>(sphereModel, enemyManager_);
+	iceShardManager_ = gameObjectManager_->AddObject<IceShardManager>(sphereModel, planeModel_, textureManager_, enemyManager_);
 	// 経験値とフェーズ（敵一覧を読んだ後に作る）。フェーズの出現ルールの変更を敵へ渡す
 	phaseDirector_ = gameObjectManager_->AddObject<PhaseDirector>(enemyManager_->GetDefinitions());
 	phaseDirector_->SetRuleChangedCallback([this]() { ApplySpawnRule(); });

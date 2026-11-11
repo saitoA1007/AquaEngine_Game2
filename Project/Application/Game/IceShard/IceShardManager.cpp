@@ -10,9 +10,9 @@
 #include <stdexcept>
 using namespace GameEngine;
 
-IceShardManager::IceShardManager(Model* sphereModel, EnemyManager* enemyManager)
+IceShardManager::IceShardManager(Model* sphereModel, Model* planeModel, TextureManager* textureManager, EnemyManager* enemyManager)
     : enemyManager_(enemyManager), model_(sphereModel) {
-    if (model_ == nullptr || enemyManager_ == nullptr) {
+    if (model_ == nullptr || planeModel == nullptr || enemyManager_ == nullptr) {
         throw std::runtime_error("IceShardManager: model or enemy manager is null");
     }
 
@@ -22,6 +22,7 @@ IceShardManager::IceShardManager(Model* sphereModel, EnemyManager* enemyManager)
     shards_.resize(kMaxShards);
 
     CreateVisual();
+    CreateParticles(planeModel, textureManager);
 
     drawTransform_.Initialize({ {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} });
     iceMaterial_.GetMaterialData()->color = shardColor_;
@@ -48,6 +49,9 @@ void IceShardManager::RegisterDebugParameters() {
     debugParam_->Register("orbitRadius", orbitRadius_, 0, kOrbitGroup);
     debugParam_->Register("orbitHeight", orbitHeight_, 1, kOrbitGroup);
     debugParam_->Register("orbitSpeed", orbitSpeed_, 2, kOrbitGroup);
+    debugParam_->Register("orbitSpeedVariation", orbitSpeedVariation_, 3, kOrbitGroup);
+    debugParam_->Register("orbitSpinSpeed", orbitSpinSpeed_, 4, kOrbitGroup);
+    debugParam_->Register("orbitMinRadiusRatio", orbitMinRadiusRatio_, 5, kOrbitGroup);
 
     // 連鎖
     debugParam_->Register("aimHalfAngleDegrees", aimHalfAngleDegrees_, 0, kChainGroup);
@@ -62,6 +66,7 @@ void IceShardManager::RegisterDebugParameters() {
     // 氷塊の見た目
     debugParam_->Register("shardScale", shardScale_, 0, kVisualGroup);
     debugParam_->Register("shardColor", shardColor_, 1, kVisualGroup);
+    debugParam_->Register("hitEffectHeight", hitEffectHeight_, 2, kVisualGroup);
 
     debugParam_->Apply();
 }
@@ -77,11 +82,25 @@ void IceShardManager::CreateVisual() {
     }
 }
 
+void IceShardManager::CreateParticles(Model* planeModel, TextureManager* textureManager) {
+    // 軌跡と着弾は、氷塊の位置からEmitで発生させるため、ループは無効にする（見た目はJSONで決める）
+    trailParticle_ = std::make_unique<ParticleBehavior>(kTrailParticleName, kMaxTrailParticles, textureManager, planeModel);
+    trailParticle_->Initialize();
+    trailParticle_->SetIsLoop(false);
+
+    hitParticle_ = std::make_unique<ParticleBehavior>(kHitParticleName, kMaxHitParticles, textureManager, planeModel);
+    hitParticle_->Initialize();
+    hitParticle_->SetIsLoop(false);
+}
+
 void IceShardManager::Update() {
-    // 調整値の反映だけを行う。氷塊の更新はUpdateShardsで行う
+    // 調整値の反映と、粒の更新を行う。氷塊の更新はUpdateShardsで行う
     if (debugParam_->ApplyIfDirty()) {
         iceMaterial_.GetMaterialData()->color = shardColor_;
     }
+
+    trailParticle_->Update();
+    hitParticle_->Update();
 }
 
 int32_t IceShardManager::GetHeldCount() const {
@@ -139,6 +158,7 @@ void IceShardManager::UpdateShards(const IceShardInput& input) {
     float deltaTime = FpsCounter::GetGameDeltaTime();
     playerPosition_ = input.playerPosition;
     orbitPhase_ += orbitSpeed_ * deltaTime;
+    orbitSpin_ += orbitSpinSpeed_ * deltaTime;
 
     // 所持と引き寄せ中の数を数える。上限を超えて引き寄せないために使う
     int32_t carryCount = 0;
@@ -190,6 +210,7 @@ void IceShardManager::UpdateGroundShard(Shard& shard, float deltaTime, const Ice
 
     shard.state = ShardState::kPulled;
     shard.orbitAngle = static_cast<float>(orbitCounter_++) * kGoldenAngle;
+    AssignOrbit(shard);
     ++carryCount;
 }
 
@@ -202,7 +223,7 @@ void IceShardManager::UpdatePulledShard(Shard& shard, float deltaTime, const Ice
     }
 
     // 周回の位置へ向かって一定の速さで近づく
-    Vector3 goal = GetOrbitPosition(shard.orbitAngle);
+    Vector3 goal = GetOrbitPosition(shard);
     float dx = goal.x - shard.position.x;
     float dy = goal.y - shard.position.y;
     float dz = goal.z - shard.position.z;
@@ -220,7 +241,7 @@ void IceShardManager::UpdatePulledShard(Shard& shard, float deltaTime, const Ice
 }
 
 void IceShardManager::UpdateOrbitShard(Shard& shard, float deltaTime) {
-    shard.position = GetOrbitPosition(shard.orbitAngle);
+    shard.position = GetOrbitPosition(shard);
     if (shard.state != ShardState::kQueued) {
         return;
     }
@@ -237,11 +258,55 @@ void IceShardManager::UpdateOrbitShard(Shard& shard, float deltaTime) {
     shard.state = ShardState::kFlying;
 }
 
-Vector3 IceShardManager::GetOrbitPosition(float orbitAngle) const {
-    float angle = orbitAngle + orbitPhase_;
-    // 高さを少しずつずらして、数が多くても重なりにくくする
-    float height = orbitHeight_ + 0.25f * std::sin(orbitAngle * 3.0f);
-    return { playerPosition_.x + std::cos(angle) * orbitRadius_, height, playerPosition_.z + std::sin(angle) * orbitRadius_ };
+void IceShardManager::AssignOrbit(Shard& shard) {
+    // 軌道の平面の法線を、球面上のランダムな向きに決める
+    float normalY = RandomGenerator::Get<float>(-1.0f, 1.0f);
+    float normalAngle = RandomGenerator::Get<float>(0.0f, 2.0f * std::numbers::pi_v<float>);
+    float normalHorizontal = std::sqrt(1.0f - normalY * normalY);
+    Vector3 normal = { normalHorizontal * std::cos(normalAngle), normalY, normalHorizontal * std::sin(normalAngle) };
+
+    // 法線に垂直な2本の単位ベクトルで、軌道の平面を張る。法線が縦に近いときは横の軸を基準にする
+    Vector3 reference = std::abs(normal.y) > 0.99f ? Vector3{ 1.0f, 0.0f, 0.0f } : Vector3{ 0.0f, 1.0f, 0.0f };
+    shard.orbitAxisU = Vector3::Normalize(Vector3::Cross(normal, reference));
+    shard.orbitAxisV = Vector3::Cross(normal, shard.orbitAxisU);
+
+    // 速さと向きと軌道の半径を氷塊ごとに変える（半径は球の中に散らすため、下限から1の間）
+    float speedScale = 1.0f + RandomGenerator::Get<float>(-orbitSpeedVariation_, orbitSpeedVariation_);
+    bool isReverse = RandomGenerator::Get<float>(0.0f, 1.0f) < 0.5f;
+    shard.orbitSpeedScale = isReverse ? -speedScale : speedScale;
+    shard.orbitRadiusScale = RandomGenerator::Get<float>((std::min)(orbitMinRadiusRatio_, 1.0f), 1.0f);
+}
+
+Vector3 IceShardManager::GetOrbitPosition(const Shard& shard) const {
+    // 氷塊ごとの傾いた軌道の上を回る
+    float angle = shard.orbitAngle + orbitPhase_ * shard.orbitSpeedScale;
+    float radius = orbitRadius_ * shard.orbitRadiusScale;
+    float cosAngle = std::cos(angle);
+    float sinAngle = std::sin(angle);
+    Vector3 offset = {
+        (shard.orbitAxisU.x * cosAngle + shard.orbitAxisV.x * sinAngle) * radius,
+        (shard.orbitAxisU.y * cosAngle + shard.orbitAxisV.y * sinAngle) * radius,
+        (shard.orbitAxisU.z * cosAngle + shard.orbitAxisV.z * sinAngle) * radius };
+
+    // 塊全体を縦軸でゆっくり自転させる
+    float cosSpin = std::cos(orbitSpin_);
+    float sinSpin = std::sin(orbitSpin_);
+    float spunX = offset.x * cosSpin + offset.z * sinSpin;
+    float spunZ = -offset.x * sinSpin + offset.z * cosSpin;
+
+    return { playerPosition_.x + spunX, orbitHeight_ + offset.y, playerPosition_.z + spunZ };
+}
+
+void IceShardManager::EmitTrail(const Shard& shard) {
+    trailParticle_->SetEmitterPos(shard.position);
+    trailParticle_->Emit(shard.position);
+}
+
+void IceShardManager::EmitHit(const Vector3& position) {
+    // 敵の中心から出すと体と殻に隠れるため、殻の上側の高さから出す
+    Vector3 emitPosition = { position.x, hitEffectHeight_, position.z };
+    hitParticle_->SetEmitterPos(emitPosition);
+    hitParticle_->Emit(emitPosition);
 }
 
 bool IceShardManager::StartNextHop(Shard& shard) {
@@ -282,12 +347,16 @@ void IceShardManager::UpdateFlyingShard(Shard& shard, float deltaTime) {
     shard.position.x = shard.hopStart.x + (shard.hopEnd.x - shard.hopStart.x) * t;
     shard.position.y = shard.hopStart.y + (shard.hopEnd.y - shard.hopStart.y) * t + std::sin(t * std::numbers::pi_v<float>) * hopArcHeight_;
     shard.position.z = shard.hopStart.z + (shard.hopEnd.z - shard.hopStart.z) * t;
+
+    // 飛んでいる間、毎フレーム位置から軌跡の粒を1個出す
+    EmitTrail(shard);
     if (t < 1.0f) {
         return;
     }
 
-    // 到着。着弾を処理して、次の標的へ向かう。全員に当たったら砕けて消える
+    // 到着。着弾の粒を弾けさせ、着弾を処理して、次の標的へ向かう。全員に当たったら砕けて消える
     shard.position = shard.hopEnd;
+    EmitHit(shard.position);
     enemyManager_->ApplyShardHit(shard.target, shardIcePower_, volleys_[static_cast<size_t>(shard.volleyIndex)].chainId);
 
     // 飛んでいる間に倒された敵への到着は、命中に数えない
@@ -441,6 +510,9 @@ void IceShardManager::Draw() {
             DrawShard(shard);
         }
     }
+
+    trailParticle_->Draw();
+    hitParticle_->Draw();
 }
 
 void IceShardManager::DrawShard(const Shard& shard) {

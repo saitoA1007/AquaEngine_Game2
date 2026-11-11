@@ -1,0 +1,40 @@
+{
+    "IceShard": {
+        "Chain": {
+            "aimHalfAngleDegrees": 45.0,
+            "hitHeight": 0.4000000059604645,
+            "hopArcHeight": 0.4000000059604645,
+            "hopTime": 0.07999999821186066,
+            "launchInterval": 0.05000000074505806,
+            "maxHopSpan": 1.5,
+            "maxLaunchSpan": 0.6000000238418579,
+            "shardIcePower": 2.0
+        },
+        "Collect": {
+            "attractRadius": 5.0,
+            "attractSpeed": 18.0,
+            "collectRadius": 0.800000011920929,
+            "dropScatter": 0.6000000238418579,
+            "groundLifetime": 8.0,
+            "maxHeldCount": 60
+        },
+        "Orbit": {
+            "orbitHeight": 1.899999976158142,
+            "orbitMinRadiusRatio": 0.3499999940395355,
+            "orbitRadius": 0.44999998807907104,
+            "orbitSpeed": 4.0,
+            "orbitSpeedVariation": 0.5,
+            "orbitSpinSpeed": 0.6000000238418579
+        },
+        "SceneName": "Game",
+        "Visual": {
+            "shardColor": [
+                0.6000000238418579,
+                0.8500000238418579,
+                1.0,
+                1.0
+            ],
+            "shardScale": 0.25
+        }
+    }
+}
