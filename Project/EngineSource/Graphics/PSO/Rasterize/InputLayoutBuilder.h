@@ -38,6 +38,8 @@ namespace GameEngine {
 		void CreateDefaultAnimationElement();
 		// グリッド描画用
 		void CreateGridElement();
+		// 破片描画用
+		void CreateFractureElement();
 		// inputLayoutを使用しない
 		void CreateNone();
 

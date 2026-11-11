@@ -202,9 +202,10 @@ void ModelRenderer::DrawFracture(const Model* model, FractureInstance& fractureI
 	for (auto& [groupName, chunks] : model->GetFractureChunks()) {
 		PackedGeometryBuffer* buffer = model->GetFractureBuffers().at(groupName).get();
 
-		auto vbView = buffer->GetVertexBufferView();
+		// スロット0: 破片の頂点 / スロット1: インスタンス番号
+		D3D12_VERTEX_BUFFER_VIEW vbViews[2] = { buffer->GetVertexBufferView(), fractureInstance.GetInstanceIndexBufferView() };
 		auto ibView = buffer->GetIndexBufferView();
-		commandList_->IASetVertexBuffers(0, 1, &vbView);
+		commandList_->IASetVertexBuffers(0, 2, vbViews);
 		commandList_->IASetIndexBuffer(&ibView);
 		commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -234,7 +235,9 @@ void ModelRenderer::DrawRuntimeCutFragments(FractureInstance& fractureInstance, 
 
 	assert(fractureInstance.HasRuntimeGeometry() && "ランタイムカットで構築されたFractureInstanceではありません");
 
-	commandList_->IASetVertexBuffers(0, 1, &fractureInstance.GetRuntimeVertexBufferView());
+	// スロット0: 破片の頂点 / スロット1: インスタンス番号
+	D3D12_VERTEX_BUFFER_VIEW vbViews[2] = { fractureInstance.GetRuntimeVertexBufferView(), fractureInstance.GetInstanceIndexBufferView() };
+	commandList_->IASetVertexBuffers(0, 2, vbViews);
 	commandList_->IASetIndexBuffer(&fractureInstance.GetRuntimeIndexBufferView());
 	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 

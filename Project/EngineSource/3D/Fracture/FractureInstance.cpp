@@ -11,44 +11,13 @@ FractureInstance::~FractureInstance() {
 }
 void FractureInstance::Initialize(const std::vector<uint32_t>& chunkIds, const PackedGeometryBuffer& geometryBuffer) {
 
-	// チャンクの数
-	numInstance_ = static_cast<uint32_t>(chunkIds.size());
-
-	// リソース作成
-	buffer_.Release();
-	buffer_.Create(numInstance_);
-	instancingData_ = buffer_.GetData();
-
-	// CPU側のトランスフォーム配列も同じサイズに確保
-	transformData_.resize(numInstance_);
-
-	argumentBuffer_.Release();
-	argumentBuffer_.Create(numInstance_);
-	argumentData_ = argumentBuffer_.GetData();
+	// チャンクの数だけリソースを確保
+	AllocateBuffers(static_cast<uint32_t>(chunkIds.size()));
 
 	for (uint32_t index = 0; index < numInstance_; ++index) {
 		// PackedGeometryBufferからこのチャンクの描画範囲を取得
 		uint32_t chunkId = chunkIds[index];
-		const GeometryRange& range = geometryBuffer.GetRange(chunkId);
-
-		// トランスフォームを初期化
-		ResetState(transformData_[index]);
-		instancingData_[index].world = Matrix4x4::MakeIdentity();
-		instancingData_[index].worldInverseTranspose = Matrix4x4::MakeIdentity();
-
-		// PackedGeometryBufferから得た描画範囲を設定
-		instancingData_[index].vertexOffset = range.vertexOffset;
-		instancingData_[index].indexOffset = range.indexOffset;
-		instancingData_[index].indexCount = range.indexCount;
-		instancingData_[index].chunkId = chunkId;
-
-		// ExecuteIndirect用のDrawコマンド引数を設定
-		argumentData_[index].instanceIndex = index;
-		argumentData_[index].drawArguments.IndexCountPerInstance = range.indexCount; // 破片のインデックス数
-		argumentData_[index].drawArguments.InstanceCount = 1;                        // 1回につき1個描画
-		argumentData_[index].drawArguments.StartIndexLocation = range.indexOffset;   // インデックスの開始位置
-		argumentData_[index].drawArguments.BaseVertexLocation = static_cast<INT>(range.vertexOffset); // 頂点の開始位置
-		argumentData_[index].drawArguments.StartInstanceLocation = 0;
+		WriteInstance(index, geometryBuffer.GetRange(chunkId), chunkId);
 	}
 }
 
@@ -106,6 +75,8 @@ void FractureInstance::AllocateBuffers(uint32_t count) {
 	if (numInstance_ == 0) {
 		buffer_.Release();
 		argumentBuffer_.Release();
+		instanceIndexBuffer_.Release();
+		instanceIndexBufferView_ = {};
 		instancingData_ = nullptr;
 		argumentData_ = nullptr;
 		transformData_.clear();
@@ -121,6 +92,17 @@ void FractureInstance::AllocateBuffers(uint32_t count) {
 	argumentBuffer_.Release();
 	argumentBuffer_.Create(numInstance_);
 	argumentData_ = argumentBuffer_.GetData();
+
+	// インスタンス番号の頂点バッファ(StartInstanceLocationで各破片の番号を引く)
+	instanceIndexBuffer_.Release();
+	instanceIndexBuffer_.Create(numInstance_);
+	uint32_t* instanceIndexData = instanceIndexBuffer_.GetData();
+	for (uint32_t index = 0; index < numInstance_; ++index) {
+		instanceIndexData[index] = index;
+	}
+	instanceIndexBufferView_.BufferLocation = instanceIndexBuffer_.GetGpuVirtualAddress();
+	instanceIndexBufferView_.SizeInBytes = static_cast<UINT>(sizeof(uint32_t) * numInstance_);
+	instanceIndexBufferView_.StrideInBytes = sizeof(uint32_t);
 }
 
 void FractureInstance::WriteInstance(uint32_t index, const GeometryRange& range, uint32_t chunkId) {
@@ -133,12 +115,13 @@ void FractureInstance::WriteInstance(uint32_t index, const GeometryRange& range,
 	instancingData_[index].indexCount = range.indexCount;
 	instancingData_[index].chunkId = chunkId;
 
-	argumentData_[index].instanceIndex = index;
-	argumentData_[index].drawArguments.IndexCountPerInstance = range.indexCount;
-	argumentData_[index].drawArguments.InstanceCount = 1;
-	argumentData_[index].drawArguments.StartIndexLocation = range.indexOffset;
-	argumentData_[index].drawArguments.BaseVertexLocation = static_cast<INT>(range.vertexOffset);
-	argumentData_[index].drawArguments.StartInstanceLocation = 0;
+	// ExecuteIndirect用のDrawコマンド引数を設定
+	argumentData_[index].drawArguments.IndexCountPerInstance = range.indexCount; // 破片のインデックス数
+	argumentData_[index].drawArguments.InstanceCount = 1;                        // 1回につき1個描画
+	argumentData_[index].drawArguments.StartIndexLocation = range.indexOffset;   // インデックスの開始位置
+	argumentData_[index].drawArguments.BaseVertexLocation = static_cast<INT>(range.vertexOffset); // 頂点の開始位置
+	// インスタンス単位の頂点バッファからindex番目(=このインスタンスの番号)を読ませる
+	argumentData_[index].drawArguments.StartInstanceLocation = index;
 }
 
 void FractureInstance::ResetState(FractureChunkState& state) {
