@@ -34,8 +34,8 @@ namespace GameEngine {
 		uint32_t chunkId; // シェーダー側でgParticleを引くためのID
 	};
 
+	// ExecuteIndirect用の引数
 	struct FractureIndirectCommand {
-		uint32_t instanceIndex;
 		D3D12_DRAW_INDEXED_ARGUMENTS drawArguments;
 	};
 
@@ -96,6 +96,9 @@ namespace GameEngine {
 
 		ConstantBuffer<FractureIndirectCommand>& GetArgumentBuffer() { return argumentBuffer_; }
 
+		// インスタンス番号(0～numInstance-1)を持つ、インスタンス単位の頂点バッファ
+		const D3D12_VERTEX_BUFFER_VIEW& GetInstanceIndexBufferView() const { return instanceIndexBufferView_; }
+
 		// ランタイムカットで構築された場合のみ有効
 		bool HasRuntimeGeometry() const { return runtimeBuffer_ != nullptr; }
 		const D3D12_VERTEX_BUFFER_VIEW& GetRuntimeVertexBufferView() const { return runtimeBuffer_->GetVertexBufferView(); }
@@ -129,6 +132,10 @@ namespace GameEngine {
 		// ExecuteIndirect用の間接描画引数バッファ
 		ConstantBuffer<FractureIndirectCommand> argumentBuffer_;
 		FractureIndirectCommand* argumentData_ = nullptr;
+
+		// インスタンス番号の頂点バッファ
+		ConstantBuffer<uint32_t> instanceIndexBuffer_;
+		D3D12_VERTEX_BUFFER_VIEW instanceIndexBufferView_{};
 
 		// これ未満の三角形数になった破片はそれ以上分割しない
 		size_t kMinTriangleCount = 12;

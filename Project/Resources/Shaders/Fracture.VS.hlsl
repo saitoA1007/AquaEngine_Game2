@@ -12,12 +12,6 @@ struct FractureForGPU
 };
 StructuredBuffer<FractureForGPU> gFracture : register(t0);
 
-struct InstanceIndexConstant
-{
-    uint instanceIndex;
-};
-ConstantBuffer<InstanceIndexConstant> gInstanceIndex : register(b0);
-
 struct Camera
 {
     float3 worldPosition;
@@ -33,17 +27,18 @@ struct VertexShaderInput
     float2 texcoord : TEXCOORD0;
     float3 normal : NORMAL0;
     float4 tangent : TANGENT0;
+    uint instanceIndex : INSTANCEINDEX0;
 };
 
 VertexShaderOutput main(VertexShaderInput input)
 {
     VertexShaderOutput output;
     
-    float4 worldPos = mul(input.position, gFracture[gInstanceIndex.instanceIndex].World);
+    float4 worldPos = mul(input.position, gFracture[input.instanceIndex].World);
     output.position = mul(worldPos, gCamera.vpMatrix);
     output.texcoord = input.texcoord;
     output.color = float4(1.0f,1.0f,1.0f,1.0f);
-    output.normal = normalize(mul(input.normal, (float3x3) gFracture[gInstanceIndex.instanceIndex].WorldInverseTranspose));
+    output.normal = normalize(mul(input.normal, (float3x3) gFracture[input.instanceIndex].WorldInverseTranspose));
     output.worldPosition = worldPos.xyz;
     return output;
 }

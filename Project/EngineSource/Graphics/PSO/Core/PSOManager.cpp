@@ -685,10 +685,12 @@ void PSOManager::DefaultLoadPSO() {
         fractureRs.AddSRVDescriptorTable(0, static_cast<uint32_t>(SrvHeapTypeCount::TextureMaxCount), 0, D3D12_SHADER_VISIBILITY_PIXEL);
         fractureRs.AddCBVParameter(1, D3D12_SHADER_VISIBILITY_ALL);
         fractureRs.AddCBVParameter(2, D3D12_SHADER_VISIBILITY_PIXEL);
-        fractureRs.Add32BitConstantsParameter(1, 0, D3D12_SHADER_VISIBILITY_VERTEX);
         fractureRs.AddSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_SHADER_VISIBILITY_PIXEL);
         fractureRs.CreateRootSignature();
-        RegisterPSO("Fracture3D", fracture3D, &fractureRs, &inputLayoutBuilder);
+        // インスタンス番号を入力スロット1から受け取る
+        InputLayoutBuilder fractureInputLayout;
+        fractureInputLayout.CreateFractureElement();
+        RegisterPSO("Fracture3D", fracture3D, &fractureRs, &fractureInputLayout);
 
         // ----------------------------------------------------
         // 一時的なテストのためここにExecuteIndirect用のコマンドシグネチャを作成
@@ -696,24 +698,19 @@ void PSOManager::DefaultLoadPSO() {
         Microsoft::WRL::ComPtr<ID3D12CommandSignature> indirectCommandSignature;
 
         // 破片描画
-        UINT kFractureInstanceIndexRootParam = 5;
-
-        D3D12_INDIRECT_ARGUMENT_DESC argumentDescs[2] = {};
-        argumentDescs[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
-        argumentDescs[0].Constant.RootParameterIndex = kFractureInstanceIndexRootParam;
-        argumentDescs[0].Constant.DestOffsetIn32BitValues = 0;
-        argumentDescs[0].Constant.Num32BitValuesToSet = 1;
-
-        argumentDescs[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+        // ルート引数を書き換えるとGPU-Based Validationでディスクリプタテーブルが正しく扱われないため、DrawIndexedのみにする
+        D3D12_INDIRECT_ARGUMENT_DESC argumentDescs[1] = {};
+        argumentDescs[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
 
         D3D12_COMMAND_SIGNATURE_DESC sigDesc = {};
         sigDesc.ByteStride = sizeof(FractureIndirectCommand);
         sigDesc.NumArgumentDescs = _countof(argumentDescs);
         sigDesc.pArgumentDescs = argumentDescs;
 
+        // ルート引数を変更しない場合はルートシグネチャを指定しない
         HRESULT hr = device_->CreateCommandSignature(
             &sigDesc,
-            fractureRs.GetRootSignature(),
+            nullptr,
             IID_PPV_ARGS(&indirectCommandSignature));
         assert(SUCCEEDED(hr));
 
@@ -737,10 +734,12 @@ void PSOManager::DefaultLoadPSO() {
         fractureRs.AddSRVDescriptorTable(0, static_cast<uint32_t>(SrvHeapTypeCount::TextureMaxCount), 0, D3D12_SHADER_VISIBILITY_PIXEL);
         fractureRs.AddCBVParameter(1, D3D12_SHADER_VISIBILITY_ALL);
         fractureRs.AddCBVParameter(2, D3D12_SHADER_VISIBILITY_PIXEL);
-        fractureRs.Add32BitConstantsParameter(1, 0, D3D12_SHADER_VISIBILITY_VERTEX);
         fractureRs.AddSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_SHADER_VISIBILITY_PIXEL);
         fractureRs.CreateRootSignature();
-        RegisterPSO("IceFracture3D", fracture3D, &fractureRs, &inputLayoutBuilder);
+        // インスタンス番号を入力スロット1から受け取る
+        InputLayoutBuilder fractureInputLayout;
+        fractureInputLayout.CreateFractureElement();
+        RegisterPSO("IceFracture3D", fracture3D, &fractureRs, &fractureInputLayout);
 
         // ----------------------------------------------------
         // 一時的なテストのためここにExecuteIndirect用のコマンドシグネチャを作成
@@ -748,24 +747,20 @@ void PSOManager::DefaultLoadPSO() {
         Microsoft::WRL::ComPtr<ID3D12CommandSignature> indirectCommandSignature;
 
         // 破片描画
-        UINT kFractureInstanceIndexRootParam = 5;
-
-        D3D12_INDIRECT_ARGUMENT_DESC argumentDescs[2] = {};
-        argumentDescs[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
-        argumentDescs[0].Constant.RootParameterIndex = kFractureInstanceIndexRootParam;
-        argumentDescs[0].Constant.DestOffsetIn32BitValues = 0;
-        argumentDescs[0].Constant.Num32BitValuesToSet = 1;
-
-        argumentDescs[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+        // ルート引数を書き換えるとGPU-Based Validationでディスクリプタテーブルが正しく扱われないため、DrawIndexedのみにする
+        // (インスタンス番号はStartInstanceLocation + インスタンス単位の頂点バッファでVSに渡す)
+        D3D12_INDIRECT_ARGUMENT_DESC argumentDescs[1] = {};
+        argumentDescs[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
 
         D3D12_COMMAND_SIGNATURE_DESC sigDesc = {};
         sigDesc.ByteStride = sizeof(FractureIndirectCommand);
         sigDesc.NumArgumentDescs = _countof(argumentDescs);
         sigDesc.pArgumentDescs = argumentDescs;
 
+        // ルート引数を変更しない場合はルートシグネチャを指定しない
         HRESULT hr = device_->CreateCommandSignature(
             &sigDesc,
-            fractureRs.GetRootSignature(),
+            nullptr,
             IID_PPV_ARGS(&indirectCommandSignature));
         assert(SUCCEEDED(hr));
 

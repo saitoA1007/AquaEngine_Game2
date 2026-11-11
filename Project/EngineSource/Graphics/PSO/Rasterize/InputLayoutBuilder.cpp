@@ -67,6 +67,20 @@ void InputLayoutBuilder::CreateDefaultAnimationElement() {
 	CreateInputLayoutDesc();
 }
 
+void InputLayoutBuilder::CreateFractureElement() {
+    Reset();
+    CreateInputElement("POSITION", 0, 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
+    CreateInputElement("TEXCOORD", 0, 0, DXGI_FORMAT_R32G32_FLOAT);
+    CreateInputElement("NORMAL", 0, 0, DXGI_FORMAT_R32G32B32_FLOAT);
+    CreateInputElement("TANGENT", 0, 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
+    // インスタンス番号はインスタンスごとに1つ進む
+    CreateInputElement("INSTANCEINDEX", 0, 1, DXGI_FORMAT_R32_UINT);
+    inputElementDescs_.back().InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA;
+    inputElementDescs_.back().InstanceDataStepRate = 1;
+    SetSemanticName();
+    CreateInputLayoutDesc();
+}
+
 void InputLayoutBuilder::CreateGridElement() {
     Reset();
     CreateInputElement("POSITION", 0, 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
