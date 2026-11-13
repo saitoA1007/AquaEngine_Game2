@@ -586,7 +586,8 @@ void EnemyManager::Draw() {
             // 球が地面に接するよう、見た目の大きさに合わせて高さを決める
             float scale = enemy->GetVisualScale();
             Vector3 position = { enemy->GetPosition().x, scale, enemy->GetPosition().z };
-            drawTransform_.SetWorldMatrix(Math::MakeWorldMatrixFromEulerRotation(position, { 0.0f, 0.0f, 0.0f }, { scale, scale, scale }));
+            // 本体は移動の向き（Y軸まわり）へ向ける。殻は球なので向けない
+            drawTransform_.SetWorldMatrix(Math::MakeWorldMatrixFromEulerRotation(position, { 0.0f, enemy->GetFacingYaw(), 0.0f }, { scale, scale, scale }));
             renderQueue_->SubmitRaytracingModel(pool.visual->model, drawTransform_, &pool.visual->refBuffers);
 
             // 凍結中は氷の殻を重ねる

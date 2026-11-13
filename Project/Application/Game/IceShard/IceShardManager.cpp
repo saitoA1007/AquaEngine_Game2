@@ -113,6 +113,16 @@ int32_t IceShardManager::GetHeldCount() const {
     return count;
 }
 
+int32_t IceShardManager::GetFlyingCount() const {
+    int32_t count = 0;
+    for (const Shard& shard : shards_) {
+        if (shard.state == ShardState::kFlying) {
+            ++count;
+        }
+    }
+    return count;
+}
+
 IceShardManager::Shard* IceShardManager::AcquireShard() {
     // 空きを優先し、なければ一番古い地面の氷塊を再利用する
     Shard* oldest = nullptr;

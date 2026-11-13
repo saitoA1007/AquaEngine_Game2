@@ -1,12 +1,14 @@
 #include "pch.h"
 #include "Enemy.h"
 #include <algorithm>
+#include <cmath>
 
 void Enemy::Spawn(const EnemyDefinition* definition, const Vector3& position, uint32_t serial) {
     definition_ = definition;
     serial_ = serial;
     position_ = { position.x, 0.0f, position.z };
     moveDirection_ = { 0.0f, 0.0f, 0.0f };
+    facingYaw_ = 0.0f;
 
     // 状態を初期化して使い始める
     isActive_ = true;
@@ -39,6 +41,18 @@ void Enemy::Update(const EnemyContext& context) {
     }
 
     UpdateBehavior(context);
+    UpdateFacing();
+}
+
+void Enemy::UpdateFacing() {
+    // 止まっているときは向きを変えない
+    constexpr float kMinMoveLength = 0.001f;
+    if (std::abs(moveDirection_.x) + std::abs(moveDirection_.z) < kMinMoveLength) {
+        return;
+    }
+
+    // モデルの前は+Z。Y軸まわりの回転θで前は(sinθ, cosθ)へ向くため、atan2(x, z)で求める
+    facingYaw_ = std::atan2(moveDirection_.x, moveDirection_.z);
 }
 
 void Enemy::UpdateIceGauge(const EnemyContext& context) {

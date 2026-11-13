@@ -1,0 +1,36 @@
+{
+    "PlayerView": {
+        "Color": {
+            "coreColor": [
+                0.4000000059604645,
+                0.800000011920929,
+                1.0,
+                1.0
+            ],
+            "frameColor": [
+                0.4000000059604645,
+                0.800000011920929,
+                1.0,
+                1.0
+            ]
+        },
+        "Layout": {
+            "frameScaleA": 1.0,
+            "frameScaleB": 1.2000000476837158,
+            "liftHeight": 0.6000000238418579,
+            "viewScale": 0.6000000238418579
+        },
+        "Pulse": {
+            "pulseScale": 1.2999999523162842,
+            "pulseTime": 0.25
+        },
+        "SceneName": "Game",
+        "Spin": {
+            "chainSpinScale": 10.0,
+            "minChargeSpinScale": 3.0,
+            "spinFollowSpeed": 6.0,
+            "spinSpeedA": 3.0,
+            "spinSpeedB": 2.0
+        }
+    }
+}

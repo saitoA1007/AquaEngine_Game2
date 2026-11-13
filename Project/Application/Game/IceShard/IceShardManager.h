@@ -83,6 +83,11 @@ public:
     /// </summary>
     int32_t GetHeldCount() const;
 
+    /// <summary>
+    /// 標的へ飛んでいる氷塊の数を取得する。発射待ちの氷塊は含まない。自機の見た目が連鎖中かを知るために使う。
+    /// </summary>
+    int32_t GetFlyingCount() const;
+
 private:
     // 氷塊の状態
     enum class ShardState {

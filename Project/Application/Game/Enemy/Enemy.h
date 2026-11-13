@@ -122,6 +122,11 @@ public:
     const Vector3& GetMoveDirection() const { return moveDirection_; }
 
     /// <summary>
+    /// 見た目の向き（Y軸まわりの回転。ラジアン）。モデルの前（+Z）が移動の向きへ向く角度で、止まっている間は直前の向きを保つ。
+    /// </summary>
+    float GetFacingYaw() const { return facingYaw_; }
+
+    /// <summary>
     /// 壁を回り込む向き（+1か-1。まだ決まっていなければ0）。一度決めたら個体ごとに固定する。
     /// </summary>
     int32_t GetWallSense() const { return wallSense_; }
@@ -155,6 +160,11 @@ private:
     void UpdateIceGauge(const EnemyContext& context);
 
     /// <summary>
+    /// 動いているときだけ、移動の向きから見た目の向きを求め直す。止まっていれば直前の向きを保つ。
+    /// </summary>
+    void UpdateFacing();
+
+    /// <summary>
     /// 氷ゲージの閾値に達して凍る。
     /// </summary>
     /// <param name="frozenDuration">凍ってから解放までの時間（秒）</param>
@@ -180,6 +190,7 @@ private:
     EnemyState state_ = EnemyState::kNormal;
     float iceGauge_ = 0.0f;                // 氷ゲージ（0から閾値まで）
     float frozenTimer_ = 0.0f;             // 凍結の残り時間（秒）
+    float facingYaw_ = 0.0f;               // 見た目の向き（Y軸まわり。ラジアン）
     int32_t wallSense_ = 0;                // 壁を回り込む向き
     uint32_t lastMistId_ = 0;              // 最後に凍った氷霧のID（0は氷霧以外で凍った、または凍っていない）
     int32_t brokenCount_ = 0;              // 砕かれた回数

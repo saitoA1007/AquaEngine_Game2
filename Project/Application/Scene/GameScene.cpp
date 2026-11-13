@@ -113,6 +113,10 @@ void GameScene::LoadAssets() {
 	hpHudModels_.core = modelManager_->GetNameByModel("hpCore.gltf");
 	hpHudModels_.shard = modelManager_->GetNameByModel("hpCoreShard.gltf");
 
+	// 自機の核と枠は、HPアイコンと同じモデルを使う
+	playerViewAssets_.core = hpHudModels_.core;
+	playerViewAssets_.frame = hpHudModels_.frame;
+
 	// 氷エリアのモデルと画像を取得する（Resources/Models/IceArea、Resources/Textures/IceArea）
 	iceAreaAssets_.slab = modelManager_->GetNameByModel("iceAreaSlab.gltf");
 	iceAreaAssets_.plane = modelManager_->GetNameByModel("planeXZ.obj");
@@ -136,6 +140,8 @@ void GameScene::LoadAssets() {
 	assert(hpHudModels_.frame != nullptr);
 	assert(hpHudModels_.core != nullptr);
 	assert(hpHudModels_.shard != nullptr);
+	assert(playerViewAssets_.core != nullptr);
+	assert(playerViewAssets_.frame != nullptr);
 	assert(iceAreaAssets_.slab != nullptr);
 	assert(iceAreaAssets_.plane != nullptr);
 
@@ -185,7 +191,7 @@ void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
 	field_ = gameObjectManager_->AddObject<Field>(cylinderModel);
 
 	// プレイヤー
-	player_ = gameObjectManager_->AddObject<Player>(sphereModel, iceAreaAssets_, inputCommand_, field_, &playerStats_);
+	player_ = gameObjectManager_->AddObject<Player>(playerViewAssets_, iceAreaAssets_, inputCommand_, field_, &playerStats_);
 
 	// 氷霧の発生を受け取る。氷霧の見た目と破片は敵より先に作る
 	iceMistEffect_ = gameObjectManager_->AddObject<IceMistEffect>(planeModel_, textureManager_, whiteTextureHandle_);
@@ -331,6 +337,9 @@ void GameScene::StepIceShards() {
 	input.isCharging = player_->IsCharging();
 
 	iceShardManager_->UpdateShards(input);
+
+	// 飛んでいる氷塊の数を自機の見た目へ伝える（連鎖中は回転が速くなる）。Playerは氷塊の管理を知らない
+	player_->SetFlyingShardCount(iceShardManager_->GetFlyingCount());
 }
 
 void GameScene::StepEnemies() {

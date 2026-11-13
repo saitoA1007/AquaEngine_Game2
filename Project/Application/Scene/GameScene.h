@@ -68,7 +68,7 @@ private: // アセット
 
 	// 管理クラスが所有するモデルへの非所有ポインタ。LoadAssetsで取得する
 	GameEngine::Model* cylinderModel_ = nullptr; // フィールドの地面と縁
-	GameEngine::Model* sphereModel_ = nullptr;   // プレイヤーの仮の見た目
+	GameEngine::Model* sphereModel_ = nullptr;   // 氷塊の仮の見た目
 	GameEngine::Model* planeModel_ = nullptr;    // 氷霧のパーティクルの板
 	GameEngine::Model* shellShardModel_ = nullptr;  // 氷の殻の破片（球の殻を12個に割ったモデル）
 
@@ -80,6 +80,7 @@ private: // アセット
 
 	// HPアイコン（3D）のモデル。枠・核・欠片
 	HpHudModels hpHudModels_;
+	PlayerViewAssets playerViewAssets_; // 自機の核と枠のモデル（hpCore.gltf、hpFrame.gltf）
 	IceAreaAssets iceAreaAssets_;   // 氷エリアの描画に使うモデルとテクスチャ
 
 	// 強化の選択画面で使う画像のハンドル
@@ -155,7 +156,7 @@ private:
 	/// ゲームオブジェクトを生成する。更新・描画・削除はGameObjectManagerへ任せる。
 	/// </summary>
 	/// <param name="cylinderModel">フィールドに使うモデル</param>
-	/// <param name="sphereModel">プレイヤーに使うモデル</param>
+	/// <param name="sphereModel">氷塊に使うモデル</param>
 	void CreateGameObjects(GameEngine::Model* cylinderModel, GameEngine::Model* sphereModel);
 
 	/// <summary>

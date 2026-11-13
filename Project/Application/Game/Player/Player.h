@@ -2,7 +2,6 @@
 #include <functional>
 #include <memory>
 #include "IGameObject.h"
-#include "ModelComponent.h"
 #include "InputCommand.h"
 #include "DebugParameter.h"
 #include "Vector3.h"
@@ -10,6 +9,7 @@
 #include "Application/Game/Player/PlayerStats.h"
 #include "Application/Game/Field/Field.h"
 #include "Application/Game/Player/IceAreaView.h"
+#include "Application/Game/Player/PlayerView.h"
 #include "Application/Game/Player/IceMistInfo.h"
 
 /// <summary>
@@ -21,12 +21,12 @@ public:
     /// <summary>
     /// 見た目・入力・フィールド・強化値を参照する。
     /// </summary>
-    /// <param name="model">自機の見た目に使うモデル。管理クラスが所有する。</param>
+    /// <param name="viewAssets">自機の見た目（核と枠）に使うモデル。モデルは管理クラスが所有する。</param>
     /// <param name="iceAreaAssets">氷エリアの描画に使うモデルとテクスチャ。モデルは管理クラスが所有する。</param>
     /// <param name="inputCommand">入力機能。シーンが所有する。</param>
     /// <param name="field">移動制限に使うフィールド。GameObjectManagerが所有し、シーン終了まで有効。</param>
     /// <param name="stats">移動速度などの強化値。GameSceneが所有する。</param>
-    Player(GameEngine::Model* model, const IceAreaAssets& iceAreaAssets, GameEngine::InputCommand* inputCommand, const Field* field, const PlayerStats* stats);
+    Player(const PlayerViewAssets& viewAssets, const IceAreaAssets& iceAreaAssets, GameEngine::InputCommand* inputCommand, const Field* field, const PlayerStats* stats);
     ~Player() override = default;
 
     void Initialize() override;
@@ -70,6 +70,12 @@ public:
     /// </summary>
     /// <param name="callback">氷霧の情報を受け取る関数。呼び出し先がプレイヤーより長く生存する必要がある。</param>
     void SetIceMistCallback(const std::function<void(const IceMistInfo&)>& callback) { iceMistCallback_ = callback; }
+
+    /// <summary>
+    /// 氷塊が飛んでいる数を伝える。1つでもあれば連鎖中として、見た目の回転が速くなる。毎フレームGameSceneが呼ぶ。
+    /// </summary>
+    /// <param name="count">飛んでいる氷塊の数</param>
+    void SetFlyingShardCount(int32_t count) { flyingShardCount_ = count; }
 
     /// <summary>
     /// 現在のHPを取得する。
@@ -121,14 +127,18 @@ private:
     void UpdateIceAreaRadius();
 
     /// <summary>
+    /// 自機の見た目へ、チャージの進み具合と連鎖中かを渡して進める。
+    /// </summary>
+    void UpdatePlayerView(float deltaTime);
+
+    /// <summary>
     /// 氷霧を発生させ、コールバックで通知する。単押しは狭く弱い。長押しはチャージ量で範囲と威力が上がる。
     /// </summary>
     void FireIceMist();
 
 private:
     // 調整値
-    float radius_ = 0.5f; // 自機の半径（見た目と境界の余白）
-    Vector4 color_ = { 0.4f, 0.8f, 1.0f, 1.0f }; // 水色系統（仮）
+    float radius_ = 0.5f; // 自機の半径（境界の余白。見た目の大きさはPlayerViewの調整値）
     float baseIceAreaRadius_ = 4.0f;  // 氷エリアの元の半径（チャージしていないとき。単押しの氷霧の半径）（仮）
     float maxIceAreaRadius_ = 8.0f;   // フルチャージ時の氷エリアの半径（仮）
     float tapThreshold_ = 0.2f;       // 単押しとみなす押している時間の上限（秒）（仮）
@@ -153,6 +163,7 @@ private:
     bool waitReleaseBeforeCharge_ = false;    // 入力を戻した後、Aを離すまでチャージを始めないか
     float chargeTimer_ = 0.0f;                // チャージの経過時間（秒）
     float cooldownTimer_ = 0.0f;              // クールタイムの残り（秒）
+    int32_t flyingShardCount_ = 0;            // 飛んでいる氷塊の数（GameSceneから受け取る。見た目の回転にだけ使う）
     Vector3 moveDirection_ = { 0.0f, 0.0f, 0.0f }; // 今フレームの移動方向（氷霧の通知に添える）
     uint32_t mistCounter_ = 0;                // 発生させた氷霧の数（IDの採番に使う）
 
@@ -163,7 +174,7 @@ private:
     std::function<void(const IceMistInfo&)> iceMistCallback_; // 氷霧の通知先（GameSceneが設定する）
 
     // 描画
-    GameEngine::ModelComponent modelComponent_;
+    PlayerView playerView_;   // 自機の見た目（浮いた核と回る枠）。差し替え可能
     IceAreaView iceAreaView_; // 氷エリアの見た目。差し替え可能
 
     // 調整値の機能

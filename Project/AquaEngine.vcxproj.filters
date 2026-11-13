@@ -258,6 +258,9 @@
     <ClCompile Include="Application\Game\Player\IceAreaView.cpp">
       <Filter>Application\Game\Player</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Game\Player\PlayerView.cpp">
+      <Filter>Application\Game\Player</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Game\Enemy\ChaseEnemy.cpp">
       <Filter>Application\Game\Enemy</Filter>
     </ClCompile>
@@ -870,6 +873,9 @@
       <Filter>Application\Game\Player</Filter>
     </ClInclude>
     <ClInclude Include="Application\Game\Player\IceAreaView.h">
+      <Filter>Application\Game\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\Player\PlayerView.h">
       <Filter>Application\Game\Player</Filter>
     </ClInclude>
     <ClInclude Include="Application\Game\Enemy\ChaseEnemy.h">

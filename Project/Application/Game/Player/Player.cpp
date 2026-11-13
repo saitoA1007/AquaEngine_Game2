@@ -5,18 +5,15 @@
 #include <cmath>
 using namespace GameEngine;
 
-Player::Player(Model* model, const IceAreaAssets& iceAreaAssets, InputCommand* inputCommand, const Field* field, const PlayerStats* stats)
-    : inputCommand_(inputCommand), field_(field), stats_(stats), modelComponent_(model), iceAreaView_(iceAreaAssets) {
+Player::Player(const PlayerViewAssets& viewAssets, const IceAreaAssets& iceAreaAssets, InputCommand* inputCommand, const Field* field, const PlayerStats* stats)
+    : inputCommand_(inputCommand), field_(field), stats_(stats), playerView_(viewAssets), iceAreaView_(iceAreaAssets) {
 
     RegisterDebugParameters();
-
-    modelComponent_.materialData_->enableLighting = 1;
 }
 
 void Player::RegisterDebugParameters() {
     debugParam_ = std::make_unique<DebugParameter>("Player");
     debugParam_->Register("radius", radius_);
-    debugParam_->Register("color", color_);
     debugParam_->Register("initialHp", initialHp_);
     debugParam_->Register("invincibleTime", invincibleTime_);
     debugParam_->Register("blinkInterval", blinkInterval_);
@@ -56,7 +53,6 @@ void Player::SetInputEnabled(bool isEnabled) {
 }
 
 void Player::Initialize() {
-    modelComponent_.materialData_->color = color_;
 }
 
 Vector3 Player::GetMoveDirection() const {
@@ -87,7 +83,6 @@ Vector3 Player::GetMoveDirection() const {
 
 void Player::Update() {
     debugParam_->ApplyIfDirty();
-    modelComponent_.materialData_->color = color_;
 
     // 氷エリアの結晶の回転と、発動時の光の時間を進める
     iceAreaView_.Update(FpsCounter::GetGameDeltaTime());
@@ -109,9 +104,14 @@ void Player::Update() {
     // 移動後の位置を中心に、チャージと氷霧を扱う
     UpdateIceMist(FpsCounter::GetGameDeltaTime());
 
-    modelComponent_.worldTransform_.transform_.scale = { radius_, radius_, radius_ };
-    modelComponent_.worldTransform_.transform_.translate = position_;
-    modelComponent_.Update();
+    // 氷霧の瞬間（上のUpdateIceMistで始まる）を含め、見た目の状態を進める
+    UpdatePlayerView(FpsCounter::GetGameDeltaTime());
+}
+
+void Player::UpdatePlayerView(float deltaTime) {
+    // チャージの進み具合（0〜1）と、連鎖中か（氷塊が1つでも飛んでいるか）を見た目へ渡す
+    float chargeRatio = isCharging_ ? (std::min)(chargeTimer_ / (std::max)(maxChargeTime_, 0.01f), 1.0f) : 0.0f;
+    playerView_.Update(deltaTime, chargeRatio, flyingShardCount_ > 0);
 }
 
 void Player::UpdateIceMist(float deltaTime) {
@@ -189,6 +189,9 @@ void Player::FireIceMist() {
     // 氷霧の範囲の縁から光の輪を広げる
     iceAreaView_.PlayBurst(position_, info.radius);
 
+    // 自機の核と枠を一瞬大きくする
+    playerView_.PlayPulse();
+
     if (iceMistCallback_) {
         iceMistCallback_(info);
     }
@@ -211,10 +214,6 @@ void Player::ApplyPushback(const Vector3& offset) {
     position_.z += offset.z;
     position_ = field_->ClampToField(position_, radius_);
     position_.y = radius_;
-
-    // Updateの後に呼ばれるため、見た目の位置もここで更新する
-    modelComponent_.worldTransform_.transform_.translate = position_;
-    modelComponent_.Update();
 }
 
 void Player::Draw() {
@@ -229,5 +228,6 @@ void Player::Draw() {
             return;
         }
     }
-    modelComponent_.DrawRaytracing(renderQueue_);
+    // 核と枠は描く直前の位置で行列を作るため、Updateの後の押し戻しも反映される
+    playerView_.Draw(renderQueue_, position_);
 }
