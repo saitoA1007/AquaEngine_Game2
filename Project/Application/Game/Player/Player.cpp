@@ -31,7 +31,7 @@ void Player::RegisterDebugParameters() {
 
     // 保存済みの初期HPと氷エリアの元の半径を反映してから開始する
     hp_ = initialHp_;
-    currentIceAreaRadius_ = baseIceAreaRadius_ * stats_->rangeScale;
+    currentIceAreaRadius_ = baseIceAreaRadius_;
 }
 
 void Player::SetInputEnabled(bool isEnabled) {
@@ -153,9 +153,8 @@ void Player::UpdateIceMist(float deltaTime) {
 
 void Player::UpdateIceAreaRadius() {
     // チャージ中は経過時間に応じて元の半径からフルチャージの半径へ広がる。離したら元に戻る
-    // 強化の範囲の倍率は、通常半径とフルチャージ半径の両方に掛ける
-    float baseRadius = baseIceAreaRadius_ * stats_->rangeScale;
-    float maxRadius = maxIceAreaRadius_ * stats_->rangeScale;
+    float baseRadius = baseIceAreaRadius_;
+    float maxRadius = maxIceAreaRadius_;
     if (!isCharging_) {
         currentIceAreaRadius_ = baseRadius;
         return;
@@ -172,13 +171,13 @@ void Player::FireIceMist() {
 
     if (chargeTimer_ < tapThreshold_) {
         // 単押し。チャージした範囲にはならず、威力は弱い
-        info.radius = baseIceAreaRadius_ * stats_->rangeScale;
-        info.power = tapPower_ * stats_->powerScale;
+        info.radius = baseIceAreaRadius_;
+        info.power = tapPower_;
     } else {
         // 長押し。チャージ中の氷エリアの半径がそのまま氷霧の範囲になり、威力は割合で上がる
         float ratio = (std::min)(chargeTimer_ / (std::max)(maxChargeTime_, 0.01f), 1.0f);
         info.radius = currentIceAreaRadius_;
-        info.power = (tapPower_ + (maxChargePower_ - tapPower_) * ratio) * stats_->powerScale;
+        info.power = tapPower_ + (maxChargePower_ - tapPower_) * ratio;
     }
 
     // チャージの状態を戻し、共通のクールタイムを始めてから通知する

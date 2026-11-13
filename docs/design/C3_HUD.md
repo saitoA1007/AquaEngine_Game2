@@ -21,12 +21,11 @@
 ## 3. HPが0のとき(最低限の終わり方)
 
 - `GameScene`がゲームオーバーの状態(`isGameOver_`)に入る。
-- ゲームを止める処理は`GameScene::UpdateTimeScale()`の1か所。条件は`IsGameStopped()`(強化の選択中、またはゲームオーバー中)で、止めるなら`FpsCounter::SetTimeScale(0)`、それ以外は1。`Initialize`とデストラクタで1に戻す。
-- `Player::SetInputEnabled(false)`でチャージを取り消し、氷霧を出さず、入力を受け付けない。止まっている間にAを離して氷霧が出るのを防ぐ。C2の強化の選択も同じ関数を使う。
+- ゲームを止める処理は`GameScene::UpdateTimeScale()`の1か所。条件は`IsGameStopped()`(ゲームオーバー中。強化の選択は2026-11-13になくした)で、止めるなら`FpsCounter::SetTimeScale(0)`、それ以外は1。`Initialize`とデストラクタで1に戻す。
+- `Player::SetInputEnabled(false)`でチャージを取り消し、氷霧を出さず、入力を受け付けない。止まっている間にAを離して氷霧が出るのを防ぐ。
 - 止めている間は、`GameScene`が`PadVibration::Stop()`を呼び、`PadVibration::Update`を呼ばない。
 - `GameOverView`が「GAME OVER」を出す。待ち時間(`retryWaitTime`、既定1秒。止まらない`FpsCounter::GetDeltaTime`で数える)の後に「Aで再開」を出し、入力コマンド`Retry`(Space、パッドのA。押した瞬間)を受け付ける。`GameScene`が`isFinished_ = true`にし、フェードを挟んでGameシーンを最初からやり直す。
 - `GameScene::NextSceneName()`は`"Game"`(仮)。`"Title"`は登録されておらず、シーンが終わると`assert`で止まるため。C5で変える。
-- 強化の選択中は、画面のUI(`GameHud`と`ComboPopupView`)を描かない。`GameScene::UpdateHud`が毎フレーム`SetVisible`で渡す。HPアイコンの演出やHITの数と残り時間は保ち、閉じたら元どおり描く。敵の頭上の氷ゲージや氷エリアなど、ゲーム世界の中の表示は変えない。`GameOverView`と強化画面も変えない。
 - UIの演出は止まらない時間(`GetDeltaTime`)で進める。連鎖数はゲームの時間(`GetGameDeltaTime`)で動くため、止まっている間は一緒に止まる。
 
 ## 4. 連鎖数(`ComboPopupView`)

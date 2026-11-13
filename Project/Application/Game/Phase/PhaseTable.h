@@ -19,7 +19,7 @@ enum class PhaseType {
 /// </summary>
 struct PhaseRow {
     PhaseType type = PhaseType::kNormal;       // フェーズの種類
-    int32_t expToNext = 10;                    // 次のレベルまでに必要な経験値（ボスでは使わない）
+    int32_t expToNext = 10;                    // 次のフェーズまでに必要な経験値（ボスでは使わない）
     float spawnInterval = 1.0f;                // スポーンの間隔（秒）
     int32_t spawnPerInterval = 3;              // 1回のスポーンで出そうとする数
     int32_t maxEnemies = 60;                   // フェーズ全体で同時に存在できる敵の最大数
@@ -27,7 +27,7 @@ struct PhaseRow {
 };
 
 /// <summary>
-/// フェーズ表。レベルとフェーズは同じ番号で、行の番号 + 1がそのフェーズの番号になる。
+/// フェーズ表。行の番号 + 1がそのフェーズの番号になる。
 /// </summary>
 struct PhaseTable {
     std::vector<PhaseRow> phases;
@@ -41,7 +41,7 @@ namespace PhaseTableIO {
     // フェーズ表の保存先（作業ディレクトリはProject）
     inline const std::string kPhaseTablePath = "Resources/Json/PhaseData/PhaseTable.json";
 
-    // フェーズ表の行数（レベルとフェーズの上限）
+    // フェーズ表の行数（フェーズの上限）
     inline constexpr int32_t kPhaseCount = 10;
 
     /// <summary>

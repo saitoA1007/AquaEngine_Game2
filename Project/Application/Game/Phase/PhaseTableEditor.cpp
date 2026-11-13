@@ -33,11 +33,11 @@ void PhaseTableEditor::Save() {
     }
 }
 
-void PhaseTableEditor::Draw(int32_t level, int32_t exp, int32_t phase, int32_t pendingLevelUps) {
+void PhaseTableEditor::Draw(int32_t exp, int32_t phase) {
     ImGui::Begin("PhaseTable");
 
     // 現在の状態
-    ImGui::Text("level: %d  phase: %d  exp: %d  pending level ups: %d", level, phase, exp, pendingLevelUps);
+    ImGui::Text("phase: %d  exp: %d", phase, exp);
     ImGui::Separator();
 
     if (ImGui::Button("Save")) {

@@ -15,7 +15,7 @@
   - チャージ: `chargeTimer_ / maxChargeTime_`で、1倍から`minChargeSpinScale`(フルチャージ)へ補間する。
   - 連鎖: 氷塊が1つでも飛んでいる(`kFlying`)間は`chainSpinScale`倍。チャージと重なったら掛け合わせる。
 - 氷霧(`Player::FireIceMist`から`PlayPulse`): 核と枠をまとめて、1 → `pulseScale` → 1倍(sinの山)。時間は`pulseTime`。
-- 点滅: 無敵の点滅は`Player::Draw`で3つまとめて飛ばす。回転・拡縮はゲーム時間(`FpsCounter::GetGameDeltaTime`)で動くので、強化の選択中は止まる。
+- 点滅: 無敵の点滅は`Player::Draw`で3つまとめて飛ばす。回転・拡縮はゲーム時間(`FpsCounter::GetGameDeltaTime`)で動くので、ゲームオーバー中は止まる。
 
 ### 構造
 

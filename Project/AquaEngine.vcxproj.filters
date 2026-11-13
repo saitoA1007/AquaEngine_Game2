@@ -18,9 +18,6 @@
     <Filter Include="Application\Game\Phase">
       <UniqueIdentifier>{2c6e9a14-8b3d-4f57-a0c1-5d7e3b9f1a82}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Application\Game\Upgrade">
-      <UniqueIdentifier>{9f4b1d73-6e2a-4c08-b5d9-0a8c3e7f2b46}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Application\Game\UI">
       <UniqueIdentifier>{4a7d2e91-5c38-4b16-8e0f-1d9a6c3b7f52}</UniqueIdentifier>
     </Filter>
@@ -287,15 +284,6 @@
     </ClCompile>
     <ClCompile Include="Application\Game\Phase\PhaseTableEditor.cpp">
       <Filter>Application\Game\Phase</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Game\Upgrade\PlayerUpgrade.cpp">
-      <Filter>Application\Game\Upgrade</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Game\Upgrade\UpgradeCardView.cpp">
-      <Filter>Application\Game\Upgrade</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\Game\Upgrade\UpgradeSelectUI.cpp">
-      <Filter>Application\Game\Upgrade</Filter>
     </ClCompile>
     <ClCompile Include="Application\Game\UI\GameHud.cpp">
       <Filter>Application\Game\UI</Filter>
@@ -907,15 +895,6 @@
     </ClInclude>
     <ClInclude Include="Application\Game\Phase\PhaseTableEditor.h">
       <Filter>Application\Game\Phase</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Game\Upgrade\PlayerUpgrade.h">
-      <Filter>Application\Game\Upgrade</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Game\Upgrade\UpgradeCardView.h">
-      <Filter>Application\Game\Upgrade</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Game\Upgrade\UpgradeSelectUI.h">
-      <Filter>Application\Game\Upgrade</Filter>
     </ClInclude>
     <ClInclude Include="Application\Game\UI\HudInput.h">
       <Filter>Application\Game\UI</Filter>

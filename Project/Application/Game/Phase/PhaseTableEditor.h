@@ -35,11 +35,9 @@ public:
     /// <summary>
     /// 編集画面を描画する。現在の状態の表示、フェーズの選択と編集、保存、飛び先の指定ができる。
     /// </summary>
-    /// <param name="level">現在のレベル</param>
-    /// <param name="exp">現在のレベルで溜めた経験値</param>
+    /// <param name="exp">現在のフェーズで溜めた経験値</param>
     /// <param name="phase">現在のフェーズ</param>
-    /// <param name="pendingLevelUps">未処理のレベルアップ数</param>
-    void Draw(int32_t level, int32_t exp, int32_t phase, int32_t pendingLevelUps);
+    void Draw(int32_t exp, int32_t phase);
 
 private:
     /// <summary>

@@ -18,10 +18,8 @@
 | `IceAreaView` | 氷エリアの範囲を示す仮の描画。`Player`が所有し、差し替え可能。氷の煙パーティクルへ置き換える予定 |
 | `EnemyIO.h` | `EnemyInput`(プレイヤーの位置、半径、氷エリア半径)と`EnemyOutput`(受けたダメージ、プレイヤーへの押し戻し量)をまとめた構造体のヘッダー |
 | `IceShardManager` | 氷塊のドロップ、回収、連鎖の発射 |
-| `PhaseDirector` | 経験値、レベル、フェーズ、未処理のレベルアップ数、フェーズ表。`IGameObject`で毎フレームの処理は持たない。ボス開始の通知を出す。`PlayerStats`と強化画面は知らない |
+| `PhaseDirector` | 経験値、フェーズ、フェーズ表。経験値が必要量を超えるとその場でフェーズを進める。`IGameObject`で毎フレームの処理は持たない。ボス開始の通知を出す。`PlayerStats`は知らない |
 | `PhaseTable` / `PhaseTableIO` / `PhaseTableEditor` | フェーズ表の構造体、JSONの読み書きと検証、ImGuiの編集画面(`USE_IMGUI`のみ) |
-| `PlayerUpgrade` | 強化の3項目の名前と説明、1回あたりの上昇量(`DebugParameter`)、取った回数、`PlayerStats`への反映。`GameScene`が所有する |
-| `UpgradeSelectUI` | 強化選択の画面。`IGameObject`。止まらない時間で動き、決定をコールバックで返す |
 | `GameHud` | 常時表示のUI(HPアイコン、フェーズ)。`IGameObject`。ゲームのクラスを知らず、`GameScene`から`HudInput`を受け取って表示する。`HpHudView`を所有する。止まらない時間で動く |
 | `HudInput` | `GameHud`へ渡す表示用の値(HP、最大HP、フェーズ)の構造体 |
 | `HpHudView` / `HpHudModels` | 3DのHPアイコン(六角形の枠と回る核)と被弾の演出(核が砕けて欠片が枠に積もる)。画面に固定するため`Camera`を読む。枠と核は`SubmitInstancing`、欠片は破片モデルとアイコンごとの`FractureInstance`で描く。`GameHud`が所有する([HUD_HpIcon3D.md](HUD_HpIcon3D.md)) |
@@ -30,7 +28,7 @@
 | `ComboPopupView` | 連鎖数の表示(「HIT 12!」)。氷塊で倒したときだけ数える。発射元の氷霧のIDごとに1つ、同時に最大8つ。`IGameObject`。ゲームの時間で動く |
 | `EnemyShotManager` | 敵の弾とビーム。敵とは独立して動く |
 | `ShatterEffectManager` | 破片の`FractureInstance`の事前確保と使い回し、飛ばす処理と描画 |
-| `PlayerStats` | 移動速度、範囲の倍率、威力の倍率を持つ構造体。`GameScene`が持ち、強化前の移動速度(調整値)と`PlayerUpgrade`の回数から毎フレーム求め直す |
+| `PlayerStats` | 移動速度を持つ構造体。`GameScene`が持ち、`moveSpeed`を`DebugParameter`で調整する。`Player`が読む |
 
 ## 2. 敵の構造
 
@@ -83,7 +81,7 @@
 
 - データはJSONで持ち、`JsonSerializer`で読み書きする。
 - 敵一覧の保存先は`Resources/Json/EnemyData/`。フェーズ表の保存先は`Resources/Json/PhaseData/PhaseTable.json`。`Resources/Json/GameData/`は`GameParamEditor`が読むので使わない。
-- フェーズ表は10行(5行目と9行目がボーナス、10行目がボス)。フェーズごとに、次のレベルまでの経験値、スポーンの間隔、1回に出す数、フェーズ全体の最大数、敵のIDごとの重みを持つ。敵一覧のIDが重みに存在するかを読み込み時に検証し、失敗したら例外を出す。編集画面で保存すると、今のフェーズの出現ルールにすぐ反映する。
+- フェーズ表は10行(5行目と9行目がボーナス、10行目がボス)。フェーズごとに、次のフェーズまでの経験値、スポーンの間隔、1回に出す数、フェーズ全体の最大数、敵のIDごとの重みを持つ。敵一覧のIDが重みに存在するかを読み込み時に検証し、失敗したら例外を出す。編集画面で保存すると、今のフェーズの出現ルールにすぐ反映する。
 - `USE_IMGUI`の中で、一覧の表示、行の追加と削除、保存ができる画面をアプリ側に作る。エンジンの変更はしない。
 - Release構成では読み込みだけが動く。
 - プレイヤーなどの単一の値は`DebugParameter`で調整する。
@@ -122,22 +120,20 @@
 - 撃破と解放の違いは、オレンジの破片を一緒に飛ばすかどうかだけ。
 - 凍結中の氷の殻の描画は`EnemyManager`が持つ。
 
-## 6. 経験値と強化
+## 6. 経験値とフェーズ
 
 - `EnemyManager`が撃破を`EnemyDefeatInfo`(位置、氷塊の数、経験値、連鎖ID)のコールバックで通知する。`GameScene`のラムダが、氷塊(`IceShardManager::Drop`)、経験値(`PhaseDirector::AddExp`。撃破した瞬間に入る)、連鎖数(`ComboPopupView::AddHit`)の順に渡す。
 - 連鎖IDは、氷霧で倒したときは0で、`ComboPopupView`は数えない。氷塊は`IceShardManager`の`Volley`が発射元の氷霧のIDを持ち、`EnemyManager::ApplyShardHit`の引数で渡す。
-- `PhaseDirector`がレベルアップを判定し、未処理の数を持つ。`GameScene`が選択画面(`UpgradeSelectUI`)を開き、選ばれた結果を`PlayerUpgrade`経由で`PlayerStats`へ書き、`PhaseDirector::ConfirmLevelUp`でフェーズを進める。`PhaseDirector`は`PlayerStats`と`UpgradeSelectUI`を知らない。
+- `PhaseDirector::AddExp`が、必要量を超えるたびにその場でフェーズを進める(1回で複数フェーズ分が入ったときは続けて進める)。進んだら出現ルールの変更の通知(`GameScene::ApplySpawnRule`)を1回出し、フェーズ10に入ったらボス開始の通知を出す。ゲームは止まらない。強化はなくした(2026-11-13)。
 - フェーズが変わるたびに、`GameScene`が`EnemyManager::SetSpawnRule`で出現ルールを渡す。`EnemyManager`は`PhaseDirector`を知らない。
-- `Player`は範囲の倍率、威力の倍率、移動速度を`PlayerStats`から読む。
-- 選択中は`GameScene::UpdateTimeScale`(`FpsCounter::SetTimeScale`を呼ぶ唯一の場所)でタイムスケールを0にし、`Player::SetInputEnabled(false)`でチャージと氷霧を止め、`PadVibration`を止める。`UpgradeSelectUI`は止まらない時間で動く。
-- ゲームオーバー中も同じ扱い。`GameScene::IsGameStopped()`(選択中またはゲームオーバー中)が`UpdateTimeScale`の条件で、振動の更新の可否にも使う。
+- `Player`は移動速度を`PlayerStats`から読む。範囲と威力は`Player`の固定の調整値で、倍率は持たない。
+- ゲームの世界を止めるのはゲームオーバー中だけ。`GameScene::UpdateTimeScale`(`FpsCounter::SetTimeScale`を呼ぶ唯一の場所)が`IsGameStopped()`(ゲームオーバー中)でタイムスケールを0にし、`Player::SetInputEnabled(false)`でチャージと氷霧を止め、`PadVibration`を止める。振動の更新の可否にも`IsGameStopped()`を使う。
 
 ## 6.5 HUDとゲームオーバー
 
 - `GameScene::Update`の最後(`UpdateHud`)で、`Player`と`PhaseDirector`の値から`HudInput`を作って`GameHud`へ渡す。オブジェクトの更新はシーンの更新より先に走るが、`GameHud`は描画の直前に値を反映するため遅れない。`GameHud`、`ComboPopupView`は`Player`、`EnemyManager`、`PhaseDirector`を知らない。`ComboPopupView`は座標の変換のために`Camera`を読むだけ。
 - 被弾: `Player::TakeDamage`が実際に減ったかを返し、`GameScene::StepEnemies`が`GameHud::PlayDamage()`と`PadVibration::PlayDamage()`を呼ぶ。無敵時間中の点滅は`Player::Draw`で描画を飛ばす。
 - HPが0: `GameScene::CheckGameOver`が`isGameOver_`をtrueにし、`Player::SetInputEnabled(false)`、`PadVibration::Stop()`、`GameOverView::Open()`を行う。`GameOverView`が再開の入力を返すと、`GameScene`が`isFinished_`をtrueにする。`NextSceneName()`は仮に`"Game"`を返し、フェードのあとGameシーンが作り直される(C5で変える)。
-- 強化の選択中は、`GameScene::UpdateHud`が`GameHud`と`ComboPopupView`へ`SetVisible(false)`を渡し、画面のUIを描かない(状態は保つ)。ゲーム世界の中の表示は変えない。
 - 詳細は[C3_HUD.md](C3_HUD.md)。
 
 ## 7. カメラ

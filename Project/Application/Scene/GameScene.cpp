@@ -34,10 +34,6 @@ void GameScene::Initialize() {
 	// 振動を作り直す。前回の振動は破棄時に止まる
 	padVibration_ = std::make_unique<PadVibration>(inputCommand_);
 
-	// 強化を初期値へ戻す。回数を0にし、強化前の移動速度から値を求め直す
-	playerStats_ = PlayerStats();
-	playerUpgrade_ = std::make_unique<PlayerUpgrade>();
-	playerUpgrade_->ApplyToStats(playerStats_, baseMoveSpeed_);
 
 	// 背景・カメラ・ライトを設定する
 	SetUpEnvironment();
@@ -45,7 +41,7 @@ void GameScene::Initialize() {
 	// ゲームオブジェクトを生成する
 	CreateGameObjects(cylinderModel_, sphereModel_);
 
-	// 前回のリセット時に選択中で止まっていても、タイムスケールを1へ戻す
+	// 前回のリセット時にゲームオーバーで止まっていても、タイムスケールを1へ戻す
 	UpdateTimeScale();
 }
 
@@ -55,9 +51,6 @@ void GameScene::Update() {
 	// ライトの調整値を反映する
 	UpdateLight();
 
-	// 強化の調整値を反映し、取った回数からプレイヤーの強化値を求め直す
-	playerUpgrade_->UpdateParameters();
-	playerUpgrade_->ApplyToStats(playerStats_, baseMoveSpeed_);
 
 	// 検証用：同時破砕の計測を始める
 	if (inputCommand_->IsCommandActive("ShatterBenchmark")) {
@@ -74,11 +67,10 @@ void GameScene::Update() {
 	CheckGameOver();
 	UpdateGameOver();
 
-	// 撃破で溜まったレベルアップがあれば選択画面を開き、止めるかどうかをタイムスケールへ反映する
-	UpdateLevelUp();
+	// 止めるかどうかをタイムスケールへ反映する
 	UpdateTimeScale();
 
-	// 長押しの振動を伝え、そのフレームの振動を出す（氷霧と命中は発生時に要求済み）。止めている間は振動を止めたままにする
+	// 長押しの振動を伝え、そのフレームの振動を出す（氷霧と命中は発生時に要求済み）。ゲームオーバー中は振動を止めたままにする
 	if (!IsGameStopped()) {
 		padVibration_->SetCharging(player_->IsCharging());
 		padVibration_->Update();
@@ -125,12 +117,6 @@ void GameScene::LoadAssets() {
 	iceAreaAssets_.rimLine = textureManager_->GetHandleByName("iceAreaRimLine.png");
 	iceAreaAssets_.snowflake = textureManager_->GetHandleByName("iceAreaSnowflake.png");
 
-	// 強化の選択画面の画像を取得する（Resources/Textures/UI/Upgrade）
-	upgradeSelectTextures_.white = whiteTextureHandle_;
-	upgradeSelectTextures_.plate = textureManager_->GetHandleByName("UpgradeCardPlate.png");
-	upgradeSelectTextures_.frame = textureManager_->GetHandleByName("UpgradeCardFrame.png");
-	upgradeSelectTextures_.light = textureManager_->GetHandleByName("UpgradeCardLight.png");
-	upgradeSelectTextures_.divider = textureManager_->GetHandleByName("UpgradeDivider.png");
 
 	// 取得できなかったモデルがないか確認する
 	assert(cylinderModel_ != nullptr);
@@ -146,14 +132,10 @@ void GameScene::LoadAssets() {
 	assert(iceAreaAssets_.plane != nullptr);
 
 	// 画像は取得できないと0が返るため、0でないことを確認する
-	assert(upgradeSelectTextures_.plate != 0);
-	assert(upgradeSelectTextures_.frame != 0);
-	assert(upgradeSelectTextures_.light != 0);
 	assert(iceAreaAssets_.slabTexture != 0);
 	assert(iceAreaAssets_.slabHighlight != 0);
 	assert(iceAreaAssets_.rimLine != 0);
 	assert(iceAreaAssets_.snowflake != 0);
-	assert(upgradeSelectTextures_.divider != 0);
 }
 
 void GameScene::RegisterDebugParameters() {
@@ -167,9 +149,8 @@ void GameScene::RegisterDebugParameters() {
 	debugParam_->Register("lightIntensity", lightIntensity_, 0, kLightGroup);
 	debugParam_->Register("lightDirection", lightDirection_, 1, kLightGroup);
 
-	// プレイヤーの強化値
-	// 強化の上昇分を保存しないよう、強化前の値だけを登録する（キー名は保存済みの値を引き継ぐため変えない）
-	debugParam_->Register("moveSpeed", baseMoveSpeed_, 0, kPlayerStatsGroup);
+	// プレイヤーの固定の値
+	debugParam_->Register("moveSpeed", playerStats_.moveSpeed, 0, kPlayerStatsGroup);
 
 	debugParam_->Apply();
 }
@@ -218,45 +199,13 @@ void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
 	// 氷塊が敵に命中するたびに振動させる
 	iceShardManager_->SetHitCallback([this]() { padVibration_->PlayHit(); });
 
-	// 常時表示のUIと連鎖数（強化の選択画面より手前に重ならないよう先に作る）
+	// 常時表示のUIと連鎖数
 	gameHud_ = gameObjectManager_->AddObject<GameHud>(fontManager_, gameCamera_->GetCamera(), hpHudModels_, whiteTextureHandle_);
 	comboPopupView_ = gameObjectManager_->AddObject<ComboPopupView>(gameCamera_->GetCamera(), fontManager_);
 
-	// 強化の選択画面（描画が手前に重なるよう最後に作る）
-	upgradeSelectUI_ = gameObjectManager_->AddObject<UpgradeSelectUI>(inputCommand_, fontManager_, upgradeSelectTextures_, playerUpgrade_.get());
-	upgradeSelectUI_->SetSelectedCallback([this](UpgradeType type) { OnUpgradeSelected(type); });
 
 	// ゲームオーバーの表示（一番手前に重ねる）
 	gameOverView_ = gameObjectManager_->AddObject<GameOverView>(inputCommand_, fontManager_, whiteTextureHandle_);
-}
-
-void GameScene::UpdateLevelUp() {
-	// 未処理がなければ何もしない。選択中は、選ばれるまで次を開かない
-	if (phaseDirector_->GetPendingLevelUps() <= 0 || upgradeSelectUI_->IsOpen() || isGameOver_) {
-		return;
-	}
-	OpenUpgradeSelect();
-}
-
-void GameScene::OpenUpgradeSelect() {
-	// 選択中はチャージを取り消して氷霧を出さず、振動も止める
-	upgradeSelectUI_->Open();
-	player_->SetInputEnabled(false);
-	padVibration_->Stop();
-}
-
-void GameScene::OnUpgradeSelected(UpgradeType type) {
-	// 強化を取り、レベルとフェーズを1つ進めて、新しい出現ルールを敵へ渡す
-	playerUpgrade_->Select(type);
-	phaseDirector_->ConfirmLevelUp();
-	ApplySpawnRule();
-
-	// 未処理が残っていれば続けて開く。なければ入力を戻す（選択画面は決定の時点で閉じている）
-	if (phaseDirector_->GetPendingLevelUps() > 0) {
-		upgradeSelectUI_->Open();
-		return;
-	}
-	player_->SetInputEnabled(true);
 }
 
 void GameScene::ApplySpawnRule() {
@@ -271,8 +220,8 @@ void GameScene::ApplySpawnRule() {
 }
 
 bool GameScene::IsGameStopped() const {
-	// 強化の選択中、またはゲームオーバー中は、ゲームの世界を止める。ここに条件を足していく
-	return upgradeSelectUI_->IsOpen() || isGameOver_;
+	// ゲームオーバー中は、ゲームの世界を止める。ここに条件を足していく
+	return isGameOver_;
 }
 
 void GameScene::UpdateTimeScale() {
@@ -309,10 +258,6 @@ void GameScene::UpdateHud() {
 	input.phase = phaseDirector_->GetPhase();
 	gameHud_->SetInput(input);
 
-	// 強化の選択中は、画面のUI（HUDと連鎖数）を隠して、選択画面だけが見えるようにする
-	bool isHudVisible = !upgradeSelectUI_->IsOpen();
-	gameHud_->SetVisible(isHudVisible);
-	comboPopupView_->SetVisible(isHudVisible);
 }
 
 void GameScene::OnIceMist(const IceMistInfo& info) {
@@ -382,8 +327,6 @@ void GameScene::InputRegisterCommand() {
 	// ゲームオーバーからの再開（Spaceとパッドの A）。押した瞬間だけ有効にする
 	inputCommand_->RegisterCommand("Retry", { KeyBinding{ DIK_SPACE, PressType::kTrigger }, PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kTrigger } });
 
-	// 強化の決定（Spaceとパッドの A）。押した瞬間だけ有効にする
-	inputCommand_->RegisterCommand("UpgradeConfirm", { KeyBinding{ DIK_SPACE, PressType::kTrigger }, PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kTrigger } });
 
 	// 同時破砕の計測の開始（検証用）
 	inputCommand_->RegisterCommand("ShatterBenchmark", { KeyBinding{ DIK_F9, PressType::kTrigger } });

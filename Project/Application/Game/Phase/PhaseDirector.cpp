@@ -23,7 +23,7 @@ PhaseDirector::PhaseDirector(const std::vector<EnemyDefinition>& definitions) {
 
 void PhaseDirector::DebugUpdate() {
 #ifdef USE_IMGUI
-    editor_->Draw(level_, exp_, GetPhase(), pendingLevelUps_);
+    editor_->Draw(exp_, GetPhase());
 #endif
 }
 
@@ -33,40 +33,41 @@ void PhaseDirector::AddExp(int32_t amount) {
         return;
     }
 
-    int32_t maxLevel = static_cast<int32_t>(table_.phases.size());
+    int32_t maxPhase = static_cast<int32_t>(table_.phases.size());
+    int32_t startPhase = phase_;
     exp_ += amount;
 
-    // 未処理の分も数えて、必要量を超えるたびにレベルアップを増やす
-    while (level_ + pendingLevelUps_ < maxLevel) {
-        const PhaseRow& row = table_.phases[static_cast<size_t>(level_ + pendingLevelUps_ - 1)];
+    // 必要量を超えるたびにフェーズを1つ進める。1回で複数フェーズ分が入っても続けて進める
+    while (phase_ < maxPhase) {
+        const PhaseRow& row = table_.phases[static_cast<size_t>(phase_ - 1)];
         if (exp_ < row.expToNext) {
             break;
         }
         exp_ -= row.expToNext;
-        ++pendingLevelUps_;
+        ++phase_;
     }
 
     // 上限に達したら、それを超える分は数えない
-    if (level_ + pendingLevelUps_ >= maxLevel) {
+    if (phase_ >= maxPhase) {
         exp_ = 0;
     }
-}
 
-void PhaseDirector::ConfirmLevelUp() {
-    if (pendingLevelUps_ <= 0) {
+    // フェーズが進んでいなければ通知しない
+    if (phase_ == startPhase) {
         return;
     }
 
-    --pendingLevelUps_;
-    ++level_;
+    // 進んだ後のフェーズの出現ルールを渡し、ボスならボス開始を通知する
+    if (ruleChangedCallback_) {
+        ruleChangedCallback_();
+    }
     NotifyBossIfNeeded();
 }
 
 void PhaseDirector::JumpToPhase(int32_t phase) {
-    int32_t maxLevel = static_cast<int32_t>(table_.phases.size());
-    level_ = std::clamp(phase, 1, maxLevel);
+    int32_t maxPhase = static_cast<int32_t>(table_.phases.size());
+    phase_ = std::clamp(phase, 1, maxPhase);
     exp_ = 0;
-    pendingLevelUps_ = 0;
 
     if (ruleChangedCallback_) {
         ruleChangedCallback_();

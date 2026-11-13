@@ -15,8 +15,6 @@
 #include "Application/Game/IceShard/IceShardManager.h"
 #include "Application/Game/Player/PadVibration.h"
 #include "Application/Game/Phase/PhaseDirector.h"
-#include "Application/Game/Upgrade/PlayerUpgrade.h"
-#include "Application/Game/Upgrade/UpgradeSelectUI.h"
 #include "Application/Game/UI/GameHud.h"
 #include "Application/Game/UI/GameOverView.h"
 #include "Application/Game/UI/ComboPopupView.h"
@@ -83,16 +81,10 @@ private: // アセット
 	PlayerViewAssets playerViewAssets_; // 自機の核と枠のモデル（hpCore.gltf、hpFrame.gltf）
 	IceAreaAssets iceAreaAssets_;   // 氷エリアの描画に使うモデルとテクスチャ
 
-	// 強化の選択画面で使う画像のハンドル
-	UpgradeSelectTextures upgradeSelectTextures_;
-
 private: // ゲームの状態
 
-	// プレイヤーの強化値（Playerが参照する）。強化前の移動速度とPlayerUpgradeの回数から毎フレーム求め直す
+	// プレイヤーの固定の値（Playerが参照する）。移動速度は調整値として保存する
 	PlayerStats playerStats_;
-
-	// 強化の項目、何回取ったか。シーンが所有し、Initializeのたびに作り直す（回数を0へ戻す）
-	std::unique_ptr<PlayerUpgrade> playerUpgrade_;
 
 	// GameObjectManagerが所有するオブジェクトへの非所有ポインタ。シーン終了まで有効
 	Player* player_ = nullptr;
@@ -100,7 +92,6 @@ private: // ゲームの状態
 	EnemyManager* enemyManager_ = nullptr;
 	IceShardManager* iceShardManager_ = nullptr;
 	PhaseDirector* phaseDirector_ = nullptr;
-	UpgradeSelectUI* upgradeSelectUI_ = nullptr;
 	GameHud* gameHud_ = nullptr;
 	ComboPopupView* comboPopupView_ = nullptr;
 	GameOverView* gameOverView_ = nullptr;
@@ -123,9 +114,6 @@ private: // 調整値
 	// ライト
 	float lightIntensity_ = 0.9f;
 	Vector3 lightDirection_ = { -0.3f, -1.0f, 0.4f };
-
-	// 強化前の移動速度（保存する調整値。強化の上昇分は足さない）
-	float baseMoveSpeed_ = 8.0f;
 
 	// 調整値の機能
 	std::unique_ptr<GameEngine::DebugParameter> debugParam_;
@@ -183,29 +171,12 @@ private:
 	void NotifyIceShards(const IceMistInfo& info);
 
 	/// <summary>
-	/// 未処理のレベルアップがあり、選択画面が閉じていれば、選択画面を開いてゲームを止める。
-	/// </summary>
-	void UpdateLevelUp();
-
-	/// <summary>
-	/// 選択画面を開く。プレイヤーの入力と振動を止める。タイムスケールはUpdateTimeScaleが0にする。
-	/// </summary>
-	void OpenUpgradeSelect();
-
-	/// <summary>
-	/// 強化が選ばれたときの処理。強化を反映し、レベルとフェーズを進め、出現ルールを渡す。
-	/// 未処理が残っていれば続けて選択画面を開き、なければ入力を戻す。
-	/// </summary>
-	/// <param name="type">選ばれた強化の項目</param>
-	void OnUpgradeSelected(UpgradeType type);
-
-	/// <summary>
 	/// 現在のフェーズの出現ルールをEnemyManagerへ渡す。
 	/// </summary>
 	void ApplySpawnRule();
 
 	/// <summary>
-	/// ゲームの世界を止めているかを返す。強化の選択中、またはゲームオーバー中。
+	/// ゲームの世界を止めているかを返す。ゲームオーバー中。
 	/// </summary>
 	bool IsGameStopped() const;
 
@@ -226,7 +197,7 @@ private:
 	void UpdateGameOver();
 
 	/// <summary>
-	/// 表示用の値をまとめてGameHudへ渡し、強化の選択中は画面のUI（HUDと連鎖数）を隠す。GameScene::Updateの最後に呼ぶ。
+	/// 表示用の値をまとめてGameHudへ渡す。GameScene::Updateの最後に呼ぶ。
 	/// </summary>
 	void UpdateHud();
 
