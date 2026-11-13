@@ -75,6 +75,7 @@ private: // アセット
 
 	// 氷ゲージの矩形に使う白いテクスチャのハンドル
 	uint32_t whiteTextureHandle_ = 0;
+	uint32_t comboBurstTextureHandle_ = 0; // HIT表示の氷の破裂の画像
 
 	// HPアイコン（3D）のモデル。枠・核・欠片
 	HpHudModels hpHudModels_;

@@ -100,6 +100,9 @@ void GameScene::LoadAssets() {
 	// 氷ゲージの矩形に使う白いテクスチャを取得する
 	whiteTextureHandle_ = textureManager_->GetHandleByName("white2x2.png");
 
+	// HIT表示の氷の破裂の画像を取得する（Resources/Textures/UI/Combo）
+	comboBurstTextureHandle_ = textureManager_->GetHandleByName("ComboBurst.png");
+
 	// HPアイコン（3D）のモデルを取得する。破片モデルは核を8個に分けたもの（_cellの破壊グループが1つ）
 	hpHudModels_.frame = modelManager_->GetNameByModel("hpFrame.gltf");
 	hpHudModels_.core = modelManager_->GetNameByModel("hpCore.gltf");
@@ -136,6 +139,7 @@ void GameScene::LoadAssets() {
 	assert(iceAreaAssets_.slabHighlight != 0);
 	assert(iceAreaAssets_.rimLine != 0);
 	assert(iceAreaAssets_.snowflake != 0);
+	assert(comboBurstTextureHandle_ != 0);
 }
 
 void GameScene::RegisterDebugParameters() {
@@ -201,7 +205,7 @@ void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
 
 	// 常時表示のUIと連鎖数
 	gameHud_ = gameObjectManager_->AddObject<GameHud>(fontManager_, gameCamera_->GetCamera(), hpHudModels_, whiteTextureHandle_);
-	comboPopupView_ = gameObjectManager_->AddObject<ComboPopupView>(gameCamera_->GetCamera(), fontManager_);
+	comboPopupView_ = gameObjectManager_->AddObject<ComboPopupView>(gameCamera_->GetCamera(), fontManager_, comboBurstTextureHandle_);
 
 
 	// ゲームオーバーの表示（一番手前に重ねる）

@@ -300,6 +300,9 @@
     <ClCompile Include="Application\Game\UI\ComboPopupView.cpp">
       <Filter>Application\Game\UI</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Game\UI\OutlinedText.cpp">
+      <Filter>Application\Game\UI</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Game\Enemy\EnemyManager.cpp">
       <Filter>Application\Game\Enemy</Filter>
     </ClCompile>
@@ -912,6 +915,9 @@
       <Filter>Application\Game\UI</Filter>
     </ClInclude>
     <ClInclude Include="Application\Game\UI\ComboPopupView.h">
+      <Filter>Application\Game\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Game\UI\OutlinedText.h">
       <Filter>Application\Game\UI</Filter>
     </ClInclude>
     <ClInclude Include="Application\Game\Enemy\EnemyManager.h">

@@ -213,6 +213,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Game\UI\HpShardPile.cpp" />
     <ClCompile Include="Application\Game\UI\GameOverView.cpp" />
     <ClCompile Include="Application\Game\UI\ComboPopupView.cpp" />
+    <ClCompile Include="Application\Game\UI\OutlinedText.cpp" />
     <ClCompile Include="Application\Scene\Transition\Fade.cpp" />
     <ClCompile Include="Application\UI\Effects\DimmerUI.cpp" />
     <ClCompile Include="Application\UI\Widgets\ArrowUI.cpp" />
@@ -650,6 +651,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Game\UI\HpShardPile.h" />
     <ClInclude Include="Application\Game\UI\GameOverView.h" />
     <ClInclude Include="Application\Game\UI\ComboPopupView.h" />
+    <ClInclude Include="Application\Game\UI\OutlinedText.h" />
     <ClInclude Include="Application\Game\Enemy\EnemyManager.h" />
     <ClInclude Include="Application\Scene\Transition\Fade.h" />
     <ClInclude Include="Application\UI\Effects\DimmerUI.h" />
