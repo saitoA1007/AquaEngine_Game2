@@ -21,8 +21,13 @@ void Field::RegisterDebugParameters() {
     debugParam_->Register("radius", radius_);
     debugParam_->Register("rimWidth", rimWidth_);
     debugParam_->Register("groundThickness", groundThickness_);
+    debugParam_->Register("rimThickness", rimThickness_);
     debugParam_->Register("groundColor", groundColor_);
     debugParam_->Register("rimColor", rimColor_);
+    debugParam_->Register("groundRoughness", groundRoughness_);
+    debugParam_->Register("groundMetallic", groundMetallic_);
+    debugParam_->Register("rimRoughness", rimRoughness_);
+    debugParam_->Register("rimMetallic", rimMetallic_);
     debugParam_->Apply();
 }
 
@@ -38,6 +43,10 @@ void Field::Update() {
 
     ground_.materialData_->color = groundColor_;
     rim_.materialData_->color = rimColor_;
+    ground_.materialData_->roughness = groundRoughness_;
+    ground_.materialData_->metallic = groundMetallic_;
+    rim_.materialData_->roughness = rimRoughness_;
+    rim_.materialData_->metallic = rimMetallic_;
 
     // 地面は上面がY=0になるように置く
     float groundScaleY = groundThickness_ / kCylinderHeight;
@@ -46,9 +55,8 @@ void Field::Update() {
 
     // 縁は地面より少し大きく、上面を少し低くして地面の外周に見えるようにする
     float rimTop = -0.05f;
-    float rimThickness = groundThickness_ + 0.5f;
-    rim_.worldTransform_.transform_.scale = { radius + rimWidth_, rimThickness / kCylinderHeight, radius + rimWidth_ };
-    rim_.worldTransform_.transform_.translate = { 0.0f, rimTop - rimThickness * 0.5f, 0.0f };
+    rim_.worldTransform_.transform_.scale = { radius + rimWidth_, rimThickness_ / kCylinderHeight, radius + rimWidth_ };
+    rim_.worldTransform_.transform_.translate = { 0.0f, rimTop - rimThickness_ * 0.5f, 0.0f };
 
     ground_.Update();
     rim_.Update();

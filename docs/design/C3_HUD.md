@@ -25,7 +25,9 @@
 - `Player::SetInputEnabled(false)`でチャージを取り消し、氷霧を出さず、入力を受け付けない。止まっている間にAを離して氷霧が出るのを防ぐ。
 - 止めている間は、`GameScene`が`PadVibration::Stop()`を呼び、`PadVibration::Update`を呼ばない。
 - `GameOverView`が「GAME OVER」を出す。待ち時間(`retryWaitTime`、既定1秒。止まらない`FpsCounter::GetDeltaTime`で数える)の後に「Aで再開」を出し、入力コマンド`Retry`(Space、パッドのA。押した瞬間)を受け付ける。`GameScene`が`isFinished_ = true`にし、フェードを挟んでGameシーンを最初からやり直す。
+  - 【C5で変更(2026-11-18)】「Aで再開」と`Retry`は、「やり直す」「タイトルへ」の選択と`Decide`に置き換えた。`isGameOver_`は`isGameEnded_`に、`CheckGameOver`は`CheckGameEnd`になった。[C5_SceneFlow.md](C5_SceneFlow.md)。
 - `GameScene::NextSceneName()`は`"Game"`(仮)。`"Title"`は登録されておらず、シーンが終わると`assert`で止まるため。C5で変える。
+  - 【C5で変更】`"Title"`を登録し、`NextSceneName()`は選ばれた行き先(`"Game"`か`"Title"`)を返す。
 - UIの演出は止まらない時間(`GetDeltaTime`)で進める。連鎖数はゲームの時間(`GetGameDeltaTime`)で動くため、止まっている間は一緒に止まる。
 
 ## 4. 連鎖数(`ComboPopupView`)

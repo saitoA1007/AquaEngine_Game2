@@ -189,8 +189,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ClCompile>
     <ClCompile Include="Application\Scene\GameScene.cpp" />
     <ClCompile Include="Application\Scene\TestScene.cpp" />
+    <ClCompile Include="Application\Scene\TitleScene.cpp" />
     <ClCompile Include="Application\Game\Camera\GameCamera.cpp" />
     <ClCompile Include="Application\Game\Field\Field.cpp" />
+    <ClCompile Include="Application\Game\Field\FieldScenery.cpp" />
     <ClCompile Include="Application\Game\Player\Player.cpp" />
     <ClCompile Include="Application\Game\Player\IceAreaView.cpp" />
     <ClCompile Include="Application\Game\Player\PlayerView.cpp" />
@@ -212,6 +214,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Game\UI\HpHudView.cpp" />
     <ClCompile Include="Application\Game\UI\HpShardPile.cpp" />
     <ClCompile Include="Application\Game\UI\GameOverView.cpp" />
+    <ClCompile Include="Application\Game\UI\TitleView.cpp" />
     <ClCompile Include="Application\Game\UI\ComboPopupView.cpp" />
     <ClCompile Include="Application\Game\UI\OutlinedText.cpp" />
     <ClCompile Include="Application\Scene\Transition\Fade.cpp" />
@@ -624,8 +627,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\GameScene.h" />
     <ClInclude Include="Application\Scene\Register\SetUpScenes.h" />
     <ClInclude Include="Application\Scene\TestScene.h" />
+    <ClInclude Include="Application\Scene\TitleScene.h" />
     <ClInclude Include="Application\Game\Camera\GameCamera.h" />
     <ClInclude Include="Application\Game\Field\Field.h" />
+    <ClInclude Include="Application\Game\Field\FieldScenery.h" />
     <ClInclude Include="Application\Game\Player\Player.h" />
     <ClInclude Include="Application\Game\Player\PlayerStats.h" />
     <ClInclude Include="Application\Game\Player\IceAreaView.h" />
@@ -650,6 +655,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Game\UI\HpHudView.h" />
     <ClInclude Include="Application\Game\UI\HpShardPile.h" />
     <ClInclude Include="Application\Game\UI\GameOverView.h" />
+    <ClInclude Include="Application\Game\UI\TitleView.h" />
     <ClInclude Include="Application\Game\UI\ComboPopupView.h" />
     <ClInclude Include="Application\Game\UI\OutlinedText.h" />
     <ClInclude Include="Application\Game\Enemy\EnemyManager.h" />

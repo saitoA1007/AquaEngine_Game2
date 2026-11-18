@@ -28,8 +28,9 @@ void GameScene::Initialize() {
 	// エンジンのリセットは、オブジェクトを消さずにInitializeをもう一度呼ぶ。前回のオブジェクトが残って二重にならないよう、先に全て削除する
 	gameObjectManager_->ClearAll();
 
-	// ゲームオーバーの状態を戻す
-	isGameOver_ = false;
+	// 終わりの状態と遷移先を戻す
+	isGameEnded_ = false;
+	nextSceneName_ = kGameSceneName;
 
 	// 振動を作り直す。前回の振動は破棄時に止まる
 	padVibration_ = std::make_unique<PadVibration>(inputCommand_);
@@ -63,9 +64,9 @@ void GameScene::Update() {
 	// 敵の更新後の位置で、氷塊の回収と連鎖を進める
 	StepIceShards();
 
-	// HPが0ならゲームオーバーに入る。ゲームオーバー中は再開の入力を見る
-	CheckGameOver();
-	UpdateGameOver();
+	// 終わりの条件を判定する。終わっている間は行き先の選択を見る
+	CheckGameEnd();
+	UpdateGameEnd();
 
 	// 止めるかどうかをタイムスケールへ反映する
 	UpdateTimeScale();
@@ -94,8 +95,12 @@ void GameScene::LoadAssets() {
 	planeModel_ = modelManager_->GetNameByModel("plane.obj");
 	shellShardModel_ = modelManager_->GetNameByModel(kShellShardModelName);
 
+	// 氷柱のモデルを登録して取得する（上が細い六角柱。分割数、上の半径、下の半径、高さ）
+	modelManager_->RegisterCylinderModel(kPillarModelName, kPillarDivide, kPillarTopRadius, kPillarBottomRadius, kPillarHeight);
+	pillarModel_ = modelManager_->GetNameByModel(kPillarModelName);
+
 	// 背景のテクスチャを取得する
-	skyboxTextureHandle_ = textureManager_->GetHandleByName("qwantani_moon_noon_puresky_1k.dds");
+	skyboxTextureHandle_ = textureManager_->GetHandleByName("iceNightSky.dds");
 
 	// 氷ゲージの矩形に使う白いテクスチャを取得する
 	whiteTextureHandle_ = textureManager_->GetHandleByName("white2x2.png");
@@ -126,6 +131,7 @@ void GameScene::LoadAssets() {
 	assert(sphereModel_ != nullptr);
 	assert(planeModel_ != nullptr);
 	assert(shellShardModel_ != nullptr);
+	assert(pillarModel_ != nullptr);
 	assert(hpHudModels_.frame != nullptr);
 	assert(hpHudModels_.core != nullptr);
 	assert(hpHudModels_.shard != nullptr);
@@ -140,6 +146,7 @@ void GameScene::LoadAssets() {
 	assert(iceAreaAssets_.rimLine != 0);
 	assert(iceAreaAssets_.snowflake != 0);
 	assert(comboBurstTextureHandle_ != 0);
+	assert(skyboxTextureHandle_ != 0);
 }
 
 void GameScene::RegisterDebugParameters() {
@@ -152,6 +159,7 @@ void GameScene::RegisterDebugParameters() {
 	// ライト
 	debugParam_->Register("lightIntensity", lightIntensity_, 0, kLightGroup);
 	debugParam_->Register("lightDirection", lightDirection_, 1, kLightGroup);
+	debugParam_->Register("lightColor", lightColor_, 2, kLightGroup);
 
 	// プレイヤーの固定の値
 	debugParam_->Register("moveSpeed", playerStats_.moveSpeed, 0, kPlayerStatsGroup);
@@ -174,6 +182,9 @@ void GameScene::SetUpEnvironment() {
 void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
 	// フィールド
 	field_ = gameObjectManager_->AddObject<Field>(cylinderModel);
+
+	// フィールドの外の見た目（雪原と氷柱）。台地の大きさはFieldから読む
+	gameObjectManager_->AddObject<FieldScenery>(field_, pillarModel_, iceAreaAssets_.plane);
 
 	// プレイヤー
 	player_ = gameObjectManager_->AddObject<Player>(playerViewAssets_, iceAreaAssets_, inputCommand_, field_, &playerStats_);
@@ -224,8 +235,8 @@ void GameScene::ApplySpawnRule() {
 }
 
 bool GameScene::IsGameStopped() const {
-	// ゲームオーバー中は、ゲームの世界を止める。ここに条件を足していく
-	return isGameOver_;
+	// 終わりの表示中は、ゲームの世界を止める。ここに条件を足していく
+	return isGameEnded_;
 }
 
 void GameScene::UpdateTimeScale() {
@@ -233,24 +244,45 @@ void GameScene::UpdateTimeScale() {
 	FpsCounter::SetTimeScale(IsGameStopped() ? 0.0f : 1.0f);
 }
 
-void GameScene::CheckGameOver() {
-	if (isGameOver_ || player_->GetHp() > 0) {
+void GameScene::CheckGameEnd() {
+	if (isGameEnded_) {
 		return;
 	}
 
-	// 止まっている間にAを離して氷霧が出ないよう入力を切り、振動も止めてから、表示を開く
-	isGameOver_ = true;
-	player_->SetInputEnabled(false);
-	padVibration_->Stop();
-	gameOverView_->Open();
+	// HPが0ならゲームオーバー
+	if (player_->GetHp() <= 0) {
+		EndGame(GameEndType::kGameOver);
+		return;
+	}
+
+#ifdef USE_IMGUI
+	// 仮のクリア（ボスができるまで）。デバッグキーで入る
+	if (inputCommand_->IsCommandActive("DebugClear")) {
+		EndGame(GameEndType::kClear);
+	}
+#endif
 }
 
-void GameScene::UpdateGameOver() {
-	if (!isGameOver_ || !gameOverView_->IsRetryRequested()) {
+void GameScene::EndGame(GameEndType endType) {
+	// 止まっている間にAを離して氷霧が出ないよう入力を切り、振動も止めてから、表示を開く
+	isGameEnded_ = true;
+	player_->SetInputEnabled(false);
+	padVibration_->Stop();
+	gameOverView_->Open(endType);
+}
+
+void GameScene::UpdateGameEnd() {
+	if (!isGameEnded_) {
 		return;
 	}
 
-	// シーンを終えると、フェードを挟んでGameシーンが最初から作り直される
+	// 選ばれた行き先を遷移先にして、シーンを終える（フェードを挟んで次のシーンが作られる）
+	GameEndChoice choice = gameOverView_->GetChoice();
+	if (choice == GameEndChoice::kNone) {
+		return;
+	}
+
+	nextSceneName_ = (choice == GameEndChoice::kTitle) ? kTitleSceneName : kGameSceneName;
 	isFinished_ = true;
 }
 
@@ -313,6 +345,7 @@ void GameScene::StepEnemies() {
 void GameScene::UpdateLight() {
 	LightManager* light = renderQueue_->GetLightManager();
 	light->directionalLight_->SetLightIntensity(lightIntensity_);
+	light->directionalLight_->SetLightColor(lightColor_);
 	light->SetDirectionalDirction(lightDirection_);
 }
 
@@ -328,8 +361,17 @@ void GameScene::InputRegisterCommand() {
 	inputCommand_->RegisterCommand("IceMistCharge", { KeyBinding{ DIK_SPACE, PressType::kPush }, PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kPush } });
 	inputCommand_->RegisterCommand("IceMistRelease", { KeyBinding{ DIK_SPACE, PressType::kRelease }, PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kRelease } });
 
-	// ゲームオーバーからの再開（Spaceとパッドの A）。押した瞬間だけ有効にする
-	inputCommand_->RegisterCommand("Retry", { KeyBinding{ DIK_SPACE, PressType::kTrigger }, PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kTrigger } });
+	// 終わりの表示の操作。決定（Spaceとパッドの A）は押した瞬間だけ有効。TitleSceneも同じ名前で登録する
+	inputCommand_->RegisterCommand("Decide", { KeyBinding{ DIK_SPACE, PressType::kTrigger }, PadButtonBinding{ XINPUT_GAMEPAD_A, PressType::kTrigger } });
+
+	// 選択の上下（W・S、↑・↓、十字キー）。押した瞬間だけ有効。スティックはGameOverViewが倒した瞬間を見分ける
+	inputCommand_->RegisterCommand("MenuUp", { KeyBinding{ DIK_W, PressType::kTrigger }, KeyBinding{ DIK_UP, PressType::kTrigger }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_UP, PressType::kTrigger } });
+	inputCommand_->RegisterCommand("MenuDown", { KeyBinding{ DIK_S, PressType::kTrigger }, KeyBinding{ DIK_DOWN, PressType::kTrigger }, PadButtonBinding{ XINPUT_GAMEPAD_DPAD_DOWN, PressType::kTrigger } });
+
+#ifdef USE_IMGUI
+	// 仮のクリア（デバッグ用。ボスができるまで）
+	inputCommand_->RegisterCommand("DebugClear", { KeyBinding{ DIK_F8, PressType::kTrigger } });
+#endif
 
 
 	// 同時破砕の計測の開始（検証用）

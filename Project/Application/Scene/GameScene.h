@@ -9,6 +9,7 @@
 #include "Application/Game/Player/PlayerStats.h"
 #include "Application/Game/Player/Player.h"
 #include "Application/Game/Field/Field.h"
+#include "Application/Game/Field/FieldScenery.h"
 #include "Application/Game/Enemy/EnemyManager.h"
 #include "Application/Game/Effect/ShatterEffectManager.h"
 #include "Application/Game/Effect/IceMistEffect.h"
@@ -49,7 +50,7 @@ public:
 	/// 次のシーン遷移する場面の名前を取得
 	/// </summary>
 	/// <returns></returns>
-	std::string NextSceneName() override { return "Game"; } // 仮。リザルトとタイトル（C5）ができたら変える。再開はGameシーンを最初からやり直す
+	std::string NextSceneName() override { return nextSceneName_; }
 
 	/// <summary>
 	/// 遷移する演出
@@ -69,6 +70,7 @@ private: // アセット
 	GameEngine::Model* sphereModel_ = nullptr;   // 氷塊の仮の見た目
 	GameEngine::Model* planeModel_ = nullptr;    // 氷霧のパーティクルの板
 	GameEngine::Model* shellShardModel_ = nullptr;  // 氷の殻の破片（球の殻を12個に割ったモデル）
+	GameEngine::Model* pillarModel_ = nullptr;      // 氷柱（上が細い六角柱）
 
 	// 背景のテクスチャハンドル
 	uint32_t skyboxTextureHandle_ = 0;
@@ -97,8 +99,11 @@ private: // ゲームの状態
 	ComboPopupView* comboPopupView_ = nullptr;
 	GameOverView* gameOverView_ = nullptr;
 
-	// HPが0になってゲームオーバーの表示中か。Initializeで戻す
-	bool isGameOver_ = false;
+	// ゲームが終わって（ゲームオーバーかクリア）、終わりの表示中か。Initializeで戻す
+	bool isGameEnded_ = false;
+
+	// シーンを終えたあとに進む先のシーン名。終わりの表示で選ばれた行き先で決まる
+	std::string nextSceneName_ = kGameSceneName;
 
 	// コントローラーの振動。シーンが所有し、Initializeのたびに作り直す（破棄時に振動を止める）
 	std::unique_ptr<PadVibration> padVibration_;
@@ -109,12 +114,23 @@ private: // 定数
 
 	// 破片モデルの名前（拡張子つき。モデルはファイル名で取得する）
 	inline static const char* kShellShardModelName = "IceShellShard12.gltf";
+	inline static const char* kPillarModelName = "IcePillar";
+	// 氷柱の形（六角柱。上が細い）
+	inline static constexpr uint32_t kPillarDivide = 6;
+	inline static constexpr float kPillarTopRadius = 0.6f;
+	inline static constexpr float kPillarBottomRadius = 1.0f;
+	inline static constexpr float kPillarHeight = 1.0f;
+
+	// 遷移先のシーン名（SetUpScenes.hの登録名）
+	inline static const char* kGameSceneName = "Game";
+	inline static const char* kTitleSceneName = "Title";
 
 private: // 調整値
 
 	// ライト
 	float lightIntensity_ = 0.9f;
 	Vector3 lightDirection_ = { -0.3f, -1.0f, 0.4f };
+	Vector4 lightColor_ = { 0.85f, 0.92f, 1.0f, 1.0f }; // 夜の冷たい光
 
 	// 調整値の機能
 	std::unique_ptr<GameEngine::DebugParameter> debugParam_;
@@ -177,7 +193,7 @@ private:
 	void ApplySpawnRule();
 
 	/// <summary>
-	/// ゲームの世界を止めているかを返す。ゲームオーバー中。
+	/// ゲームの世界を止めているかを返す。ゲームが終わって終わりの表示中。
 	/// </summary>
 	bool IsGameStopped() const;
 
@@ -188,14 +204,21 @@ private:
 	void UpdateTimeScale();
 
 	/// <summary>
-	/// プレイヤーのHPが0ならゲームオーバーに入る。入力と振動を止め、ゲームオーバーの表示を開く。
+	/// ゲームの終わりを判定する。ルールで変わる終わりの条件はこの関数だけに置く。
+	/// HPが0ならゲームオーバー、デバッグキー（F8）ならクリア（ボスができるまでの仮）。
 	/// </summary>
-	void CheckGameOver();
+	void CheckGameEnd();
 
 	/// <summary>
-	/// ゲームオーバー中に、再開の入力があればシーンを終了する（Gameシーンが最初からやり直される）。
+	/// ゲームを終える。終わりの状態を立て、入力と振動を止め、終わりの表示を開く。
 	/// </summary>
-	void UpdateGameOver();
+	/// <param name="endType">ゲームの終わり方</param>
+	void EndGame(GameEndType endType);
+
+	/// <summary>
+	/// 終わりの表示で行き先が選ばれたら、遷移先を決めてシーンを終了する（やり直すはGame、タイトルへはTitle）。
+	/// </summary>
+	void UpdateGameEnd();
 
 	/// <summary>
 	/// 表示用の値をまとめてGameHudへ渡す。GameScene::Updateの最後に呼ぶ。

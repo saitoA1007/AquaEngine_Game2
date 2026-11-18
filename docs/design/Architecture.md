@@ -1,6 +1,6 @@
 # 構造設計
 
-最終更新: 2026-11-08。仕様の正本は[GameSpec.md](GameSpec.md)。
+最終更新: 2026-11-18。仕様の正本は[GameSpec.md](GameSpec.md)。
 
 - 人間が採用した構造だけを書く。未決定のものは「未決定事項」に分ける。
 - 実装の許可は別途。この文書の存在は実装の許可を意味しない。
@@ -24,7 +24,9 @@
 | `HudInput` | `GameHud`へ渡す表示用の値(HP、最大HP、フェーズ)の構造体 |
 | `HpHudView` / `HpHudModels` | 3DのHPアイコン(六角形の枠と回る核)と被弾の演出(核が砕けて欠片が枠に積もる)。画面に固定するため`Camera`を読む。枠と核は`SubmitInstancing`、欠片は破片モデルとアイコンごとの`FractureInstance`で描く。`GameHud`が所有する([HUD_HpIcon3D.md](HUD_HpIcon3D.md)) |
 | `HpShardPile` | アイコン1つ分の欠片の2Dの物理。`HpHudView`が所有する |
-| `GameOverView` | 「GAME OVER」と「Aで再開」の表示、再開の入力(`Retry`)。`IGameObject`。止まらない時間で動く |
+| `GameOverView` | ゲームの終わりの表示。見出し(「GAME OVER」か「CLEAR」。`GameEndType`)と、「やり直す」「タイトルへ」の選択。上下(`MenuUp`/`MenuDown`。スティックは中で倒した瞬間を判定)と決定(`Decide`)を受け、選ばれた行き先(`GameEndChoice`)を返す。`IGameObject`。止まらない時間で動く |
+| `TitleScene` | タイトルのシーン。`TitleView`を生成し、決定(`Decide`)で`Game`へ進む |
+| `TitleView` | タイトルの表示(背景の板、仮の作品名、「Aでスタート」)。`IGameObject`。入力は見ない |
 | `ComboPopupView` | 連鎖数の表示(「HIT 12!」)。氷塊で倒したときだけ数える。発射元の氷霧のIDごとに1つ、同時に最大8つ。`IGameObject`。ゲームの時間で動く |
 | `EnemyShotManager` | 敵の弾とビーム。敵とは独立して動く |
 | `ShatterEffectManager` | 破片の`FractureInstance`の事前確保と使い回し、飛ばす処理と描画 |
@@ -127,13 +129,13 @@
 - `PhaseDirector::AddExp`が、必要量を超えるたびにその場でフェーズを進める(1回で複数フェーズ分が入ったときは続けて進める)。進んだら出現ルールの変更の通知(`GameScene::ApplySpawnRule`)を1回出し、フェーズ10に入ったらボス開始の通知を出す。ゲームは止まらない。強化はなくした(2026-11-13)。
 - フェーズが変わるたびに、`GameScene`が`EnemyManager::SetSpawnRule`で出現ルールを渡す。`EnemyManager`は`PhaseDirector`を知らない。
 - `Player`は移動速度を`PlayerStats`から読む。範囲と威力は`Player`の固定の調整値で、倍率は持たない。
-- ゲームの世界を止めるのはゲームオーバー中だけ。`GameScene::UpdateTimeScale`(`FpsCounter::SetTimeScale`を呼ぶ唯一の場所)が`IsGameStopped()`(ゲームオーバー中)でタイムスケールを0にし、`Player::SetInputEnabled(false)`でチャージと氷霧を止め、`PadVibration`を止める。振動の更新の可否にも`IsGameStopped()`を使う。
+- ゲームの世界を止めるのはゲームオーバー中だけ。`GameScene::UpdateTimeScale`(`FpsCounter::SetTimeScale`を呼ぶ唯一の場所)が`IsGameStopped()`(ゲームが終わって終わりの表示中。ゲームオーバーとクリア)でタイムスケールを0にし、`Player::SetInputEnabled(false)`でチャージと氷霧を止め、`PadVibration`を止める。振動の更新の可否にも`IsGameStopped()`を使う。
 
 ## 6.5 HUDとゲームオーバー
 
 - `GameScene::Update`の最後(`UpdateHud`)で、`Player`と`PhaseDirector`の値から`HudInput`を作って`GameHud`へ渡す。オブジェクトの更新はシーンの更新より先に走るが、`GameHud`は描画の直前に値を反映するため遅れない。`GameHud`、`ComboPopupView`は`Player`、`EnemyManager`、`PhaseDirector`を知らない。`ComboPopupView`は座標の変換のために`Camera`を読むだけ。
 - 被弾: `Player::TakeDamage`が実際に減ったかを返し、`GameScene::StepEnemies`が`GameHud::PlayDamage()`と`PadVibration::PlayDamage()`を呼ぶ。無敵時間中の点滅は`Player::Draw`で描画を飛ばす。
-- HPが0: `GameScene::CheckGameOver`が`isGameOver_`をtrueにし、`Player::SetInputEnabled(false)`、`PadVibration::Stop()`、`GameOverView::Open()`を行う。`GameOverView`が再開の入力を返すと、`GameScene`が`isFinished_`をtrueにする。`NextSceneName()`は仮に`"Game"`を返し、フェードのあとGameシーンが作り直される(C5で変える)。
+- ゲームの終わり(C5): `GameScene::CheckGameEnd`が終わりを判定する(HPが0でゲームオーバー、F8でクリア。F8は`USE_IMGUI`のみで、ボスまでの仮)。終わりの条件はこの関数の1か所に置く。判定のあとは`GameScene::EndGame(GameEndType)`で共通に、`isGameEnded_`をtrueにし、`Player::SetInputEnabled(false)`、`PadVibration::Stop()`、`GameOverView::Open(終わり方)`を行う。`GameOverView`が行き先(`GameEndChoice`)を返すと、`GameScene::UpdateGameEnd`が`nextSceneName_`(やり直す=`"Game"`、タイトルへ=`"Title"`)を決めて`isFinished_`をtrueにする。`NextSceneName()`は`nextSceneName_`を返し、フェードのあと次のシーンが作られる。シーンをまたいで持つデータはない([C5_SceneFlow.md](C5_SceneFlow.md))。
 - 詳細は[C3_HUD.md](C3_HUD.md)。
 
 ## 7. カメラ

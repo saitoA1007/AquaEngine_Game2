@@ -44,6 +44,16 @@ public:
     /// </summary>
     float GetRadius() const { return radius_; }
 
+    /// <summary>
+    /// 台地の厚み（上面Y=0から崖の底までの距離）を取得する。
+    /// </summary>
+    float GetGroundThickness() const { return groundThickness_; }
+
+    /// <summary>
+    /// 縁の幅（外側へ張り出す距離）を取得する。
+    /// </summary>
+    float GetRimWidth() const { return rimWidth_; }
+
 private:
     /// <summary>
     /// 調整値をDebugParameterへ登録する。
@@ -54,11 +64,16 @@ private:
     // 調整値
     float radius_ = 50.0f;         // フィールドの半径
     float rimWidth_ = 2.0f;        // 縁の幅（外側へ張り出す距離）
-    float groundThickness_ = 1.0f; // 地面の厚み
+    float groundThickness_ = 12.0f; // 台地の厚み（側面が崖になる）
+    float rimThickness_ = 1.0f;     // 縁の段の厚み
 
-    // 色
-    Vector4 groundColor_ = { 0.85f, 0.92f, 1.0f, 1.0f }; // 雪の地面（仮）
-    Vector4 rimColor_ = { 0.15f, 0.35f, 0.7f, 1.0f };    // 縁（仮）
+    // 色と質感
+    Vector4 groundColor_ = { 0.32f, 0.38f, 0.48f, 1.0f }; // 暗い青灰色の雪
+    Vector4 rimColor_ = { 0.45f, 0.6f, 0.8f, 1.0f };      // 淡い氷色
+    float groundRoughness_ = 0.9f;
+    float groundMetallic_ = 0.0f;
+    float rimRoughness_ = 0.3f;
+    float rimMetallic_ = 0.0f;
 
     // 描画
     GameEngine::ModelComponent ground_;

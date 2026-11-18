@@ -249,6 +249,9 @@
     <ClCompile Include="Application\Game\Field\Field.cpp">
       <Filter>Application\Game\Field</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Game\Field\FieldScenery.cpp">
+      <Filter>Application\Game\Field</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Game\Player\Player.cpp">
       <Filter>Application\Game\Player</Filter>
     </ClCompile>
@@ -297,6 +300,9 @@
     <ClCompile Include="Application\Game\UI\GameOverView.cpp">
       <Filter>Application\Game\UI</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Game\UI\TitleView.cpp">
+      <Filter>Application\Game\UI</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Game\UI\ComboPopupView.cpp">
       <Filter>Application\Game\UI</Filter>
     </ClCompile>
@@ -319,6 +325,9 @@
       <Filter>Application\Game\Effect</Filter>
     </ClCompile>
     <ClCompile Include="Application\Scene\TestScene.cpp">
+      <Filter>Application\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Scene\TitleScene.cpp">
       <Filter>Application\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Application\Scene\Transition\Fade.cpp">
@@ -857,6 +866,9 @@
     <ClInclude Include="Application\Game\Field\Field.h">
       <Filter>Application\Game\Field</Filter>
     </ClInclude>
+    <ClInclude Include="Application\Game\Field\FieldScenery.h">
+      <Filter>Application\Game\Field</Filter>
+    </ClInclude>
     <ClInclude Include="Application\Game\Player\Player.h">
       <Filter>Application\Game\Player</Filter>
     </ClInclude>
@@ -914,6 +926,9 @@
     <ClInclude Include="Application\Game\UI\GameOverView.h">
       <Filter>Application\Game\UI</Filter>
     </ClInclude>
+    <ClInclude Include="Application\Game\UI\TitleView.h">
+      <Filter>Application\Game\UI</Filter>
+    </ClInclude>
     <ClInclude Include="Application\Game\UI\ComboPopupView.h">
       <Filter>Application\Game\UI</Filter>
     </ClInclude>
@@ -939,6 +954,9 @@
       <Filter>Application\Game\Effect</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\TestScene.h">
+      <Filter>Application\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Scene\TitleScene.h">
       <Filter>Application\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\Register\SetUpScenes.h">
