@@ -40,7 +40,7 @@ void GameScene::Initialize() {
 	SetUpEnvironment();
 
 	// ゲームオブジェクトを生成する
-	CreateGameObjects(cylinderModel_, sphereModel_);
+	CreateGameObjects(sphereModel_);
 
 	// 前回のリセット時にゲームオーバーで止まっていても、タイムスケールを1へ戻す
 	UpdateTimeScale();
@@ -90,14 +90,36 @@ void GameScene::Draw() {
 
 void GameScene::LoadAssets() {
 	// モデルを取得する
-	cylinderModel_ = modelManager_->GetNameByModel("Cylinder");
 	sphereModel_ = modelManager_->GetNameByModel("sphere.obj");
 	planeModel_ = modelManager_->GetNameByModel("plane.obj");
 	shellShardModel_ = modelManager_->GetNameByModel(kShellShardModelName);
 
-	// 氷柱のモデルを登録して取得する（上が細い六角柱。分割数、上の半径、下の半径、高さ）
-	modelManager_->RegisterCylinderModel(kPillarModelName, kPillarDivide, kPillarTopRadius, kPillarBottomRadius, kPillarHeight);
-	pillarModel_ = modelManager_->GetNameByModel(kPillarModelName);
+	// フィールドの床の円盤を取得する（Resources/Models/FieldCrystal。半径1、UVは真上からの投影）
+	fieldDiscModel_ = modelManager_->GetNameByModel(kFieldDiscModelName);
+
+	// 氷の塊のモデルを取得する（境目に並べる）
+	for (uint32_t i = 0; i < Field::kRockKinds; ++i) {
+		rockModels_[i] = modelManager_->GetNameByModel(kRockModelNames[i]);
+		assert(rockModels_[i] != nullptr);
+	}
+
+	// ひび割れの氷の画像を取得する（床。Resources/Textures/Field）
+	iceCrackAlbedoTextureHandle_ = textureManager_->GetHandleByName(kIceCrackAlbedoName);
+	iceCrackNormalTextureHandle_ = textureManager_->GetHandleByName(kIceCrackNormalName);
+	assert(iceCrackAlbedoTextureHandle_ != 0);
+	assert(iceCrackNormalTextureHandle_ != 0);
+
+	// 雪の画像を取得する（外の雪原。Resources/Textures/Field）
+	snowAlbedoTextureHandle_ = textureManager_->GetHandleByName(kSnowAlbedoName);
+	snowNormalTextureHandle_ = textureManager_->GetHandleByName(kSnowNormalName);
+	assert(snowAlbedoTextureHandle_ != 0);
+	assert(snowNormalTextureHandle_ != 0);
+
+	// 氷の結晶のモデルを取得する
+	for (uint32_t i = 0; i < FieldScenery::kCrystalKinds; ++i) {
+		crystalModels_[i] = modelManager_->GetNameByModel(kCrystalModelNames[i]);
+		assert(crystalModels_[i] != nullptr);
+	}
 
 	// 背景のテクスチャを取得する
 	skyboxTextureHandle_ = textureManager_->GetHandleByName("iceNightSky.dds");
@@ -127,11 +149,10 @@ void GameScene::LoadAssets() {
 
 
 	// 取得できなかったモデルがないか確認する
-	assert(cylinderModel_ != nullptr);
+	assert(fieldDiscModel_ != nullptr);
 	assert(sphereModel_ != nullptr);
 	assert(planeModel_ != nullptr);
 	assert(shellShardModel_ != nullptr);
-	assert(pillarModel_ != nullptr);
 	assert(hpHudModels_.frame != nullptr);
 	assert(hpHudModels_.core != nullptr);
 	assert(hpHudModels_.shard != nullptr);
@@ -179,12 +200,12 @@ void GameScene::SetUpEnvironment() {
 	UpdateLight();
 }
 
-void GameScene::CreateGameObjects(Model* cylinderModel, Model* sphereModel) {
+void GameScene::CreateGameObjects(Model* sphereModel) {
 	// フィールド
-	field_ = gameObjectManager_->AddObject<Field>(cylinderModel);
+	field_ = gameObjectManager_->AddObject<Field>(fieldDiscModel_, rockModels_, iceCrackAlbedoTextureHandle_, iceCrackNormalTextureHandle_);
 
-	// フィールドの外の見た目（雪原と氷柱）。台地の大きさはFieldから読む
-	gameObjectManager_->AddObject<FieldScenery>(field_, pillarModel_, iceAreaAssets_.plane);
+	// フィールドの外の見た目（雪原と氷の結晶）。半径と壁の幅はFieldから読む
+	gameObjectManager_->AddObject<FieldScenery>(field_, crystalModels_, iceAreaAssets_.plane, snowAlbedoTextureHandle_, snowNormalTextureHandle_);
 
 	// プレイヤー
 	player_ = gameObjectManager_->AddObject<Player>(playerViewAssets_, iceAreaAssets_, inputCommand_, field_, &playerStats_);

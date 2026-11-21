@@ -66,11 +66,20 @@ private: // シーン機能
 private: // アセット
 
 	// 管理クラスが所有するモデルへの非所有ポインタ。LoadAssetsで取得する
-	GameEngine::Model* cylinderModel_ = nullptr; // フィールドの地面と縁
+	GameEngine::Model* fieldDiscModel_ = nullptr; // フィールドの床（円盤）
+	std::array<GameEngine::Model*, Field::kRockKinds> rockModels_ = {}; // 境目の氷の塊（iceRockA〜C）
 	GameEngine::Model* sphereModel_ = nullptr;   // 氷塊の仮の見た目
 	GameEngine::Model* planeModel_ = nullptr;    // 氷霧のパーティクルの板
 	GameEngine::Model* shellShardModel_ = nullptr;  // 氷の殻の破片（球の殻を12個に割ったモデル）
-	GameEngine::Model* pillarModel_ = nullptr;      // 氷柱（上が細い六角柱）
+	std::array<GameEngine::Model*, FieldScenery::kCrystalKinds> crystalModels_ = {}; // 氷の結晶（iceCrystalA〜D）
+
+	// 雪の画像のハンドル（外の雪原。床はひび割れの氷の画像）
+	uint32_t snowAlbedoTextureHandle_ = 0;
+	uint32_t snowNormalTextureHandle_ = 0;
+
+	// ひび割れの氷の画像のハンドル（床）
+	uint32_t iceCrackAlbedoTextureHandle_ = 0;
+	uint32_t iceCrackNormalTextureHandle_ = 0;
 
 	// 背景のテクスチャハンドル
 	uint32_t skyboxTextureHandle_ = 0;
@@ -114,12 +123,16 @@ private: // 定数
 
 	// 破片モデルの名前（拡張子つき。モデルはファイル名で取得する）
 	inline static const char* kShellShardModelName = "IceShellShard12.gltf";
-	inline static const char* kPillarModelName = "IcePillar";
-	// 氷柱の形（六角柱。上が細い）
-	inline static constexpr uint32_t kPillarDivide = 6;
-	inline static constexpr float kPillarTopRadius = 0.6f;
-	inline static constexpr float kPillarBottomRadius = 1.0f;
-	inline static constexpr float kPillarHeight = 1.0f;
+	// フィールドの床の円盤（半径1。Fieldが半径を掛ける）と、雪とひび割れの氷の画像の名前（拡張子つき）
+	inline static const char* kFieldDiscModelName = "fieldDisc.gltf";
+	inline static const char* kSnowAlbedoName = "fieldSnowAlbedo.png";
+	inline static const char* kSnowNormalName = "fieldSnowNormal.png";
+	inline static const char* kIceCrackAlbedoName = "fieldIceAlbedo.png";
+	inline static const char* kIceCrackNormalName = "fieldIceNormal.png";
+	// 境目の氷の塊のモデル名（Resources/Models/FieldCrystal）
+	inline static constexpr std::array<const char*, Field::kRockKinds> kRockModelNames = { "iceRockA.gltf", "iceRockB.gltf", "iceRockC.gltf" };
+	// 氷の結晶のモデル名（Resources/Models/FieldCrystal）
+	inline static constexpr std::array<const char*, FieldScenery::kCrystalKinds> kCrystalModelNames = { "iceCrystalA.gltf", "iceCrystalB.gltf", "iceCrystalC.gltf", "iceCrystalD.gltf" };
 
 	// 遷移先のシーン名（SetUpScenes.hの登録名）
 	inline static const char* kGameSceneName = "Game";
@@ -130,7 +143,7 @@ private: // 調整値
 	// ライト
 	float lightIntensity_ = 0.9f;
 	Vector3 lightDirection_ = { -0.3f, -1.0f, 0.4f };
-	Vector4 lightColor_ = { 0.85f, 0.92f, 1.0f, 1.0f }; // 夜の冷たい光
+	Vector4 lightColor_ = { 0.8f, 0.95f, 1.0f, 1.0f }; // 少し緑がかった月光
 
 	// 調整値の機能
 	std::unique_ptr<GameEngine::DebugParameter> debugParam_;
@@ -160,9 +173,8 @@ private:
 	/// <summary>
 	/// ゲームオブジェクトを生成する。更新・描画・削除はGameObjectManagerへ任せる。
 	/// </summary>
-	/// <param name="cylinderModel">フィールドに使うモデル</param>
 	/// <param name="sphereModel">氷塊に使うモデル</param>
-	void CreateGameObjects(GameEngine::Model* cylinderModel, GameEngine::Model* sphereModel);
+	void CreateGameObjects(GameEngine::Model* sphereModel);
 
 	/// <summary>
 	/// プレイヤーの情報を敵へ渡して更新し、結果（被弾と押し戻し）をプレイヤーへ反映する。

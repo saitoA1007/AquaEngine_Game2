@@ -3,11 +3,6 @@
         {
             "from": 1,
             "slot": 0,
-            "to": 30
-        },
-        {
-            "from": 30,
-            "slot": 0,
             "to": 7
         },
         {
@@ -26,7 +21,7 @@
             "to": 16
         },
         {
-            "from": 30,
+            "from": 1,
             "slot": 1,
             "to": 16
         },
@@ -64,29 +59,6 @@
                 -472.0,
                 284.0
             ]
-        },
-        {
-            "active": true,
-            "id": 30,
-            "kind": "Effect",
-            "name": "Fog",
-            "params": {
-                "color": [
-                    0.08,
-                    0.11,
-                    0.2
-                ],
-                "density": 0.08,
-                "maxOpacity": 0.95,
-                "skyOpacity": 0.6,
-                "startDistance": 30.0
-            },
-            "passName": "",
-            "pos": [
-                -300.0,
-                284.0
-            ],
-            "type": "Fog"
         },
         {
             "id": 3,
